@@ -1,0 +1,30 @@
+---
+format:
+  html:
+    toc: false
+    anchor-sections: false
+---
+
+
+## Informações da Disciplina
+
+- **Componente curricular:** ESTAT0092 -- Modelos Lineares Generalizados
+- **Carga Horária:** 60 horas (4 créditos)
+- **Unidade Responsável:** Departamento de Estatística e Ciências Atuariais (DECAT)
+- **Docente Responsável:** Prof. Dr. Sadraque E. F. Lucena
+- **E-mail Docente:** sadraquelucena@academicos.ufs.br
+- **Plano de Ensino da Disciplina:**  [Período 2026.2](/plano_de_ensino/2026.2/plano_de_ensino_MLG.pdf){target="_blank"} | [Calendário acadêmico 2026.1 e 2026.2](/plano_de_ensino/Calendario_academico_campus_SC_2026.1_e_2026.2_Retificacao.pdf){target="_blank"}
+
+*Disciplina obrigatória para os cursos de Estatística e de Ciências Atuariais da Universidade Federal de Sergipe.*
+
+
+## Requisitos
+Esta disciplina tem como pré-requisito:
+
+- **ESTAT0081 - Análise de Regressão**.
+
+Para um bom aproveitamento nesta disciplina, é recomendável domínio prévio de:
+
+- **Probabilidade** (Distribuições discretas/contínuas, esperança, variância e distribuição conjunta).
+- **Cálculo Diferencial e Integral** (Derivadas, integrais definidas/múltiplas e séries).
+- **Análise de Regressão** (regressão linear simples e múltipla, estimação dos parâmetros, interpretação dos coeficientes e avaliação de modelos).

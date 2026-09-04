@@ -1,0 +1,107 @@
+\documentclass[20pt,a4paper]{report}
+\usepackage[dvips]{graphicx}           
+\usepackage[portuges]{babel}           
+\usepackage{color}            
+\usepackage[latin1]{inputenc}           
+\usepackage[normalem]{ulem}
+\setlength{\textwidth}{160mm}
+\setlength{\textheight}{220mm}
+\setlength{\topmargin}{-8pt}
+\setlength{\oddsidemargin}{0mm}
+\usepackage{amsmath,amsfonts, amssymb}
+\usepackage{enumitem}% http://ctan.org/pkg/enumitem
+
+\begin{document}
+
+  \begin{minipage}[b]{0.1 \linewidth}
+     \includegraphics[width=.9cm]{ufs_vertical_positiva.png}
+  \end{minipage}\hfill	
+  \begin{minipage}[b]{0.85 \linewidth}
+	       \textsc{\large Universidade Federal de Sergipe}\\
+	       \textsc{\large Departamento de Estatística e Ciências Atuariais}\\
+	       Disciplina: ESTAT0078 -- Inferência I\\
+	       Professor: Sadraque E. F. Lucena
+\end{minipage}
+
+\vspace{0.8cm}
+\begin{center} {\bf Lista de Exercícios 1} \end{center}
+\vspace{0.8cm}
+
+	\begin{enumerate}[label=1.\arabic*)]
+		\item \textbf{Modelagem de Epidemias}. Uma cidade está enfrentando uma epidemia, e a probabilidade de uma pessoa ser infectada é de 5\%. Suponha que a cidade tenha 50.000 habitantes e você é contratado para modelar a propagação da doença. Considere que o número de pessoas infectadas, $X$, segue a distribuição binomial com $n=50\,000$ habitantes e $p=0.05$.
+		\begin{enumerate}
+			\item Calcule $P(X=2\,600)$, a probabilidade de exatamente 2\,600 pessoas serem infectadas.
+			\item Calcule $P(X\leq 2\,600)$, a probabilidade de até 2\,600 pessoas serem infectadas.
+			\item Simule no R 1\,000 amostras e faça um histograma da distribuição de pessoas infectadas [use \texttt{set.seed(12345)}].
+		\end{enumerate}
+		
+		\item \textbf{Análise de Fluxo de Veículos em um Pedágio.} Uma concessionária de rodovias está estudando o fluxo de veículos em um pedágio. Em média, passam 10 veículos por minuto. Para otimizar a operação do pedágio, a concessionária precisa entender como esse fluxo varia. Considere que o número de veículos que passam por minuto segue uma distribuição de Poisson com parâmetro $\lambda=10$ (média de 10 veículos por minuto).
+		\begin{enumerate}
+			\item Calcule $P(X=8)$, a probabilidade de exatamente 8 veículos passarem pelo pedágio em um minuto.
+			\item Calcule $P(5<X\leq 15)$, a probabilidade de entre 6 até 15 veículos passarem pelo pedágio em um minuto.
+			\item Simule no R 1\,000 amostras de uma distribuição Poisson com  $\lambda=10$ e faça um histograma dos dados [use \texttt{set.seed(12345)}].
+		\end{enumerate}
+		
+		\item \textbf{Análise de Temperatura em uma Sala.} Um sistema de climatização em um escritório mantém a temperatura ambiente controlada entre 18$^\circ$C e 24$^\circ$C. A empresa deseja entender a variação da temperatura ao longo do dia para garantir o conforto dos funcionários. Considere que a temperatura $X$ na sala segue uma distribuição Uniforme(18,24).
+		\begin{enumerate}
+			\item Calcule $P(X\leq 20)$, a probabilidade de a temperatura ser menor ou igual a 20$^\circ$C.
+			\item Calcule $P(19\leq X\leq 22)$, a probabilidade de a temperatura estar entre 19$^\circ$C e 22$^\circ$C.
+			\item Simule no R 1\,000 amostras de uma distribuição Uniforme(18,24) e faça um histograma dos dados [use \texttt{set.seed(12345)}].
+		\end{enumerate}
+		
+		\item \textbf{Análise de Risco em Investimentos.} Uma carteira de investimentos tem um retorno anual que segue uma distribuição normal com média de 7\% e desvio padrão de 2\% (variância de 4\%$^2$).
+		\begin{enumerate}
+			\item Calcule  $P(X<0)$, a probabilidade de a carteira ter um retorno negativo em um ano.
+			\item Calcule $P(5\leq X\leq 10)$, a probabilidade de o retorno ser entre 5\% e 10\%.
+			\item Calcule $P(X\geq6)$, a probabilidade de um pacote ser entregue em 6 dias ou mais.
+			\item Simule no R 1\,000 amostras de retornos anuais e faça um histograma [use \texttt{set.seed(12345)}].
+		\end{enumerate}
+		
+		\item \textbf{Análise do Tempo de Atendimento em um Call Center.} Um \textit{call center} está analisando o tempo de atendimento dos clientes para otimizar seus recursos. O tempo de atendimento $T$ é uma variável aleatória que segue uma distribuição exponencial com uma taxa média de  $\alpha=0.2$ atendimentos por minuto (o que equivale a um tempo médio de atendimento de 5 minutos).
+		\begin{enumerate}
+			\item Calcule $P(T\leq3)$, a probabilidade de que o tempo de atendimento seja de até 3 minutos.
+			\item Calcule $P(T\geq 10)$, a probabilidade de que o tempo de atendimento seja superior a 10 minutos.
+			\item Simule no R 1\,000 amostras de uma distribuição exponencial com $\lambda=0.2$ e faça um histograma dos dados [use \texttt{set.seed(12345)}].
+		\end{enumerate}
+		
+	\end{enumerate}
+	
+	\newpage
+	
+	\noindent Respostas:
+	
+	\begin{enumerate}[label=1.\arabic*)]
+		
+		\item \begin{enumerate}
+			\item 0.001004671
+			\item 0.9799346
+			\item \textcolor{white}{.}\\ \includegraphics[width=.4\textwidth]{fig1binom.png}
+		\end{enumerate}
+		
+		\item \begin{enumerate}
+			\item 0.112599
+			\item 0.8841736
+			\item \textcolor{white}{.}\\ \includegraphics[width=.4\textwidth]{fig2pois.png}
+		\end{enumerate}
+		
+		\item \begin{enumerate}
+			\item 0.3333333
+			\item 0.6666667
+			\item \textcolor{white}{.}\\ \includegraphics[width=.4\textwidth]{fig3unif.png}
+		\end{enumerate}
+		
+		\item \begin{enumerate}
+			\item 0.0002326291
+			\item 0.8663856
+			\item 0.6914625
+			\item \textcolor{white}{.}\\ \includegraphics[width=.4\textwidth]{fig4norm.png}
+		\end{enumerate}
+		
+		\item \begin{enumerate}
+			\item 0.4511884
+			\item 0.1652989
+			\item \textcolor{white}{.}\\ \includegraphics[width=.4\textwidth]{fig5exp.png}
+		\end{enumerate}
+	\end{enumerate}
+	
+\end{document}

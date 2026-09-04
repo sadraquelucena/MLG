@@ -1,0 +1,23 @@
+/*-- scss:defaults --*/
+
+//$presentation-font-size-root: 28pt;
+$presentation-font-size-root: 2.8em;
+$presentation-title-slide-text-align: "left";
+
+$presentation-h1-font-size: 2em;
+
+
+/* Tamanho da fonte dos code chunks */
+pre code {
+  font-size: 20pt !important;  /* Força a aplicação do estilo */
+}
+
+/* Bloco de código preenchendo todo o frame */
+.reveal code {
+  max-height: 100% !important;
+}
+
+.reveal .slide-logo {
+   max-height: 2em !important;
+}
+

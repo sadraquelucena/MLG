@@ -1,0 +1,72 @@
+---
+title: "1. O Problema da Inferência Estatística"
+format:
+  html:
+    toc: false
+    anchor-sections: false
+---
+
+
+---
+
+Sejam bem-vindos(as) à Inferência I!
+
+Na primeira aula, traçamos nosso "plano de voo" para o semestre: conversamos sobre os objetivos da disciplina, os temas que vamos explorar, o formato das avaliações e os canais de comunicação. Para já aquecer os motores, mergulhamos em uma revisão fundamental de algumas das principais distribuições de probabilidade e cálculos práticos no R. Assim, preparamos o terreno para os desafios de estimação que vêm pela frente.
+
+
+
+Slides:
+
+
+:::: {.grid}
+
+::: {.g-col-12 .g-col-md-4}
+
+<a href="slides/01-O_problema_da_inferencia_estatistica.html"
+   target="_blank"
+   class="thumb html-slide">
+<img
+  src="slides/01-O_problema_da_inferencia_estatistica.png"
+  alt="Versão PDF"
+  class="img-fluid">
+</a>
+<p class="text-center">Versão HTML</p>
+
+:::
+
+::: {.g-col-12 .g-col-md-4}
+
+<a href="slides/01-O_problema_da_inferencia_estatistica.pdf"
+   target="_blank"
+   class="thumb pdf-slide">
+<img
+  src="slides/01-O_problema_da_inferencia_estatistica.png"
+  alt="Versão PDF"
+  class="img-fluid">
+</a>
+<p class="text-center">Versão PDF</p>
+
+:::
+
+
+::::
+
+---
+
+Lista de Exercícios:
+
+:::: {.grid}
+
+::: {.g-col-12 .g-col-md-3}
+
+<a href="lista_de_exercicios/Inferencia1_Lista1.pdf"
+   target="_blank"
+   class="thumb pdf-lista">
+<img
+  src="lista_de_exercicios/lista.png"
+  class="img-fluid">
+</a>
+
+:::
+
+::::

@@ -1,0 +1,44 @@
+project:            # Configurações gerais do projeto Quarto
+  type: website     # Define que o projeto será um website
+  output-dir: docs  # Diretório onde os arquivos serão gravados após renderizar
+  
+  pre-render:
+    - ./gerar_thumbnails.sh
+  
+  render:
+    - index.qmd
+    - info.qmd
+    - aulas/*/conteudo.qmd
+
+website:                  # Configurações específicas do website
+  bread-crumbs: false     # Oculta: Início > Aula 01 > Distribuições
+  page-navigation: true   # Adiciona botões "Página anterior" e "Próxima página" no final de cada página do site.
+  title: "Modelos Lineares Generalizados"   # Título principal do website
+  favicon: img/mlg_logo.png  # ícone da aba
+
+  sidebar:                # Configuração da barra lateral
+    style: docked         # Estilo fixo
+    collapse-level: 4     # mostrar todos os níveis
+    search: false         # Esconde a caixa de pesquisa da sidebar
+    border: false         # Remove a borda vertical da sidebar
+    logo: img/mlg_logo.png  # Logo exibido na parte superior da sidebar
+
+    contents:             # Lista dos itens que aparecerão na sidebar 
+    - href: info.qmd      # Link para uma página do site
+      text: "Informações da Disciplina"  # Texto exibido para o usuário na sidebar
+
+    - section: "Aulas"
+      contents: 
+      - href: aulas/01-MLG_e_familia_exponencial/conteudo.qmd
+      
+
+format:                      # Configurações do formato HTML
+  html:
+    theme: styles.scss       # Arquivo SCSS responsável por toda a aparência do site
+    toc: true                # Exibe automaticamente um Sumário baseado nos títulos da página
+    grid:                    # Configura o sistema de grid da página
+      sidebar-width: 320px   # Define a largura da sidebar
+
+resources:
+  - aulas/**
+

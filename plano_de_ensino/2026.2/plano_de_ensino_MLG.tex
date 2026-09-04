@@ -1,0 +1,194 @@
+\documentclass[11pt,a4paper]{report}
+\usepackage[dvips]{graphicx}           
+\usepackage[brazil]{babel}           
+\usepackage{color}            
+\usepackage[latin1]{inputenc}           
+\usepackage[normalem]{ulem}
+\usepackage{enumitem}
+\usepackage{float}
+
+\usepackage[
+top    = 2.50cm,
+bottom = 2.50cm,
+left   = 2.60cm,
+right  = 2.50cm]{geometry}
+
+\usepackage{caption}
+\captionsetup[table]{name=Quadro}
+
+\usepackage[table]{xcolor} 
+\usepackage{booktabs} % para linhas na table colorida
+\setlength{\aboverulesep}{0pt}
+\setlength{\belowrulesep}{0pt}
+
+\usepackage{palatino} % fonte
+\usepackage{setspace} % espaçamento
+
+\begin{document}
+
+  \begin{minipage}[b]{0.1 \linewidth}
+     \includegraphics[width=1.25cm]{ufs_vertical_positiva.png}
+     \vspace{.2cm}
+  \end{minipage}\hfill	
+  \begin{minipage}[b]{0.85 \linewidth}
+     %\vspace{-1cm}
+    \textsc{\large Universidade Federal de Sergipe}\\
+    \textsc{\large Centro de Ciências Exatas e Tecnologia}\\
+    \textsc{\large Departamento de Estatística e Ciências Atuariais}\\
+\end{minipage}
+
+\onehalfspacing
+
+\begin{table*}[h!]
+	\rowcolors{1}{gray!20}{gray!20}
+	\renewcommand{\arraystretch}{1.5}
+	\begin{tabular}{|lp{4.2cm}p{5cm}l|}
+		\hline
+		\textbf{Componente Curricular}: & \multicolumn{3}{l|}{ESTAT0078 -- INFERÊNCIA I}\\
+		%\textbf{Carga horária:} & \multicolumn{3}{l|}{60 horas (4 créditos)}\\
+		\textbf{Carga horária:} & 60 horas (4 créditos) & \multicolumn{2}{l|}{\textbf{Horário:} \quad Terças -- 19h00 às 20h30}\\
+		& & \multicolumn{2}{l|}{\qquad\qquad\quad Quintas -- 20h45 às 22h15}\\
+		\textbf{Unidade Responsável:} & \multicolumn{3}{l|}{Departamento de Estatística e Ciências Atuariais}\\
+		\textbf{Docente:} & \multicolumn{3}{l|}{Prof. Dr. Sadraque E. F. Lucena}\\
+		\textbf{Tipo de Componente:} & Disciplina & \textbf{Quantidade de Avaliações:} & 3\\
+		\textbf{Período Letivo:} & \multicolumn{3}{l|}{2026-2}\\
+		\hline
+	\end{tabular}
+\end{table*}
+
+
+\begin{itemize}[label={},itemindent=-2em,leftmargin=2em]
+\item {\bf Ementa:} Amostras e distribuições amostrais. Estimação pontual e por intervalo. Estudo de estimadores mais comumente usados: método dos momentos, máxima verossimilhança, estimador de Bayes. Intervalos de confiança; métodos para construção de intervalos de confiança.
+
+\item {\bf Objetivos:} Desenvolver a capacidade de construir, avaliar e interpretar procedimentos de estimação estatística para parâmetros populacionais, compreendendo seus fundamentos probabilísticos, propriedades teóricas e aplicações na quantificação da incerteza em problemas científicos.
+
+\item {\bf Metodologia:} Serão ministradas aulas teóricas expositivas; utilizados recursos visuais; resolu\-ção de exercícios em sala de aula; solicitação de atividades extraclasse.
+
+\item {\bf Habilidades e Competências:} Ao final da disciplina, espera-se que o estudante seja capaz de compreender os fundamentos da inferência estatística e seu papel na tomada de decisões sob incerteza. Deverá ser capaz de construir estimadores para parâmetros populacionais utilizando diferentes métodos, analisar criticamente suas propriedades estatísticas e selecionar procedimentos inferenciais apropriados para distintos contextos científicos. Espera-se, ainda, que seja capaz de interpretar a variabilidade amostral, quantificar a incerteza associada às estimativas por meio de intervalos de confiança e compreender os fundamentos teóricos que justificam os principais métodos de estimação. O cronograma de aulas encontra-se no Quadro 1.
+
+\item {\bf Avaliação:} Serão realizadas três avaliações ao longo do semestre. Este plano de ensino permite a vinculação (ou até mesmo substituição) de uma destas avaliações por um trabalho e/ou seminário a critério do professor. Estudantes que perderem uma das provas e/ou trabalho(s), sem justificativa legal (comprovada), terá nota zero de acordo com as normas do sistema acadêmico. A avaliação substitutiva versará sobre todo o conteúdo da disciplina e qualquer estudante poderá fazê-la para substituir a nota da avaliação que faltou ou para substituir a menor nota.
+
+\noindent {\bf Hora-trabalho:} Ao final de cada aula serão indicados exercícios para serem resolvidos como forma de fixação do conteúdo exposto em sala de aula.
+\end{itemize}
+
+\newpage
+\noindent {\bf Conteúdo:}
+
+\begin{enumerate}
+	\item Fundamentos da Inferência Estatística
+	\begin{enumerate}[label*=\arabic*.]
+		\item Inferência estatística e tomada de decisão
+		\item População, amostra, parâmetro e estatística
+		\item Variabilidade amostral
+		\item Distribuições amostrais
+		\item Introdução ao problema da estimação
+	\end{enumerate}
+	
+	\item Construção de Estimadores
+	\begin{enumerate}[label*=\arabic*.]
+		\item Conceitos de estimador e estimativa
+		\item Método dos Momentos
+		\item Método da Máxima Verossimilhança
+		\item Introdução à Inferência Bayesiana
+	\end{enumerate}
+	
+	\item Avaliação de Estimadores
+	\begin{enumerate}[label*=\arabic*.]
+		\item Viés
+		\item Variância
+		\item Erro Quadrático Médio
+		\item Consistência
+		\item Eficiência
+		\item Informação de Fisher
+		\item Limite de Cramér--Rao
+	\end{enumerate}
+	
+	\item Estrutura Teórica da Estimação
+	\begin{enumerate}[label*=\arabic*.]
+		\item Estatísticas suficientes
+		\item Critério da fatoração de Neyman--Fisher
+		\item Família exponencial
+		\item Completude
+		\item Estimadores Uniformemente Mínimos de Variância (UMVUE)
+	\end{enumerate}
+	
+	\item Estimação por Intervalos
+	\begin{enumerate}[label*=\arabic*.]
+		\item Quantidades pivotais
+		\item Intervalos de confiança exatos
+		\item Intervalos de confiança assintóticos
+		\item Introdução aos métodos computacionais de construção de intervalos (\textit{Bootstrap})
+	\end{enumerate}
+\end{enumerate}
+
+\newpage
+\noindent {\bf Bibliografia:}\\
+
+{\it Básica:}
+\begin{itemize}
+	\item Bolfarine, H. e Sandoval, C. (2001). Introdução a Inferência Estatística. Sociedade Brasileira de Matemática, Coleção Matemática Aplicada.
+	\item CASELLA, George; BERGER, Roger L. Statistical inference. 2nd ed. Pacific Grove: Thomson, 2002.
+	\item MOOD, Alexander McFarlane; GRAYBILL, Franklin A; BOES, Duane C. Introduction to the theory of statistics. 3rd ed. Singapore: McGraw-Hill, 1974.
+	\item MORETTIN, Luiz Gonzaga. Estatística básica: probabilidade e inferência. São Paulo: Pearson, 2010.
+\end{itemize}
+
+{\it Complementar:}
+\begin{itemize}
+	\item MAGALHÃES, Marcos Nascimento; Probabilidade e Variável Aleatória. 3. ed. São Paulo, SP: EDUSP, 2011.
+	\item JAMES, Barry R. Probabilidade: um curso em nível intermediário. 3. ed. Rio de Janeiro: IMPA, 2010.
+	\item ROSS, Sheldon M. Introduction to probability models. 8th. ed. United States of America: Academic Press, 2003.
+	\item YOUNG, G. A.; SMITH, R. L. Essentials of statistical inference. New York: Cambridge University Press, 2005.
+\end{itemize}
+
+
+\begin{table}[H]
+	\caption{Cronograma de aulas de ESTAT0078 -- Inferência I para 2026-2.}
+	\rowcolors{1}{gray!20}{white}
+	\renewcommand{\arraystretch}{1.15}
+	\begin{tabular}{|c|c|c|p{10cm}|}
+		\toprule
+		\textbf{Data}	&	\textbf{Dia da Semana}	&	\textbf{Aula}	&	\textbf{Assunto Previsto}	\\
+		\midrule
+		\textcolor{red}{07/10/25} & \textcolor{red}{Terça} & \textcolor{red}{1} & \textcolor{red}{VI Encontro de Estatística e Ciências Atuariais da UFS} \\
+		09/10/25 & Quinta & 2 & Apresentação da disciplina. Revisão das principais distribuições de probabilidade \\
+		14/10/25 & Terça & 3 & Amostras, Estatísticas e Estimadores \\
+		16/10/25 & Quinta & 4 & Viés de um estimador \\
+		21/10/25 & Terça & 5 & Erro quadrático médio de um estimador \\
+		23/10/25 & Quinta & 6 & Estimadores eficientes \\
+		28/10/25 & Terça & 7 & Estatísticas suficientes \\
+		30/10/25 & Quinta & 8 & Critério da fatoração de Neyman \\
+		04/11/25 & Terça & 9 & Família Exponencial \\
+		06/11/25 & Quinta & 10 & Estatística completa e estimador não viesado de variância uniformemente mínima \\
+		11/11/25 & Terça & 11 & Aula de Exercícios \\
+		\textcolor{blue}{13/11/25} & \textcolor{blue}{Quinta} & \textcolor{blue}{12} & \textcolor{blue}{Avaliação 1} \\
+		18/11/25 & Terça & 13 & O método dos momentos \\
+		\textcolor{red}{20/11/25} & \textcolor{red}{Quinta} & \textcolor{red}{--} & \textcolor{red}{Dia Nacional de Zumbi e da Consciência Negra (feriado nacional)} \\
+		\textcolor{red}{25/11/25} & \textcolor{red}{Terça} & \textcolor{red}{14} & \textcolor{red}{XI SEMAC} \\
+		\textcolor{red}{27/11/25} & \textcolor{red}{Quinta} & \textcolor{red}{15} & \textcolor{red}{XI SEMAC} \\
+		02/12/25 & Terça & 16 & O método dos momentos (continuação) \\
+		04/12/25 & Quinta & 17 & O método da máxima verossimilhança \\
+		09/12/25 & Terça & 18 & Propriedade dos estimadores de máxima verossimilhança \\
+		11/12/25 & Quinta & 19 & O método da máxima verossimilhança: caso multiparamétrico \\
+		16/12/25 & Terça & 20 & Exercícios \\
+		\textcolor{blue}{18/12/25} & \textcolor{blue}{Quinta} & \textcolor{blue}{21} & \textcolor{blue}{Avaliação 2} \\
+		\textcolor{red}{23/12/25} & \textcolor{red}{Terça} & \textcolor{red}{--} & \textcolor{red}{Recesso acadêmico} \\
+		\textcolor{red}{25/12/25} & \textcolor{red}{Quinta} & \textcolor{red}{--} & \textcolor{red}{Recesso acadêmico} \\
+		\textcolor{red}{30/12/25} & \textcolor{red}{Terça} & \textcolor{red}{--} & \textcolor{red}{Recesso acadêmico} \\
+		\textcolor{red}{01/01/26} & \textcolor{red}{Quinta} & \textcolor{red}{--} & \textcolor{red}{Confraternização Universal (feriado nacional) e Aniversário de São Cristóvão (feriado municipal)} \\
+		\textcolor{red}{06/01/26} & \textcolor{red}{Terça} & \textcolor{red}{--} & \textcolor{red}{Férias coletivas para docentes} \\
+		\textcolor{red}{08/01/26} & \textcolor{red}{Quinta} & \textcolor{red}{--} & \textcolor{red}{Férias coletivas para docentes} \\
+		13/01/26 & Terça & 22 & Amostras de populações normais \\
+		15/01/26 & Quinta & 23 & O método da quantidade pivotal \\
+		20/01/26 & Terça & 24 & Intervalos para populações normais: o caso de uma única amostra \\
+		22/01/26 & Quinta & 25 & Intervalos para populações normais: duas amostras independentes \\
+		27/01/26 & Terça & 26 & Intervalos para populações normais: duas amostras independentes \\
+		29/01/26 & Quinta & 27 & Intervalos de confiança aproximados \\
+		03/02/26 & Terça & 28 & Exercícios \\
+		05/02/26 & Quinta & 29 & Exercícios \\
+		\textcolor{blue}{10/02/26} & \textcolor{blue}{Terça} & \textcolor{blue}{30} & \textcolor{blue}{Avaliação 3} \\
+		\textcolor{blue}{12/02/26} & \textcolor{blue}{Quinta} & \textcolor{blue}{31} & \textcolor{blue}{Avaliação Substitutiva} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\end{document}

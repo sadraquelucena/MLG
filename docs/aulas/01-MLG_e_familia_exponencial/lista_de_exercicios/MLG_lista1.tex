@@ -1,0 +1,161 @@
+\documentclass[20pt,a4paper]{report}
+\usepackage[dvips]{graphicx}           
+\usepackage[portuges]{babel}           
+\usepackage{color}            
+\usepackage[latin1]{inputenc}           
+\usepackage[normalem]{ulem}
+\setlength{\textwidth}{160mm}
+\setlength{\textheight}{220mm}
+\setlength{\topmargin}{-8pt}
+\setlength{\oddsidemargin}{0mm}
+\usepackage{amsmath,amsfonts, amssymb}
+\usepackage{enumitem}% http://ctan.org/pkg/enumitem
+
+\begin{document}
+
+  \begin{minipage}[b]{0.1 \linewidth}
+     \includegraphics[width=.9cm]{ufs_vertical_positiva.png}
+  \end{minipage}\hfill	
+  \begin{minipage}[b]{0.85 \linewidth}
+	       \textsc{\large Universidade Federal de Sergipe}\\
+	       \textsc{\large Departamento de Estatística e Ciências Atuariais}\\
+	       Disciplina: ESTAT0092 -- Modelos Lineares Generalizados\\
+	       Professor: Sadraque E. F. Lucena
+\end{minipage}
+
+\vspace{0.8cm}
+\begin{center} {\bf Lista de Exercícios 1} \end{center}
+\vspace{0.8cm}
+
+	\begin{enumerate}[label=1.\arabic*)]
+		\item Considere a representação da família exponencial		
+		$$
+		f(y;\theta,\phi)  = \exp\left\{ \frac{\theta y-b(\theta)}{\phi} + c(y,\phi) \right\},
+		$$
+		em que $\theta$ é o parâmetro canônico e $\phi$ é o parâmetro de dispersão. Para cada uma das distribuições abaixo, escreva sua função de probabilidade ou densidade na forma da família exponencial e identifique os elementos $\theta$, $\phi$, $b(\theta)$, $c(y,\phi)$.
+		
+		\begin{enumerate}
+			\item $Y\sim\text{Exponencial}(\lambda)$, cuja função de densidade é
+			$$
+			f(y;\lambda)=\lambda e^{-\lambda y},
+			\qquad y>0.
+			$$
+			
+			\item $Y\sim\text{Logarítmica}(\rho)$, cuja função de probabilidade é
+			$$
+			f(y;\rho)
+			=
+			\frac{\rho^y}{-y\ln(1-\rho)},
+			\qquad y\in\{1,2,3,\ldots\}.
+			$$
+			
+			\item $Y\sim\text{Binomial}(m,\mu)$, cuja função de probabilidade é
+			$$
+			P(Y=y)
+			=
+			\binom{m}{y}\mu^y(1-\mu)^{m-y},
+			\qquad y=0,1,\ldots,m.
+			$$
+			
+			\item $Y\sim\text{Gama}(\mu,\phi)$, cuja função de densidade é
+			$$
+			f(y;\mu,\phi)
+			=
+			\frac{1}{\Gamma(1/\phi)}
+			\left(\frac{1}{\phi\mu}\right)^{1/\phi}
+			y^{1/\phi-1}
+			\exp\left(-\frac{y}{\phi\mu}\right),
+			\qquad y>0.
+			$$
+			
+			\item $Y\sim\text{Normal inversa}(\mu,\phi)$, cuja função de densidade é
+			$$
+			f(y;\mu,\phi)
+			=
+			\frac{1}{\sqrt{2\pi\phi y^3}}
+			\exp\left\{
+			-\frac{(y-\mu)^2}{2\phi\mu^2y}
+			\right\},
+			\qquad y>0.
+			$$
+		\end{enumerate}
+		
+		\item Julgue cada afirmação como verdadeira (V) ou falsa (F). Justifique as afirmações falsas.
+		
+		\begin{enumerate}
+			\item Toda distribuição de probabilidade pertence à família exponencial.
+			
+			\item Na representação da família exponencial, $\theta$ é o parâmetro canônico.
+			
+			\item O parâmetro $\phi$ é denominado parâmetro de dispersão.
+			
+			\item Duas distribuições diferentes podem pertencer à família exponencial e possuir diferentes funções $b(\theta)$.
+			
+			\item Pertencer à família exponencial significa possuir a mesma função de probabilidade ou densidade.
+			
+			\item A distribuição Binomial pertence à família exponencial.
+			
+			\item Para verificar se uma distribuição pertence à família exponencial, devemos identificar $\theta$, $\phi$, $b(\theta)$ e $c(y,\phi)$.
+		\end{enumerate}
+		
+	\end{enumerate}
+	
+	\newpage
+	
+	\noindent Respostas:
+	
+	\begin{enumerate}[label=1.\arabic*)]
+		\item 
+		
+		\begin{enumerate}
+			\item $f(y;\lambda) = \lambda e^{-\lambda y} = \exp\{ -\lambda y + \ln(\lambda) \}$\\
+			$\theta = -\lambda$\\
+			$\phi = 1$\\
+			$b(\theta) = -\ln(-\theta)$\\
+			$c(y,\phi)= 0$
+			
+			\item $f(y;\rho) = \frac{\rho^y}{-y\ln(1-\rho)} = \exp\left\{ y\ln(\rho) - \ln(-\ln(1-\rho)) - \ln(y) \right\}$\\
+			$\theta = \ln(\rho)$\\
+			$\phi = 1$\\
+			$b(\theta) = \ln(-\ln(1-e^\theta))$\\
+			$c(y,\phi) = -\ln(y)$
+			
+			\item $P(Y=y) = \binom{m}{y}\mu^y(1-\mu)^{m-y} = \exp\left\{ y\ln\left(\frac{\mu}{1-\mu}\right) + m\ln(1-\mu) + \ln\binom{m}{y} \right\}$\\
+			$\theta = \ln\left(\frac{\mu}{1-\mu}\right)$\\
+			$\phi = 1$\\
+			$b(\theta) = m\ln(1+e^\theta)$\\
+			$c(y,\phi) = \ln\binom{m}{y}$
+			
+			\item $f(y;\mu,\phi) = \frac{1}{\Gamma(1/\phi)} \left(\frac{1}{\phi\mu}\right)^{1/\phi} y^{1/\phi-1} \exp\left(-\frac{y}{\phi\mu}\right) = \exp\left\{ \frac{-\frac{1}{\mu}y - \ln(\mu)}{\phi} - \frac{\ln(\phi)}{\phi} - \ln\Gamma(1/\phi) + \left(\frac{1}{\phi}-1\right)\ln(y) \right\}$\\
+			$\theta = -\frac{1}{\mu}$\\
+			$\phi = \phi$\\
+			$b(\theta) = -\ln(-\theta)$\\
+			$c(y,\phi) = -\frac{\ln(\phi)}{\phi} - \ln\Gamma(1/\phi) + \left(\frac{1}{\phi}-1\right)\ln(y)$
+			
+			\item $f(y;\mu,\phi) = \frac{1}{\sqrt{2\pi\phi y^3}} \exp\left\{ -\frac{(y-\mu)^2}{2\phi\mu^2y} \right\} = \exp\left\{ \frac{-\frac{1}{2\mu^2}y + \frac{1}{\mu}}{\phi} - \frac{1}{2\phi y} - \frac{1}{2}\ln(2\pi\phi y^3) \right\}$\\
+			$\theta = -\frac{1}{2\mu^2}$\\
+			$\phi = \phi$, $b(\theta) = -(-2\theta)^{1/2}$\\
+			$c(y,\phi) = -\frac{1}{2\phi y} - \frac{1}{2}\ln(2\pi\phi y^3)$
+		\end{enumerate}
+		
+		\item Julgue cada afirmação como verdadeira (V) ou falsa (F). Justifique as afirmações falsas.
+		
+		\begin{enumerate}
+			\item \textbf{(F)} \textit{Justificativa:} Diversas distribuições não pertencem à família exponencial (por exemplo, a distribuição Uniforme $U(0,\theta)$ ou a distribuição t de Student). Em particular, distribuições cujos limites do suporte (o domínio onde a probabilidade é maior que zero) dependem dos parâmetros não pertencem à família exponencial regular.
+			
+			\item \textbf{(V)}
+			
+			\item \textbf{(V)}
+			
+			\item \textbf{(V)}
+			
+			\item \textbf{(F)} \textit{Justificativa:} Pertencer à família exponencial significa apenas que a função de probabilidade ou densidade pode ser reescrita usando a \textit{mesma estrutura matemática}, ou seja, o mesmo formato geral. As funções específicas $b(\theta)$ e $c(y,\phi)$ são distintas e servem justamente para caracterizar e diferenciar as distribuições dentro desta família.
+			
+			\item \textbf{(V)}
+			
+			\item \textbf{(V)}
+		\end{enumerate}
+		
+	\end{enumerate}
+	
+\end{document}

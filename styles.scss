@@ -1,0 +1,122 @@
+/*-- scss:defaults --*/
+
+/* Sass Variables */
+/* https://quarto.org/docs/output-formats/html-themes.html#sass-variables */
+
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap');
+
+$font-family-sans-serif: "Atkinson Hyperlegible", sans-serif;
+
+/* Colors */
+$body-bg: #517699;     /* $body-bg: #002626; cor de fundo da página */
+$body-color: white;      /* cor do texto */
+$link-color: #D5DEE7;  /* cor dos links */
+
+$sidebar-bg: #517699;  /* cor de fundo da barra de navegação */
+$sidebar-fg: white;      /* cor do texto na barra de navegação */
+
+/* styles.css */
+
+html {
+  overflow-y: scroll; /* Sempre mostra a barra de rolagem */
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+
+
+/*-- scss:rules --*/
+
+.render-commit-push {
+  padding: 0.5em 0.5em 0em 3em;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  background: #f8f8f8 5px center/3em no-repeat;
+  border-top: 1px solid #5B888C;
+  border-bottom: 1px solid #5B888C;
+  /*background-image: url("images/render-commit-push.png");*/
+  background-size: 2em;
+  background-position: 0.5em 0.5em;
+}
+
+.pull {
+  padding: 0.5em 0.5em 0em 3em;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  background: #f8f8f8 5px center/3em no-repeat;
+  border-top: 1px solid #E0A890;
+  border-bottom: 1px solid #E0A890;
+  /*background-image: url("images/pull.png");*/
+  background-size: 1em;
+  background-position: 1em 0.5em;
+}
+
+
+/* 1. Força os submenus a ficarem sempre visíveis */
+.sidebar-navigation .collapse {
+  display: block !important;
+  height: auto !important;
+  visibility: visible !important;
+}
+
+/* 2. Esconde as setinhas de expandir/recolher */
+.sidebar-navigation .sidebar-item-toggle,
+.sidebar-navigation .collapse-toggle {
+  display: none !important;
+}
+
+/* 3. Remove o cursor de clique dos títulos das seções */
+.sidebar-navigation .sidebar-item-section > .sidebar-item-text {
+  pointer-events: none;
+  cursor: default;
+  font-weight: bold;
+}
+
+
+.thumb {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.thumb img {
+  display: block;
+  width: 100%;
+}
+
+/* máscara */
+
+.thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-repeat: no-repeat;
+  background-position: bottom right;
+  background-size: contain;
+
+  pointer-events: none;
+}
+
+/* PDF Slides */
+
+.thumb.pdf-slide::after {
+  background-image: url(/img/mascara-pdf-slide.png);
+}
+
+/* PDF Lista */
+
+.thumb.pdf-lista::after {
+  background-image: url(/img/mascara-pdf-lista.png);
+}
+
+/* HTML */
+
+.thumb.html-slide::after {
+  background-image: url(/img/mascara-html-slide.png);
+}

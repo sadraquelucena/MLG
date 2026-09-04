@@ -1,0 +1,16 @@
+---
+title: "Bem-vindo(a)!"
+format:
+  html:
+    toc: false
+    anchor-sections: false
+---
+
+
+Este espaço reúne todo o material da disciplina **ESTAT0092 — Modelos Lineares Generalizados**, ofertada pelo Departamento de Estatística e Ciências Atuariais da Universidade Federal de Sergipe e ministrada pelo [Prof. Dr. Sadraque E. F. Lucena](http://sadraquelucena.github.io){target="_blank"}.
+
+Ao longo do semestre, estudaremos como construir modelos de regressão capazes de representar diferentes tipos de respostas e situações de pesquisa. Partiremos do modelo de regressão normal linear para compreender suas limitações e, a partir delas, desenvolveremos uma estrutura mais geral baseada em três componentes: componente aleatório, componente sistemático e função de ligação. A família exponencial fornecerá a estrutura matemática que permite tratar, de forma unificada, diferentes distribuições para a variável resposta.
+
+Mais do que aplicar técnicas, o objetivo da disciplina é desenvolver a capacidade de especificar, estimar, avaliar e interpretar modelos estatísticos, compreendendo as relações entre os dados, as distribuições de probabilidade e a estrutura do modelo.
+
+Neste ambiente você encontrará o cronograma da disciplina, notas de aula, listas de exercícios, materiais complementares e demais recursos utilizados ao longo do semestre.
