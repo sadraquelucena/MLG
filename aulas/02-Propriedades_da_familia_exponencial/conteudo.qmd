@@ -1,0 +1,82 @@
+---
+title: "2. Propriedades da Família Exponencial"
+format:
+  html:
+    toc: false
+    anchor-sections: false
+---
+
+
+---
+
+Nesta aula, vamos explorar a família exponencial como uma estrutura matemática comum a diferentes distribuições de probabilidade. Vamos entender o papel do parâmetro canônico e do parâmetro de dispersão, as condições de regularidade necessárias para obter suas propriedades e, a partir da função $b(\theta)$, demonstrar como obter diretamente a esperança e a variância da variável resposta.
+
+
+
+Slides:
+
+
+```{r}
+#| echo: false
+#| eval: true
+
+# Pega o nome do arquivos html e pdf automaticamente
+html_slide <- list.files("slides", pattern = "\\.html$", full.names = FALSE)
+pdf_slide  <- list.files("slides", pattern = "\\.pdf$", full.names = FALSE)
+png_slide <- sub("\\.pdf$", ".png", pdf_slide)
+lista <- list.files("lista_de_exercicios", pattern = "\\.pdf$", full.names = FALSE)
+png_lista <- sub("\\.pdf$", ".png", lista)
+```
+
+:::: {.grid}
+
+::: {.g-col-12 .g-col-md-4}
+
+<a href="slides/`r html_slide`"
+   target="_blank"
+   class="thumb html-slide">
+<img
+  src="slides/`r png_slide`"
+  alt="Slides da aula em HTML"
+  class="img-fluid">
+</a>
+<p class="text-center">Slides da aula em HTML</p>
+
+:::
+
+::: {.g-col-12 .g-col-md-4}
+
+<a href="slides/`r pdf_slide`"
+   target="_blank"
+   class="thumb pdf-slide">
+<img
+  src="slides/`r png_slide`"
+  alt="Slides da aula em PDF"
+  class="img-fluid">
+</a>
+<p class="text-center">Slides da aula em PDF</p>
+
+:::
+
+
+::::
+
+---
+
+Lista de Exercícios:
+
+:::: {.grid}
+
+::: {.g-col-12 .g-col-md-3}
+
+<a href="lista_de_exercicios/`r lista`"
+   target="_blank"
+   class="thumb pdf-lista">
+<img
+  src="lista_de_exercicios/`r png_lista`"
+  class="img-fluid">
+</a>
+
+:::
+
+::::

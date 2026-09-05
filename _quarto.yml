@@ -29,7 +29,9 @@ website:                  # Configurações específicas do website
 
     - section: "Aulas"
       contents: 
+      - href: aulas/00-Regressao_linear/conteudo.qmd
       - href: aulas/01-MLG_e_familia_exponencial/conteudo.qmd
+      - href: aulas/02-Propriedades_da_familia_exponencial/conteudo.qmd
       
 
 format:                      # Configurações do formato HTML

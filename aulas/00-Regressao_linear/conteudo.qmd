@@ -1,5 +1,5 @@
 ---
-title: "1. O Problema da Inferência Estatística"
+title: "0. O Modelo Normal Linear"
 format:
   html:
     toc: false
@@ -7,66 +7,55 @@ format:
 ---
 
 
----
+Nesta aula, vamos revisar o **Modelo Normal Linear**, retomando sua estrutura, os métodos de estimação e os principais critérios de avaliação e diagnóstico. Vamos discutir a diferença entre modelos explicativos e preditivos, a importância de conhecer e preparar os dados antes do ajuste e o papel da análise de resíduos na verificação das suposições do modelo. Também serão abordados gráficos de diagnóstico, alavancagem, distância de Cook, análise de sensibilidade e multicolinearidade. Ao final, vamos conectar o Modelo Normal Linear aos **Modelos Lineares Generalizados**, mostrando como a distribuição da resposta e a função de ligação permitem ampliar essa estrutura para diferentes tipos de dados.
 
-Sejam bem-vindos(as) à Inferência I!
-
-Na primeira aula, traçamos nosso "plano de voo" para o semestre: conversamos sobre os objetivos da disciplina, os temas que vamos explorar, o formato das avaliações e os canais de comunicação. Para já aquecer os motores, mergulhamos em uma revisão fundamental de algumas das principais distribuições de probabilidade e cálculos práticos no R. Assim, preparamos o terreno para os desafios de estimação que vêm pela frente.
 
 
 
 Slides:
 
 
+```{r}
+#| echo: false
+#| eval: true
+
+# Pega o nome do arquivos html e pdf automaticamente
+html_slide <- list.files("slides", pattern = "\\.html$", full.names = FALSE)
+pdf_slide  <- list.files("slides", pattern = "\\.pdf$", full.names = FALSE)
+png_slide <- sub("\\.pdf$", ".png", pdf_slide)
+lista <- list.files("lista_de_exercicios", pattern = "\\.pdf$", full.names = FALSE)
+png_lista <- sub("\\.pdf$", ".png", lista)
+```
+
 :::: {.grid}
 
 ::: {.g-col-12 .g-col-md-4}
 
-<a href="slides/01-O_problema_da_inferencia_estatistica.html"
+<a href="slides/`r html_slide`"
    target="_blank"
    class="thumb html-slide">
 <img
-  src="slides/01-O_problema_da_inferencia_estatistica.png"
-  alt="Versão PDF"
+  src="slides/`r png_slide`"
+  alt="Slides da aula em HTML"
   class="img-fluid">
 </a>
-<p class="text-center">Versão HTML</p>
+<p class="text-center">Slides da aula em HTML</p>
 
 :::
 
 ::: {.g-col-12 .g-col-md-4}
 
-<a href="slides/01-O_problema_da_inferencia_estatistica.pdf"
+<a href="slides/`r pdf_slide`"
    target="_blank"
    class="thumb pdf-slide">
 <img
-  src="slides/01-O_problema_da_inferencia_estatistica.png"
-  alt="Versão PDF"
+  src="slides/`r png_slide`"
+  alt="Slides da aula em PDF"
   class="img-fluid">
 </a>
-<p class="text-center">Versão PDF</p>
+<p class="text-center">Slides da aula em PDF</p>
 
 :::
 
-
-::::
-
----
-
-Lista de Exercícios:
-
-:::: {.grid}
-
-::: {.g-col-12 .g-col-md-3}
-
-<a href="lista_de_exercicios/Inferencia1_Lista1.pdf"
-   target="_blank"
-   class="thumb pdf-lista">
-<img
-  src="lista_de_exercicios/lista.png"
-  class="img-fluid">
-</a>
-
-:::
 
 ::::

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>1. O Problema da Inferência Estatística – Inferência I</title>
+<title>0. O Modelo Normal Linear – Modelos Lineares Generalizados</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -33,7 +33,9 @@ ul.task-list li input[type="checkbox"] {
 <script src="../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../">
-<link href="../../img/inferencia1-logo-sem-borda.png" rel="icon" type="image/png">
+<link href="../../aulas/01-MLG_e_familia_exponencial/conteudo.html" rel="next">
+<link href="../../info.html" rel="prev">
+<link href="../../img/mlg_logo.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
@@ -84,7 +86,7 @@ ul.task-list li input[type="checkbox"] {
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">1. O Problema da Inferência Estatística</h1>
+          <h1 class="quarto-secondary-nav-title">0. O Modelo Normal Linear</h1>
         </a>     
     </div>
   </nav>
@@ -95,8 +97,8 @@ ul.task-list li input[type="checkbox"] {
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
       <a href="../../index.html" class="sidebar-logo-link">
-      <img src="../../img/inferencia1-logo-sem-borda.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
-      <img src="../../img/inferencia1-logo-sem-borda.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      <img src="../../img/mlg_logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../../img/mlg_logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
       </a>
       </div>
     <div class="sidebar-menu-container"> 
@@ -116,17 +118,24 @@ ul.task-list li input[type="checkbox"] {
           </a> 
       </div>
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">Parte 1: Fundamentos da Inferência Estatística</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth2 show">  
-      </ul>
-  </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/00-Regressao_linear/conteudo.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">0. O Modelo Normal Linear</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/01-MLG_e_familia_exponencial/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">1. MLG e Família Exponencial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/02-Propriedades_da_familia_exponencial/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">2. Propriedades da Família Exponencial</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -140,7 +149,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">1. O Problema da Inferência Estatística</h1>
+<h1 class="title d-none d-lg-block">0. O Modelo Normal Linear</h1>
 </div>
 
 
@@ -157,29 +166,20 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<hr>
-<p>Sejam bem-vindos(as) à Inferência I!</p>
-<p>Na primeira aula, traçamos nosso “plano de voo” para o semestre: conversamos sobre os objetivos da disciplina, os temas que vamos explorar, o formato das avaliações e os canais de comunicação. Para já aquecer os motores, mergulhamos em uma revisão fundamental de algumas das principais distribuições de probabilidade e cálculos práticos no R. Assim, preparamos o terreno para os desafios de estimação que vêm pela frente.</p>
+<p>Nesta aula, vamos revisar o <strong>Modelo Normal Linear</strong>, retomando sua estrutura, os métodos de estimação e os principais critérios de avaliação e diagnóstico. Vamos discutir a diferença entre modelos explicativos e preditivos, a importância de conhecer e preparar os dados antes do ajuste e o papel da análise de resíduos na verificação das suposições do modelo. Também serão abordados gráficos de diagnóstico, alavancagem, distância de Cook, análise de sensibilidade e multicolinearidade. Ao final, vamos conectar o Modelo Normal Linear aos <strong>Modelos Lineares Generalizados</strong>, mostrando como a distribuição da resposta e a função de ligação permitem ampliar essa estrutura para diferentes tipos de dados.</p>
 <p>Slides:</p>
 <div class="grid">
 <div class="g-col-12 g-col-md-4">
-<a href="slides/01-O_problema_da_inferencia_estatistica.html" target="_blank" class="thumb html-slide"> <img src="slides/01-O_problema_da_inferencia_estatistica.png" alt="Versão PDF" class="img-fluid"> </a>
+<a href="slides/00-Regressao_linear.html" target="_blank" class="thumb html-slide"> <img src="slides/00-Regressao_linear.png" alt="Slides da aula em HTML" class="img-fluid"> </a>
 <p class="text-center">
-Versão HTML
+Slides da aula em HTML
 </p>
 </div>
 <div class="g-col-12 g-col-md-4">
-<a href="slides/01-O_problema_da_inferencia_estatistica.pdf" target="_blank" class="thumb pdf-slide"> <img src="slides/01-O_problema_da_inferencia_estatistica.png" alt="Versão PDF" class="img-fluid"> </a>
+<a href="slides/00-Regressao_linear.pdf" target="_blank" class="thumb pdf-slide"> <img src="slides/00-Regressao_linear.png" alt="Slides da aula em PDF" class="img-fluid"> </a>
 <p class="text-center">
-Versão PDF
+Slides da aula em PDF
 </p>
-</div>
-</div>
-<hr>
-<p>Lista de Exercícios:</p>
-<div class="grid">
-<div class="g-col-12 g-col-md-3">
-<p><a href="lista_de_exercicios/Inferencia1_Lista1.pdf" target="_blank" class="thumb pdf-lista"> <img src="lista_de_exercicios/lista.png" class="img-fluid"> </a></p>
 </div>
 </div>
 
@@ -579,6 +579,18 @@ Versão PDF
     }
   });
   </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../info.html" class="pagination-link" aria-label="Informações da Disciplina">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Informações da Disciplina</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../../aulas/01-MLG_e_familia_exponencial/conteudo.html" class="pagination-link" aria-label="1. MLG e Família Exponencial">
+        <span class="nav-page-text">1. MLG e Família Exponencial</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 
 

@@ -462,7 +462,7 @@ em que $\mu$ é a média de $Y$ e $g$ é uma função monótona diferenciável.
 
 
 
-## Exemplo 2.1
+## Exemplo 1.1
 
 Considere $Y\sim$ Poisson($\mu$), cuja função de probabilidade é
 $$
@@ -478,7 +478,7 @@ Escreva a função de probabilidade na forma da família exponencial e identifiq
 
 
 
-## Exemplo 2.2
+## Exemplo 1.2
 
 Considere $Y\sim$ Bernoulli($\mu$), cuja função de probabilidade é
 $$
@@ -494,7 +494,7 @@ Escreva a função de probabilidade na forma da família exponencial e identifiq
 
 
 
-## Exemplo 2.3
+## Exemplo 1.3
 
 Considere $Y\sim N(\mu, \sigma^2)$, cuja função de densidade é
 $$

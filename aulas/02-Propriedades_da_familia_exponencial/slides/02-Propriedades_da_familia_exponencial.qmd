@@ -1,0 +1,249 @@
+---
+title: "Propriedades da Família Exponencial"
+subtitle: |
+  *Uma linguagem comum para diferentes distribuições*
+author:
+  name: | # indica que o campo name terá múltiplas linhas
+    ESTAT0092 -- Modelos Lineares Generalizados<br>
+    Prof. Dr. Sadraque E. F. Lucena<br>
+    <a href="http://sadraquelucena.github.io/mlg" style="font-size:.8em;">http://sadraquelucena.github.io/mlg</a><br>
+  
+format:
+  revealjs:
+    theme: meutema.scss
+    width: 1600
+    height: 900
+    margin: 0.1         # margem em torno do conteúdo
+    min-scale: 0.2       # escala mínima permitida
+    max-scale: 2.0       # escala máxima permitida
+    slide-number: true
+    code-line-numbers: false # sem numero das linhas nos code chunks
+    subtitle-style: "font-size: 2em; font-weight: bold;"  # Aqui é onde aumentamos o subtítulo
+    logo: imagens/ufs_principal_positiva.png
+    transition: fade
+    transition-speed: fast
+    scss: meutema.scss
+    include-in-header:
+      text: |
+        <style>
+        .sublist-2col ul ul {
+          column-count: 2;
+          column-gap: 2rem;
+        }
+        .sublist-2col ul ul li {
+          break-inside: avoid; /* Impede que um item quebre entre colunas */
+        }
+        </style>
+
+lang: pt-BR
+---
+
+## Família Exponencial
+
+- Uma variável aleatória $Y$ pertence à família exponencial se sua função de probabilidade ou densidade puder ser escrita na forma $$f(y;\theta,\phi) = \exp\left\{ \phi^{-1}\left[\theta y-b(\theta)\right] +c(y,\phi) \right\},$$ em que $\theta$ e $\phi$ são parâmetros e $b(\cdot)$ e $c(\cdot,\cdot)$ são funções conhecidas.
+
+- $\theta$ é chamado **parâmetro canônico**, que está relacionado à média da variável aleatória.
+- $\phi$ é chamado **parâmetro de dispersão**, pois controla a variabilidade da distribuição.
+
+
+
+
+## Por que essa representação é útil?
+
+- A representação na forma da família exponencial não é apenas uma forma alternativa de escrever uma distribuição.
+
+- Ela fornece uma estrutura matemática comum que permite obter, de forma unificada, propriedades importantes da distribuição da resposta.
+
+- Em particular, $$\boxed{E(Y)=b'(\theta)} \quad \text{e}\quad \boxed{\operatorname{Var}(Y)=\phi b''(\theta).}$$
+
+- Assim, diferentes distribuições podem compartilhar a mesma estrutura matemática.
+
+- **Essa estrutura é a base para construirmos os Modelos Lineares Generalizados.**
+
+
+
+
+## Condições de regularidade
+
+- Para obter as propriedades da família exponencial, assumimos
+algumas condições de regularidade.
+
+- Uma condição importante é que o **suporte da distribuição não dependa
+dos parâmetros**.
+  - Isto é, o conjunto de valores possíveis de $Y$ deve ser o mesmo
+para todos os valores admissíveis de $\theta$ e $\phi$.
+
+- Essa condição permite, sob as condições matemáticas adequadas,
+trocar a ordem entre diferenciação e integração:
+
+$$
+\frac{\partial}{\partial\theta}
+\int f(y;\theta,\phi)\,dy
+=
+\int
+\frac{\partial}{\partial\theta}
+f(y;\theta,\phi)\,dy.
+$$
+
+
+
+
+## Condições de regularidade
+
+- Exemplos de distribuiçẽos que o suporte não depende dos parâmetros:
+  - **Distribuição Normal:** Para $Y\sim N(\mu,\sigma^2)$, o suporte é $-\infty<y<\infty$, independentemente de $\mu$ e $\sigma^2$.
+  - **Distribuição Exponencial:** Se $Y\sim$ Exponencial($\lambda$), o suporte é $y>0$, independentemente de $\lambda$.
+
+- Exemplo de distribuição que o suporte depende do parâmetro:
+  - **Distribuição Uniforme:** $Y\sim U(0,\theta)$ tem suporte $0<y<\theta$, que depende de $\theta$.
+
+
+
+
+## Propriedade 2.1: Média na Família Exponencial
+
+Se $Y$ pertence à família exponencial, então a forma da sua função de probabilidade ou densidade permite obter sua média diretamente a partir de $b(\theta)$: $$ E[Y]=\frac{\partial}{\partial\theta}b(\theta)=b'(\theta). $$
+
+- Vejamos. Como $f$ é uma função de densidade de probabilidade, $$ \int_{-\infty}^{+\infty} f(y;\theta,\phi)\,dy=1 $$
+
+- Como o lado direito é constante em relação a $\theta$, sua derivada é zero: $$ \frac{\partial}{\partial\theta}\int_{-\infty}^{+\infty} f(y;\theta,\phi)\,dy=0 $$
+
+
+
+
+## Propriedade 2.1: Média na Família Exponencial
+
+- Pelas condições de regularidade, podemos trocar a ordem de derivação e integração:
+
+$$ \int_{-\infty}^{+\infty} \frac{\partial}{\partial\theta} f(y;\theta,\phi)\,dy=0 $${#eq-1}
+
+- Como $f(y;\theta,\phi) = \exp\left\{ \frac{\theta y-b(\theta)}{\phi} +c(y,\phi) \right\},$ temos que $$ \frac{\partial}{\partial\theta}f(y;\theta,\phi) = f(y;\theta,\phi) \frac{y-b'(\theta)}{\phi} $${#eq-2}
+
+
+
+
+## Propriedade 2.1: Média na Família Exponencial
+
+Substituindo a @eq-2 na @eq-1, temos
+
+\begin{aligned}
+  \int\limits_{-\infty}^{+\infty} \frac{\partial}{\partial\theta} f(y;\theta,\phi)\,dy = 0 &\Rightarrow \int\limits_{-\infty}^{+\infty} f(y;\theta,\phi) \frac{y-b'(\theta)}{\phi}\,dy = 0\\
+  &\Rightarrow \frac{1}{\phi} \left\{ \int\limits_{-\infty}^{+\infty} y f(y; \theta,\phi) \, dy - b'(\theta) \int\limits_{-\infty}^{+\infty} f(y; \theta,\phi) \, dy \right\} = 0\\
+  &\Rightarrow \frac{1}{\phi} \left\{ E[Y] - b'(\theta) \right\} = 0\\
+  &\Rightarrow \boxed{E[Y] = b'(\theta)}
+\end{aligned}
+
+
+
+
+## Propriedade 2.2: Variância na Família Exponencial
+
+Se $Y$ pertence à família exponencial, então a forma da sua função de probabilidade ou densidade permite obter sua média diretamente a partir de $b(\theta)$: $$ Var[Y]= \phi \,b''(\theta). $$
+
+- Vejamos.
+
+
+
+
+## Propriedade 2.2: Variância na Família Exponencial
+
+A segunda derivada de $f(y;\theta,\phi)$ é
+
+$$
+\begin{aligned}
+\frac{\partial^2}{\partial \theta^2} f(y; \theta, \phi) &= \left[ \frac{\partial}{\partial \theta} f(y; \theta, \phi) \right] \left( \frac{y - b'(\theta)}{\phi} \right) \\
+&\quad + f(y; \theta, \phi) \left[ \frac{\partial}{\partial \theta} \left( \frac{y - b'(\theta)}{\phi} \right) \right]\\
+\end{aligned}
+$$
+
+Substituindo o valor da primeira derivada:
+
+$$
+\begin{aligned}
+\frac{\partial^2}{\partial \theta^2} f(y; \theta, \phi) &= f(y; \theta, \phi) \left( \frac{y - b'(\theta)}{\phi} \right)^2  + f(y; \theta, \phi) \left( \frac{-b''(\theta)}{\phi} \right) \\
+&= f(y; \theta, \phi) \left[ \frac{\left(y - b'(\theta)\right)^2}{\phi^2} - \frac{b''(\theta)'}{\phi} \right]
+\end{aligned}
+$$
+
+
+
+
+## Propriedade 2.2: Variância na Família Exponencial
+
+- Sabemos que a integral da densidade em todo o espaço amostral é $1$. 
+- Derivando ambos os lados duas vezes em relação a $\theta$:
+$$
+\begin{aligned}
+\int\limits_{-\infty}^{+\infty} f(y; \theta, \phi) dy = 1 &\Rightarrow \int\limits_{-\infty}^{+\infty} \frac{\partial^2}{\partial \theta^2} f(y; \theta, \phi) dy = 0\\
+&\Rightarrow \int\limits_{-\infty}^{+\infty} f(y; \theta, \phi) \left[ \frac{(y - b'(\theta))^2}{\phi^2} - \frac{b''(\theta)}{\phi} \right] dy = 0\\
+\Rightarrow \frac{1}{\phi^2} \int_{-\infty}^{+\infty} & (y - b'(\theta))^2 f(y; \theta, \phi) dy - \frac{b''(\theta)}{\phi} \int_{-\infty}^{+\infty} f(y; \theta, \phi) dy = 0
+\end{aligned}
+$$
+
+
+## Propriedade 2.2: Variância na Família Exponencial
+
+$$
+\begin{aligned}
+&\Rightarrow \frac{1}{\phi^2} \underbrace{\int_{-\infty}^{+\infty} (y - b'(\theta))^2 f(y; \theta, \phi) dy}_{\text{Esperança}} - \frac{b''(\theta)}{\phi} \cdot 1 = 0\\
+&\Rightarrow \frac{1}{\phi^2} E\left[ (Y - b'(\theta))^2 \right] - \frac{b''(\theta)}{\phi} = 0
+\end{aligned}
+$$
+
+Pela **Propriedade 2.1**, $E[Y] = b'(\theta)$. Substituindo:
+$$
+\begin{aligned}
+&\frac{1}{\phi^2} \underbrace{E\left[ (Y - E(Y))^2 \right]}_{\text{Definição de Var}(Y)} - \frac{b''(\theta)}{\phi} = 0 \Rightarrow\frac{Var[Y]}{\phi^2} - \frac{b''(\theta)}{\phi} = 0 \\
+&\Rightarrow\frac{Var[Y]}{\phi^2} = \frac{b''(\theta)}{\phi} \Rightarrow Var[Y] = \frac{\phi^2 \cdot b''(\theta)}{\phi} \Rightarrow \boxed{Var[Y] = \phi b''(\theta)}
+\end{aligned}
+$$
+
+## Exemplo 2.1
+
+Considere $Y\sim$ Poisson($\mu$). Da aula anterior, vimos que é possível escrever $$f(y;\mu) = exp\left\{ \phi^{-1} [\theta y - b(\theta)] + c(y, \phi) \right\},$$
+
+com
+
+- $\theta=\ln(\mu)$
+- $\phi=1$
+- $b(\theta)=e^\theta$
+- $c(y,\phi)=-\ln(y!)$
+
+Calcule $E(Y)$ e $Var(Y)$ usando as propriedades da família exponencial.
+
+
+
+
+## Exemplo 2.2
+
+Considere $Y\sim$ Bernoulli($\mu$). Da aula anterior, vimos que é possível escrever $$f(y;\mu) = exp\left\{ \phi^{-1} [\theta y - b(\theta)] + c(y, \phi) \right\},$$
+
+com
+
+- $\theta=\ln\left(\frac{\mu}{1-\mu}\right)$
+- $\phi=1$
+- $b(\theta)=\ln(1+e^\theta)$
+- $c(y,\phi)=0$
+
+Calcule $E(Y)$ e $Var(Y)$ usando as propriedades da família exponencial.
+
+
+
+## Exemplo 2.3
+
+Considere $Y\sim N(\mu,\sigma^2)$. Da aula anterior, vimos que é possível escrever $$f(y;\mu) = exp\left\{ \phi^{-1} [\theta y - b(\theta)] + c(y, \phi) \right\},$$
+
+com
+
+- $\theta=\mu$
+- $\phi=\sigma^2$
+- $b(\theta)=\frac{\theta^2}{2}$
+- $c(y,\phi)=-\frac{1}{2}\ln(2\pi\phi)-\frac{y^2}{2\phi}$
+
+Calcule $E(Y)$ e $Var(Y)$ usando as propriedades da família exponencial.
+
+
+
+
+
+# Fim
