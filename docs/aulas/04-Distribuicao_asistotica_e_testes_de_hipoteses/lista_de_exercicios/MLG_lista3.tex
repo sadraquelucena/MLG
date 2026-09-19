@@ -1,0 +1,162 @@
+\documentclass[20pt,a4paper]{report}
+\usepackage[dvips]{graphicx}           
+\usepackage[portuges]{babel}           
+\usepackage{color}            
+\usepackage[latin1]{inputenc}           
+\usepackage[normalem]{ulem}
+\setlength{\textwidth}{160mm}
+\setlength{\textheight}{220mm}
+\setlength{\topmargin}{-8pt}
+\setlength{\oddsidemargin}{0mm}
+\usepackage{amsmath,amsfonts, amssymb}
+\usepackage{enumitem}% http://ctan.org/pkg/enumitem
+
+\begin{document}
+
+  \begin{minipage}[b]{0.1 \linewidth}
+     \includegraphics[width=.9cm]{ufs_vertical_positiva.png}
+  \end{minipage}\hfill	
+  \begin{minipage}[b]{0.85 \linewidth}
+	       \textsc{\large Universidade Federal de Sergipe}\\
+	       \textsc{\large Departamento de Estatística e Ciências Atuariais}\\
+	       Disciplina: ESTAT0092 -- Modelos Lineares Generalizados\\
+	       Professor: Sadraque E. F. Lucena
+\end{minipage}
+
+\vspace{0.8cm}
+\begin{center} {\bf Lista de Exercícios 3} \end{center}
+\vspace{0.8cm}
+
+	\begin{enumerate}[label=3.\arabic*)]
+		\item \textbf{Regressão Gamma.} Considere um modelo de regressão Gamma com função de ligação logarítmica, isto é,
+		
+		\[
+		Y_i \sim \operatorname{Gamma}(\mu_i,\phi),
+		\qquad
+		\log(\mu_i)=\eta_i=\boldsymbol{x}_i^\top\boldsymbol{\beta}.
+		\]
+		
+		A distribuição de \(Y_i\) pode ser escrita na forma da família exponencial como
+		
+		\[
+		f(y_i;\theta_i,\phi)
+		=
+		\exp\left\{
+		\frac{y_i\theta_i-b(\theta_i)}{\phi}
+		+c(y_i,\phi)
+		\right\},
+		\]
+		
+		em que
+		
+		\[
+		\theta_i=-\frac{1}{\mu_i},
+		\qquad
+		b(\theta_i)=-\log(-\theta_i),
+		\qquad
+		V(\mu_i)=\mu_i^2.
+		\]
+		
+		Determine:
+		
+		\begin{enumerate}
+			\item \(\mu_i\) em função de \(\boldsymbol{\beta}\).
+			
+			\item As derivadas $\frac{d\mu_i}{d\eta_i}$ e $\frac{d\theta_i}{d\mu_i}$.
+			
+			\item As matrizes \(\boldsymbol{V}\) e \(\boldsymbol{W}\).
+			
+			\item A função escore \(U_{\boldsymbol{\beta}}\).
+			
+			\item A matriz de informação de Fisher esperada
+			\(\boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}}\).
+		\end{enumerate}
+		
+		
+		\item \textbf{Regressão Inversa Gaussiana.} Considere um modelo de regressão Inversa Gaussiana com função de ligação identidade, isto é,
+		
+		\[
+		Y_i \sim \operatorname{IG}(\mu_i,\phi),
+		\qquad
+		\mu_i=\eta_i=\boldsymbol{x}_i^\top\boldsymbol{\beta}.
+		\]
+		
+		A distribuição de \(Y_i\) pode ser escrita na forma da família exponencial como
+		
+		\[
+		f(y_i;\theta_i,\phi)
+		=
+		\exp\left\{
+		\frac{y_i\theta_i-b(\theta_i)}{\phi}
+		+c(y_i,\phi)
+		\right\},
+		\]
+		
+		em que
+		
+		\[
+		\theta_i=-\frac{1}{2\mu_i^2},
+		\qquad
+		b(\theta_i)=-\sqrt{-2\theta_i},
+		\qquad
+		V(\mu_i)=\mu_i^3.
+		\]
+		
+		Determine:
+		
+		\begin{enumerate}
+			\item \(\mu_i\) em função de \(\boldsymbol{\beta}\).
+			
+			\item As derivadas $\frac{d\mu_i}{d\eta_i}$ e $\frac{d\theta_i}{d\mu_i}$.
+			
+			\item As matrizes \(\boldsymbol{V}\) e \(\boldsymbol{W}\).
+			
+			\item A função escore \(U_{\boldsymbol{\beta}}\).
+			
+			\item A matriz de informação de Fisher esperada
+			\(\boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}}\).
+		\end{enumerate}
+		
+	\end{enumerate}
+	
+	\newpage
+	
+	\noindent Respostas:
+	
+	\begin{enumerate}[label=3.\arabic*)]
+		\item 
+		
+		\begin{enumerate}
+			\item $\mu_i = \exp(\boldsymbol{x}_i^\top\boldsymbol{\beta})$\\
+			
+			\item $\frac{d\mu_i}{d\eta_i} = \exp(\eta_i) = \mu_i$\\[5pt] $\frac{d\theta_i}{d\mu_i} = -(-1)\mu_i^{-2} = \frac{1}{\mu_i^2}$\\
+			(\textit{Nota: Em MLG, sabemos que \(\frac{d\theta_i}{d\mu_i} = \frac{1}{V(\mu_i)}\), o que confirma o resultado \(\frac{1}{\mu_i^2}\)})\\
+			
+			\item $\boldsymbol{V} = \operatorname{diag}(\mu_1^2, \mu_2^2, \dots, \mu_n^2)$\\[5pt]
+			$\boldsymbol{W} = \operatorname{diag}(1, 1, \dots, 1) = \boldsymbol{I}_n$\\
+			
+			\item $U_{\beta_j} = \sum_{i=1}^n \frac{y_i - \mu_i}{\phi \mu_i^2} (\mu_i) x_{ij} = \sum_{i=1}^n \frac{y_i - \mu_i}{\phi \mu_i} x_{ij}$.\\ Em notação matricial, o vetor escore é $\boldsymbol{U}_{\boldsymbol{\beta}} = \frac{1}{\phi} \boldsymbol{X}^\top \operatorname{diag}\left(\frac{1}{\mu_i}\right) (\boldsymbol{y} - \boldsymbol{\mu})$\\
+			
+			\item $\boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}} = \frac{1}{\phi} \boldsymbol{X}^\top \boldsymbol{X}$\\
+		\end{enumerate}
+		
+		\item 
+		
+		\begin{enumerate}
+			\item $\mu_i = \boldsymbol{x}_i^\top\boldsymbol{\beta}$\\
+			
+			\item $\frac{d\mu_i}{d\eta_i} = 1$\\[5pt]
+			$\frac{d\theta_i}{d\mu_i} = \left(-\frac{1}{2}\right) \cdot (-2)\mu_i^{-3} = \frac{1}{\mu_i^3}$\\
+			
+			\item $\boldsymbol{V} = \operatorname{diag}(\mu_1^3, \mu_2^3, \dots, \mu_n^3)$\\[5pt]
+			$\boldsymbol{W} = \operatorname{diag}\left(\frac{1}{\mu_1^3}, \frac{1}{\mu_2^3}, \dots, \frac{1}{\mu_n^3}\right)$\\
+			
+			\item $U_{\beta_j} = \sum_{i=1}^n \frac{y_i - \mu_i}{\phi \mu_i^3} x_{ij}$\\
+			Em forma matricial, $\boldsymbol{U}_{\boldsymbol{\beta}} = \frac{1}{\phi} \boldsymbol{X}^\top \boldsymbol{W} (\boldsymbol{y} - \boldsymbol{\mu}) = \frac{1}{\phi} \boldsymbol{X}^\top \operatorname{diag}\left(\frac{1}{\mu_i^3}\right) (\boldsymbol{y} - \boldsymbol{\mu})$\\
+			
+			\item $\boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}} = \frac{1}{\phi} \boldsymbol{X}^\top \operatorname{diag}\left(\frac{1}{\mu_1^3}, \frac{1}{\mu_2^3}, \dots, \frac{1}{\mu_n^3}\right) \boldsymbol{X}$
+		\end{enumerate}
+		
+	\end{enumerate}
+	
+\end{document}

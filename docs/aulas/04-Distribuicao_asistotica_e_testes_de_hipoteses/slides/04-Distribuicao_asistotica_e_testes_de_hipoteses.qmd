@@ -1,0 +1,603 @@
+---
+title: "Estimação por Máxima Verossimilhança"
+subtitle: |
+  *Como usamos os dados para estimar $\boldsymbol{\beta}$ e $\phi$?*
+author:
+  name: | # indica que o campo name terá múltiplas linhas
+    ESTAT0092 -- Modelos Lineares Generalizados<br>
+    Prof. Dr. Sadraque E. F. Lucena<br>
+    <a href="http://sadraquelucena.github.io/mlg" style="font-size:.8em;">http://sadraquelucena.github.io/mlg</a><br>
+  
+format:
+  revealjs:
+    theme: meutema.scss
+    width: 1600
+    height: 900
+    margin: 0.1         # margem em torno do conteúdo
+    min-scale: 0.2       # escala mínima permitida
+    max-scale: 2.0       # escala máxima permitida
+    slide-number: true
+    code-line-numbers: false # sem numero das linhas nos code chunks
+    subtitle-style: "font-size: 2em; font-weight: bold;"  # Aqui é onde aumentamos o subtítulo
+    logo: imagens/ufs_principal_positiva.png
+    transition: fade
+    transition-speed: fast
+    scss: meutema.scss
+    include-in-header:
+      text: |
+        <style>
+        .sublist-2col ul ul {
+          column-count: 2;
+          column-gap: 2rem;
+        }
+        .sublist-2col ul ul li {
+          break-inside: avoid; /* Impede que um item quebre entre colunas */
+        }
+        </style>
+
+lang: pt-BR
+---
+
+## Definição de um MLG
+
+Seja $Y_i$ a variável resposta e $x_{i1},x_{i2},\ldots,x_{ip}$ as variáveis preditoras, $i=1,\ldots,n$. Um MLG é definido por três componentes:
+
+<br>
+**1. Componente aleatório.** A distribuição da variável resposta $Y_i$ pertence à família exponencial, na forma $$f(y_i;\theta_i,\phi) = \exp\left\{\frac{y_i\theta_i-b(\theta_i)}{\phi}
++c(y_i,\phi)\right\}.$$
+
+- A média é $\mu_i = E(Y_i) = b'(\theta_i)$.
+  - Ou seja, a média $\mu_i$ e o parâmetro canônico $\theta_i$ estão relacionados.
+  - Note que $\theta_i = (b')^{-1}(\mu_i)$.
+- A variância é $Var(Y_i) = \phi\, b''(\theta_i) = \phi\, V(\mu_i)$.
+
+
+
+
+## Definição de um MLG
+
+**2. Componente sistemático.** As variáveis preditoras são combinadas linearmente por meio do preditor linear: $$\eta_i = \beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}= \mathbf{x}_i^\top\boldsymbol{\beta}.$$
+
+- $\mathbf{x}_i = (1, x_{i1}, \ldots,x_{ip})^\top$ é o vetor contendo o intercepto e as variáveis preditoras;
+- $\boldsymbol{\beta} = (\beta_0, \beta_1, \ldots, \beta_p)^\top$ é o vetor de coeficientes de regressão.
+
+
+**3. Função de ligação.** A média $\mu_i$ é relacionada ao preditor linear por uma função de ligação: $$g(\mu_i)=\eta_i.$$
+
+- Consequentemente, $\mu_i=g^{-1}(\eta_i)$.
+
+
+
+
+## A cadeia de relações
+
+- Portanto, os parâmetros $\boldsymbol{\beta}$ determinam a distribuição de $Y_i$ por meio da sequência $$\boldsymbol{\beta}\;\longrightarrow\;\eta_i\;\longrightarrow\;\mu_i\;\longrightarrow\;\theta_i$$ pois $$\eta_i=\mathbf{x}_i^\top\boldsymbol{\beta},\qquad\mu_i=g^{-1}(\eta_i),\qquad\theta_i = (b')^{-1}(\mu_i).$$
+
+- Essa cadeia será fundamental para obter a **função escore**, que será utilizada para obter as estimativas dos parâmetros pelo **método da máxima verossimilhança**.
+
+- No método da máxima verossimilhança, **derivamos a log-verossimilhança em relação aos parâmetros** para obter a função escore. Como a log-verossimilhança depende de $\boldsymbol{\beta}$ indiretamente, por meio de $\eta_i$, $\mu_i$ e $\theta_i$, sua derivada em relação a $\boldsymbol{\beta}$ será obtida utilizando a **regra da cadeia**.
+
+
+
+
+## Função de verossimilhança
+
+- Nos MLGs, buscamos os valores de $\boldsymbol{\beta}$ e $\phi$ que maximizam a função de verossimilhança.
+
+- Como as observações são independentes, a função de verossimilhança é
+
+\begin{aligned}
+L(\boldsymbol{\beta},\phi) &= \prod_{i=1}^{n}f(y_i;\theta_i,\phi)\\
+&= \exp\left\{ \phi^{-1} \sum_{i=1}^n \left[ y_i \theta_i - b(\theta_i) \right] + \sum_{i=1}^n c(y_i, \phi) \right\}\\
+&= \exp\left\{ \phi^{-1} \left( \sum_{i=1}^n y_i \theta_i - \sum_{i=1}^n b(\theta_i) \right) + \sum_{i=1}^n c(y_i, \phi) \right\}
+\end{aligned}
+
+
+
+
+## Função de log-verossimilhança
+
+\begin{aligned}
+\ell(\boldsymbol{\beta}, \phi) &= \ln\left[ L(\boldsymbol{\beta}, \phi) \right]\\
+&= \phi^{-1} \left( \sum_{i=1}^n y_i \theta_i - \sum_{i=1}^n b(\theta_i) \right) + \sum_{i=1}^n c(y_i, \phi)
+\end{aligned}
+
+- Embora $\ell$ seja escrita em termos de $\theta_i$ e $\phi$, os parâmetros do modelo são $\boldsymbol{\beta}$ e $\phi$.
+
+
+
+
+## Máxima Verossimilhança
+
+- Os parâmetros $\boldsymbol{\beta}=(\beta_0,\beta_1,\ldots,\beta_p)^\top$ e $\phi$ são estimados maximizando a função de log-verossimilhança, isto é, $$(\widehat{\boldsymbol{\beta}},\widehat{\phi}) = \underset{\boldsymbol{\beta},\phi}{\operatorname{arg\,max}}\;\ell(\boldsymbol{\beta},\phi).$$
+
+- Para encontrar os estimadores, procuramos os valores de $\boldsymbol{\beta}$ e $\phi$ que satisfazem as equações $$\frac{\partial \ell}{\partial\beta_j}=0, ~~  j=0,1,\ldots,p, \qquad \text{e} \qquad \frac{\partial \ell}{\partial\phi}=0$$
+
+- O conjunto dessas derivadas forma a **função escore**.
+
+
+
+
+## Função escore
+
+- A função escore é o gradiente (vetor que aponta na direção em que o valor da função cresce mais rápido) da log-verossimilhança. Ela é dada por $$\boldsymbol{U}(\boldsymbol{\beta}, \phi) = \left( \frac{\partial \ell}{\partial\beta_0}, \frac{\partial \ell}{\partial\beta_1}, \ldots, \frac{\partial \ell}{\partial\beta_p}, \frac{\partial \ell}{\partial\phi} \right)^\top$$
+
+- Ela pode ser particionada como $\boldsymbol{U}(\boldsymbol{\beta}, \phi) = \left( \boldsymbol{U}_\beta^\top, U_\phi \right)^\top,$ onde $$\boldsymbol{U}_\beta = \left( \frac{\partial \ell}{\partial\beta_0}, \frac{\partial \ell}{\partial\beta_1}, \ldots, \frac{\partial \ell}{\partial\beta_p} \right)^\top \qquad \text{e} \qquad U_\phi = \frac{\partial \ell}{\partial\phi}$$
+
+- Assim, para obter $\boldsymbol{U}(\boldsymbol{\beta}, \phi)$, obtemos separadamente $\boldsymbol{U}_\beta$ e $U_\phi$.
+
+
+
+## Função escore
+
+- As derivadas em $\boldsymbol{U}_\beta$ são $$\frac{\partial\ell}{\partial\beta_j} = \sum\limits_{i=1}^n \phi^{-1} \sqrt{\frac{w_i}{V_i}}(y_i - \mu_i)x_{ij},\quad \text{com}\quad w_i=\frac{\left(\partial\mu_i/\partial\eta_i\right)^2}{V_i} \quad \text{e}\quad V_i=V(\mu_i)$$
+
+- A derivada em $U_\phi$ é $$U_\phi = \frac{\partial \ell}{\partial\phi} = -\phi^{-2}\left[ \sum\limits_{i=1}^n y_i\theta_i - \sum\limits_{i=1}^n b(\theta_i) \right] + \sum\limits_{i=1}^n \frac{\partial c(y_i,\phi)}{\partial\phi}$$ 
+
+
+
+
+## Função escore
+
+Se definirmos $\boldsymbol{Y} = (y_1,\ldots,y_n)^\top$ o vetor de valores de $Y$ a serem observados e $\boldsymbol{X}$ a matriz $n\times(p+1)$ definida como $$\boldsymbol{X} = \begin{pmatrix}
+1 & x_{11} & x_{12} & \cdots & x_{1p} \\
+1 & x_{21} & x_{22} & \cdots & x_{2p} \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+1 & x_{n1} & x_{n2} & \cdots & x_{np}
+\end{pmatrix},$$ $\boldsymbol{U}_{\beta}$ pode ser escrito, em notação matricial, como $$\boldsymbol{U}_\beta = \phi^{-1} \boldsymbol{X}^\top \boldsymbol{W}^{1/2} \boldsymbol{V}^{-1/2} (\boldsymbol{Y}-\boldsymbol{\mu}),$$ onde $\boldsymbol{W}=\text{diag}\{w_1,\ldots,w_n\}$ e $\boldsymbol{V}=\text{diag}\{V_1,\ldots,V_n\}$.
+
+
+
+
+## Função escore
+
+- Se a ligação é canônica, então $g(\mu_i) = \eta_i = \theta_i$.
+  - Nesse caso, $\frac{\partial\mu_i}{\partial\eta_i} = \frac{\partial\mu_i}{\partial\theta_i}=V(\mu_i)=V_i$.
+  - Daí, $w_i=(\partial\mu_i/\partial\eta_i)^2/V_i = V_i^2/V_i = V_i$ e $$\boldsymbol{W} = diag\{w_1,\ldots,w_n\} = diag\{V_1,\ldots,V_n\} = \boldsymbol{V}$$
+- Ou seja, quando a função de ligação é canônica, a derivada da log-verossimilhança com relação a $\beta_j$ é $$\frac{\partial\ell}{\partial\beta_j} = \sum\limits_{i=1}^n \phi^{-1} (y_i-\mu_i)x_{ij}$$ e $\boldsymbol{U}_\beta = \phi^{-1} \boldsymbol{X}^\top (\boldsymbol{Y}-\boldsymbol{\mu})$
+
+
+
+
+## Informação de Fisher
+
+- A matriz de informação de Fisher observada, denotada por $\boldsymbol{J}(\boldsymbol{\beta}, \phi)$, é o negativo da matriz hessiana da log-verossimilhança. Ou seja, $$ \boldsymbol{J}(\boldsymbol{\beta},\phi)=-\begin{pmatrix} \frac{\partial^2 \ell}{\partial\beta_0^2} & \frac{\partial^2 \ell}{\partial\beta_0\partial\beta_1} & \cdots & \frac{\partial^2 \ell}{\partial\beta_0\partial\beta_p} & \frac{\partial^2 \ell}{\partial\beta_0\partial\phi} \\ \frac{\partial^2 \ell}{\partial\beta_1\partial\beta_0} & \frac{\partial^2 \ell}{\partial\beta_1^2} & \cdots & \frac{\partial^2 \ell}{\partial\beta_1\partial\beta_p} & \frac{\partial^2 \ell}{\partial\beta_1\partial\phi} \\ \vdots & \vdots & \ddots & \vdots & \vdots \\ \frac{\partial^2 \ell}{\partial\beta_p\partial\beta_0} & \frac{\partial^2 \ell}{\partial\beta_p\partial\beta_1} & \cdots & \frac{\partial^2 \ell}{\partial\beta_p^2} & \frac{\partial^2 \ell}{\partial\beta_p\partial\phi} \\ \frac{\partial^2 \ell}{\partial\phi\partial\beta_0} & \frac{\partial^2 \ell}{\partial\phi\partial\beta_1} & \cdots & \frac{\partial^2 \ell}{\partial\phi\partial\beta_p} & \frac{\partial^2 \ell}{\partial\phi^2} \end{pmatrix} $$
+
+
+
+
+
+## Informação de Fisher
+
+- As derivadas parciais de $\boldsymbol{J}( \boldsymbol{\beta},\phi)$ são $$ \small \begin{aligned} &\frac{\partial^2 \ell}{\partial\beta_j\partial\beta_l}=\phi^{-1}\sum_{i=1}^{n}(Y_i-\mu_i)\frac{\partial^2\theta_i}{\partial\mu_i^2}\left(\frac{\partial\mu_i}{\partial\eta_i}\right)^2x_{ij}x_{il}+\phi^{-1}\sum_{i=1}^{n}(Y_i-\mu_i)\frac{\partial\theta_i}{\partial\mu_i}\frac{\partial^2\mu_i}{\partial\eta_i^2}x_{ij}x_{il}\\&\qquad\qquad-\phi^{-1}\sum_{i=1}^{n}\left(\frac{\partial\mu_i}{\partial\eta_i}\right)^2\frac{\partial\theta_i}{\partial\mu_i}x_{ij}x_{il}\\
+&\frac{\partial^2 \ell}{\partial\beta_j\partial\phi}=-\phi^{-2}\sum_{i=1}^{n}\sqrt{\frac{w_i}{V_i}}(y_i-\mu_i)x_{ij}\\
+&\frac{\partial^2 \ell}{\partial\phi^2}=2\phi^{-3}\left(\sum_{i=1}^{n}Y_i\theta_i-\sum_{i=1}^{n}b(\theta_i)\right)+\sum_{i=1}^{n}\frac{\partial^2c(Y_i,\phi)}{\partial\phi^2}
+\end{aligned}$$
+
+
+
+
+## Informação de Fisher
+
+- Podemos escrever $\boldsymbol{J}(\boldsymbol{\beta}, \phi) = \begin{pmatrix} \boldsymbol{J}_{\boldsymbol{\beta} \boldsymbol{\beta}} & \boldsymbol{J}_{\boldsymbol{\beta} \phi}\\ \boldsymbol{J}^\top_{\boldsymbol{\beta} \phi} & \boldsymbol{J}_{\phi \phi} \end{pmatrix}$ em que
+
+::::{.columns}
+:::{.column width="47%"}
+$$\small \boldsymbol{J}_{\boldsymbol{\beta}\boldsymbol{\beta}}=-\begin{pmatrix} \frac{\partial^2\ell}{\partial\beta_0^2} & \frac{\partial^2\ell}{\partial\beta_0\partial\beta_1} & \cdots & \frac{\partial^2\ell}{\partial\beta_0\partial\beta_p} \\ \frac{\partial^2\ell}{\partial\beta_1\partial\beta_0} & \frac{\partial^2\ell}{\partial\beta_1^2} & \cdots & \frac{\partial^2\ell}{\partial\beta_1\partial\beta_p} \\ \vdots & \vdots & \ddots & \vdots \\ \frac{\partial^2\ell}{\partial\beta_p\partial\beta_0} & \frac{\partial^2\ell}{\partial\beta_p\partial\beta_1} & \cdots & \frac{\partial^2\ell}{\partial\beta_p^2} \end{pmatrix} $$
+:::
+:::{.column width="5%"}
+:::
+:::{.column width="47%"}
+$$\small \begin{aligned} &\boldsymbol{J}_{\boldsymbol{\beta}\phi}=-\left(\frac{\partial^2\ell}{\partial\phi\partial\beta_0},\frac{\partial^2\ell}{\partial\phi\partial\beta_1},\ldots,\frac{\partial^2\ell}{\partial\phi\partial\beta_p}\right)^\top\\ &\quad\;\;\, =\phi^{-2}\boldsymbol{X}^\top\boldsymbol{W}^{1/2}\boldsymbol{V}^{-1/2}(\boldsymbol{Y}-\boldsymbol{\mu})\\[10pt] &J_{\phi\phi}=-\frac{\partial^2\ell}{\partial\phi^2} \end{aligned} $$
+:::
+::::
+
+
+
+
+## Informação de Fisher
+
+- A matriz de informação de Fisher esperada, denotada por $\boldsymbol{K}(\boldsymbol{\beta},\phi)$, é o valor esperado da matriz de informação de Fisher observada: $$\small \boldsymbol{K}(\boldsymbol{\beta},\phi) = E[\boldsymbol{J}(\boldsymbol{\beta},\phi)] =-\begin{pmatrix} E\left[\frac{\partial^2\ell}{\partial\beta_0^2}\right] & E\left[\frac{\partial^2\ell}{\partial\beta_0\partial\beta_1}\right] & \cdots & E\left[\frac{\partial^2\ell}{\partial\beta_0\partial\beta_p}\right] & E\left[\frac{\partial^2\ell}{\partial\beta_0\partial\phi}\right] \\ E\left[\frac{\partial^2\ell}{\partial\beta_1\partial\beta_0}\right] & E\left[\frac{\partial^2\ell}{\partial\beta_1^2}\right] & \cdots & E\left[\frac{\partial^2\ell}{\partial\beta_1\partial\beta_p}\right] & E\left[\frac{\partial^2\ell}{\partial\beta_1\partial\phi}\right] \\ \vdots & \vdots & \ddots & \vdots & \vdots \\ E\left[\frac{\partial^2\ell}{\partial\beta_p\partial\beta_0}\right] & E\left[\frac{\partial^2\ell}{\partial\beta_p\partial\beta_1}\right] & \cdots & E\left[\frac{\partial^2\ell}{\partial\beta_p^2}\right] & E\left[\frac{\partial^2\ell}{\partial\beta_p\partial\phi}\right] \\ E\left[\frac{\partial^2\ell}{\partial\phi\partial\beta_0}\right] & E\left[\frac{\partial^2\ell}{\partial\phi\partial\beta_1}\right] & \cdots & E\left[\frac{\partial^2\ell}{\partial\phi\partial\beta_p}\right] & E\left[\frac{\partial^2\ell}{\partial\phi^2}\right] \end{pmatrix} $$
+
+
+
+
+## Informação de Fisher
+
+- Os elementos de $\boldsymbol{K}(\boldsymbol{\beta},\phi)$ são
+$$
+\begin{aligned}
+&E\left[\frac{\partial^2\ell}{\partial\beta_j\partial\beta_l}\right] = -\phi^{-1}\sum_{i=1}^{n}w_i x_{ij}x_{il}\\
+&E\left[\frac{\partial^2\ell}{\partial\beta_j\partial\phi}\right] = 0\\
+&E\left[\frac{\partial^2\ell}{\partial\phi^2}\right] = 2\phi^{-3}\left(\sum_{i=1}^{n}\mu_i\theta_i-\sum_{i=1}^{n}b(\theta_i)\right)+\sum_{i=1}^{n}E\left(\frac{\partial^2c(Y_i,\phi)}{\partial\phi^2}\right)
+\end{aligned}
+$$
+
+
+
+
+## Informação de Fisher
+
+- Podemos escrever $\boldsymbol{K}(\boldsymbol{\beta}, \phi) = \begin{pmatrix} \boldsymbol{K}_{\beta\beta} & \boldsymbol{K}_{\beta\phi}\\ \boldsymbol{K}_{\beta\phi}^\top & \boldsymbol{K}_{\phi\phi} \end{pmatrix}$ em que
+
+<div style="font-size: 0.75em;">
+$$
+\begin{aligned}
+\boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}} &= -\begin{pmatrix} E\left[\frac{\partial^2\ell}{\partial\beta_0^2}\right] & E\left[\frac{\partial^2\ell}{\partial\beta_0\partial\beta_1}\right] & \cdots & E\left[\frac{\partial^2\ell}{\partial\beta_0\partial\beta_p}\right] \\ E\left[\frac{\partial^2\ell}{\partial\beta_1\partial\beta_0}\right] & E\left[\frac{\partial^2\ell}{\partial\beta_1^2}\right] & \cdots & E\left[\frac{\partial^2\ell}{\partial\beta_1\partial\beta_p}\right] \\ \vdots & \vdots & \ddots & \vdots \\ E\left[\frac{\partial^2\ell}{\partial\beta_p\partial\beta_0}\right] & E\left[\frac{\partial^2\ell}{\partial\beta_p\partial\beta_1}\right] & \cdots & E\left[\frac{\partial^2\ell}{\partial\beta_p^2}\right] \end{pmatrix} = E\left[\boldsymbol{J}_{\boldsymbol{\beta}\boldsymbol{\beta}}\right]\\
+\boldsymbol{K}_{\boldsymbol{\beta}\phi} &= -\left(E\left[\frac{\partial^2\ell}{\partial\phi\partial\beta_0}\right],E\left[\frac{\partial^2\ell}{\partial\phi\partial\beta_1}\right],\ldots,E\left[\frac{\partial^2\ell}{\partial\phi\partial\beta_p}\right]\right)^\top = E\left[\boldsymbol{J}_{\boldsymbol{\beta}\phi}\right]\\
+K_{\phi\phi} &= -E\left[\frac{\partial^2\ell}{\partial\phi^2}\right] = E\left[J_{\phi\phi}\right]
+\end{aligned}
+$$
+</div>
+
+
+
+
+## Informação de Fisher
+
+- O termo $\boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}}$ pode ser escrito como $\boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}}=\phi^{-1}\boldsymbol{X}^{\top}\boldsymbol{W}\boldsymbol{X}$
+
+- Como $E\left[\frac{\partial^2\ell}{\partial\beta_j\partial\phi}\right] = 0$, podemos escrever $\boldsymbol{K}_{\boldsymbol{\beta}\phi}=\boldsymbol{O}_{(p+1)\times1}$, onde $\boldsymbol{O}$ é o vetor-coluna de zeros de dimensão $p+1$.
+
+Assim, $$ \boldsymbol{K}(\boldsymbol{\beta},\phi)=\begin{pmatrix}\boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}} & \boldsymbol{K}_{\boldsymbol{\beta}\phi} \\ \boldsymbol{K}_{\boldsymbol{\beta}\phi}^{\top} & K_{\phi\phi}\end{pmatrix}=\begin{pmatrix}\phi^{-1}\boldsymbol{X}^{\top}\boldsymbol{W}\boldsymbol{X} & \boldsymbol{O}_{(p+1)\times1} \\ \boldsymbol{O}_{1\times(p+1)} & K_{\phi\phi}\end{pmatrix} $$
+
+
+
+
+## Informação de Fisher
+
+- Se a ligação é canônica, então
+$$
+\begin{aligned}
+&\boldsymbol{J}_{\boldsymbol{\beta}\phi} = \phi^{-2} \boldsymbol{X}^\top (\boldsymbol{Y}-\boldsymbol{\mu})\\
+&\boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}} = \phi^{-1}\boldsymbol{X}^\top\boldsymbol{V}\boldsymbol{X}\\
+&\boldsymbol{J}_{\boldsymbol{\beta}\boldsymbol{\beta}} = \boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}}
+\end{aligned}
+$$
+
+
+
+
+## Exemplo 3.1: regressão de Poisson
+
+Considere um modelo de regressão de Poisson com função de ligação logarítmica, isto é, $$Y_i \sim \text{Poisson}(\mu_i), \qquad \log(\mu_i)=\eta_i=\boldsymbol{x}_i^\top\boldsymbol{\beta}.$$ A distribuição de $Y_i$ pode ser escrita na forma da família exponencial como $f(y_i;\theta_i,\phi) = \exp\left\{ \frac{y_i\theta_i-b(\theta_i)}{\phi} +c(y_i,\phi) \right\}$, em que $$\theta_i=\log(\mu_i), \quad b(\theta_i)=e^{\theta_i}, \quad \phi=1, \quad V(\mu_i)=\mu_i.$$ Determine:
+
+::::{.columns}
+:::{.column width="35%"}
+a. $\mu_i$ em função de $\boldsymbol{\beta}$.
+
+b. As matrizes $\boldsymbol{V}$ e $\boldsymbol{W}$.
+:::
+
+:::{.column width="65%"}
+c. A função escore $U_{\boldsymbol{\beta}}$.
+
+d. A matriz de informação de Fisher esperada
+$\boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}}$.
+:::
+::::
+
+
+
+
+## Exemplo 3.2: regressão logística
+
+Considere um modelo de regressão logística, isto é,
+
+$$Y_i \sim \operatorname{Bernoulli}(\mu_i), \qquad \log\left(\frac{\mu_i}{1-\mu_i}\right)=\eta_i=\boldsymbol{x}_i^\top\boldsymbol{\beta}.$$
+
+A distribuição de $Y_i$ pode ser escrita na forma da família exponencial como $f(y_i;\theta_i,\phi) = \exp\left\{ \frac{y_i\theta_i-b(\theta_i)}{\phi} +c(y_i,\phi) \right\}$, em que
+
+$$\theta_i=\log\left(\frac{\mu_i}{1-\mu_i}\right), \quad b(\theta_i)=\log(1+e^{\theta_i}), \quad \phi=1, \quad V(\mu_i)=\mu_i(1-\mu_i).$$
+
+Determine:
+
+::::{.columns}
+
+:::{.column width="40%"}
+
+a. $\mu_i$ em função de $\boldsymbol{\beta}$.
+
+b. As matrizes $\boldsymbol{V}$ e $\boldsymbol{W}$.
+
+:::
+
+:::{.column width="60%"}
+
+c. A função escore $U_{\boldsymbol{\beta}}$.
+
+d. A matriz de informação de Fisher esperada $\boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}}$.
+
+:::
+
+::::
+
+
+
+
+## Estimador de Máxima Verossimilhança
+
+- Os estimadores de máxima verossimilhança $\widehat{\beta}$ e $\widehat{\phi}$ são os valores de $\beta$ e $\phi$ que maximizam a log-verossimilhança.
+- Eles são obtidos como solução de $$\boldsymbol{U}(\boldsymbol{\beta}, \phi) = 0$$
+- Temos então:
+$$
+\begin{cases}
+\boldsymbol{U}_\beta = \phi^{-1}\boldsymbol{X}^\top\boldsymbol{W}^{1/2}\boldsymbol{V}^{-1/2}(\boldsymbol{Y}-\boldsymbol{\mu})=0\\
+U_{\phi} = -\phi^{-2}\left( \sum\limits_{i=1}^n y_i\theta_i - \sum\limits_{i=1}^n b(\theta_i) \right) + \sum\limits_{i=1}^n \frac{\partial c(y_i,\phi)}{\partial\phi} = 0
+\end{cases}
+$$
+
+
+
+
+## Estimador de Máxima Verossimilhança
+
+- A equação $\boldsymbol{U}_\beta=0$ equivale a $\boldsymbol{X}^\top \boldsymbol{W}^{1/2}\boldsymbol{V}^{-1/2}(\boldsymbol{Y}-\boldsymbol{\mu})=0$
+- Como $\boldsymbol{W}$, $\boldsymbol{V}$ e $\boldsymbol{\mu}$ dependem apenas de $\boldsymbol{\beta}$, o EMV de $\boldsymbol{\beta}$ é encontrado como solução de $\boldsymbol{U}_\beta=0$, independentemente de $\phi$.
+- Assim, $\widehat{\beta}$ é obtido como solução de
+$$
+\boldsymbol{X}^\top \boldsymbol{W}^{1/2}\boldsymbol{V}^{-1/2}\boldsymbol{\mu} = \boldsymbol{X}^\top \boldsymbol{W}^{1/2}\boldsymbol{V}^{-1/2}\boldsymbol{Y}
+$$
+- Quando a ligação é canônica, $\boldsymbol{W} = \boldsymbol{V}$.
+- Assim, quando a ligação é canônica, $\widehat{\boldsymbol{\beta}}$ é solução de
+$$
+\boldsymbol{X}^\top \boldsymbol{\mu} = \boldsymbol{X}^\top \boldsymbol{Y}
+$$
+
+
+
+
+## Estimador de Máxima Verossimilhança
+
+- Agora, o EMV de $\phi$, em geral, depende do valor de $\boldsymbol{\beta}$.
+- Temos que $U_\phi = 0$ equivale a
+$$
+\sum\limits_{i=1}^n y_i\theta_i - \sum\limits_{i=1}^n b(\theta_i) = \phi^2 \sum\limits_{i=1}^n  \frac{\partial c(y_i,\phi)}{\partial\phi}
+$$
+- Como $b'(\theta_i) = \mu_i = g^{-1}(\eta_i) = g^{-1}(\boldsymbol{x}^\top_i \boldsymbol{\beta})$, temos que $\theta_i$ depende de $\boldsymbol{\beta}$.
+- Ou seja, substitui-se $\boldsymbol{\beta}$ por $\widehat{\boldsymbol{\beta}}$ na equação acima para encontrar $\widehat{\phi}$.
+
+
+
+
+## Estimador de Máxima Verossimilhança
+
+- Os EMVs de $\eta_i$ e de $\mu_i$ são 
+$$
+\widehat{\eta}_i = \boldsymbol{x}^\top_i\widehat{\boldsymbol{\beta}} \quad \text{e} \quad \widehat{\mu}_i = g^{-1}(\eta_i) = g^{-1}(\boldsymbol{x}^\top_i \widehat{\boldsymbol{\beta}})
+$$
+- O EMV de $\boldsymbol{\mu}$ é $\widehat{\boldsymbol{\mu}} = (\widehat{\mu}_1, \ldots, \widehat{\mu}_n)^\top$
+
+- Seja $\boldsymbol{\eta}$ o vetor de preditores lineares
+$$
+\boldsymbol{\eta} = (\eta_1,\ldots, \eta_n)^\top = (\boldsymbol{x}^\top_1\boldsymbol{\beta},\ldots,\boldsymbol{x}_n^\top\boldsymbol{\beta})^\top
+$$
+
+- Em notação matricial, temos $\boldsymbol{\eta} = \boldsymbol{X}\boldsymbol{\beta}$.
+- O EMV de $\boldsymbol{\eta}$ é $\widehat{\boldsymbol{\eta}} = \boldsymbol{X}\widehat{\boldsymbol{\beta}}$
+- Quando $\phi$ é conhecido (exemplo: distribuição de Poisson e Bernoulli), apenas $\boldsymbol{\beta}$ precisa ser estimado.
+
+
+
+
+## Exemplo 3.3
+
+Considere um modelo de regressão Normal com função de ligação identidade, isto é,
+
+$$Y_i \sim N(\mu_i,\phi), \qquad \mu_i=\eta_i=\boldsymbol{x}_i^\top\boldsymbol{\beta}.$$
+
+A distribuição de $Y_i$ pode ser escrita na forma da família exponencial como
+
+$$
+f(y_i;\theta_i,\phi)
+=
+\exp\left\{
+\frac{y_i\theta_i-b(\theta_i)}{\phi}
++c(y_i,\phi)
+\right\},
+$$
+
+em que
+
+$$
+\theta_i=\mu_i, \qquad
+b(\theta_i)=\frac{\theta_i^2}{2}, \qquad
+c(y_u,\phi) = -\frac{1}{2}\left[ \frac{y_i^2}{\phi} + \log(2\pi\phi) \right] \qquad
+V(\mu_i)=1.
+$$
+
+Determine os estimadores de $\boldsymbol{\beta}$ e $\phi$.
+
+
+
+## Exemplo 3.4
+
+Considere um modelo de regressão de Poisson com função de ligação logarítmica, isto é,
+
+$$Y_i \sim \operatorname{Poisson}(\mu_i), \qquad
+\log(\mu_i)=\eta_i=\boldsymbol{x}_i^\top\boldsymbol{\beta}.$$
+
+A distribuição de $Y_i$ pode ser escrita na forma da família exponencial como
+
+$$
+f(y_i;\theta_i,\phi)
+=
+\exp\left\{
+\frac{y_i\theta_i-b(\theta_i)}{\phi}
++c(y_i,\phi)
+\right\},
+$$
+
+em que
+
+$$
+\theta_i=\log(\mu_i), \qquad
+b(\theta_i)=e^{\theta_i}, \qquad
+V(\mu_i)=\mu_i, \qquad \phi=1.
+$$
+
+Determine o estimador de $\boldsymbol{\beta}$ e verifique se ele possui forma fechada.
+
+
+
+
+## Exemplo 3.5
+
+Considere um modelo de regressão logística, isto é,
+
+$$Y_i \sim \operatorname{Bernoulli}(\mu_i), \qquad
+\log\left(\frac{\mu_i}{1-\mu_i}\right)
+=
+\eta_i
+=
+\boldsymbol{x}_i^\top\boldsymbol{\beta}.$$
+
+A distribuição de $Y_i$ pode ser escrita na forma da família exponencial com
+$$
+\theta_i=\log\left(\frac{\mu_i}{1-\mu_i}\right), \qquad
+b(\theta_i)=\log(1+e^{\theta_i}), \qquad
+V(\mu_i)=\mu_i(1-\mu_i), \qquad \phi=1.
+$$
+
+Determine o estimador de $\boldsymbol{\beta}$ e verifique se ele possui forma fechada.
+
+
+
+
+## O Método de Newton-Raphson
+
+- Na obtenção dos EMVs de $\boldsymbol{\beta}$ e $\phi$ nem sempre é possível obter uma solução em forma fechada.
+- Nesse caso, buscamos numericamente uma solução da equação
+$$
+U_{\boldsymbol{\beta}}(\boldsymbol{\beta})=\boldsymbol{0}.
+$$
+
+- Um método que pode ser utilizado com essa finalidade é o
+método de Newton-Raphson.
+- O método de Newton-Raphson produz uma sequência de aproximações
+$\boldsymbol{\beta}^{(0)},\boldsymbol{\beta}^{(1)},\ldots$ até atingir
+um critério de convergência.
+- Vejamos.
+
+
+
+## O Método de Newton-Raphson
+
+- Considere o problema de encontrar a solução de $h(x)=0$.
+
+- A partir de uma aproximação inicial $x^{(0)}$, o método constrói
+uma sequência de aproximações usando a reta tangente à função $$x^{(m)} = x^{(m-1)} - \frac{h\left(x^{(m-1)}\right)} {h'\left(x^{(m-1)}\right)}$$
+
+- O processo é repetido até que as aproximações sucessivas sejam
+suficientemente próximas:
+$$
+\left|x^{(m)}-x^{(m-1)}\right|<\varepsilon.
+$$
+
+
+
+
+## O Método de Newton-Raphson
+
+- Para obter $\widehat{\boldsymbol{\beta}}$, aplica-se o método de Newton-Raphson à equação $U_{\boldsymbol{\beta}}(\boldsymbol{\beta})=\boldsymbol{0}$.
+- A atualização é dada por $\boldsymbol{\beta}^{(m)} = \boldsymbol{\beta}^{(m-1)} + \boldsymbol{J}_{\boldsymbol{\beta}\boldsymbol{\beta}}^{-1} \left(\boldsymbol{\beta}^{(m-1)}\right) \boldsymbol{U}_{\boldsymbol{\beta}} \left(\boldsymbol{\beta}^{(m-1)}\right)$.
+
+### Algoritmo
+
+1. Escolha uma aproximação inicial $\boldsymbol{\beta}^{(0)}$.
+
+2. Calcule $\boldsymbol{U}_{\boldsymbol{\beta}} \left(\boldsymbol{\beta}^{(m-1)}\right) \quad\text{e}\quad \boldsymbol{J}_{\boldsymbol{\beta}\boldsymbol{\beta}} \left(\boldsymbol{\beta}^{(m-1)}\right)$.
+
+3. Atualize $\boldsymbol{\beta}$: $\boldsymbol{\beta}^{(m)} = \boldsymbol{\beta}^{(m-1)} + \boldsymbol{J}_{\boldsymbol{\beta}\boldsymbol{\beta}}^{-1} \boldsymbol{U}_{\boldsymbol{\beta}}$.
+
+4. Repita até que $\left\| \boldsymbol{\beta}^{(m)} - \boldsymbol{\beta}^{(m-1)} \right\|<\varepsilon$.
+
+Então, $\widehat{\boldsymbol{\beta}} = \boldsymbol{\beta}^{(m)}$.
+
+
+
+
+## O Método de Newton-Raphson
+
+- Após obter $\widehat{\boldsymbol{\beta}}$, o estimador de máxima
+verossimilhança de $\phi$ é obtido resolvendo $U_\phi(\phi;\widehat{\boldsymbol{\beta}})=0$.
+
+- Quando essa equação não possui solução em forma fechada, aplica-se o método de Newton-Raphson:
+$$
+\phi^{(m)} = \phi^{(m-1)} - \frac{ U_\phi\left(\phi^{(m-1)};\widehat{\boldsymbol{\beta}}\right) }{ U'_\phi\left(\phi^{(m-1)};\widehat{\boldsymbol{\beta}}\right) } = \phi^{(m-1)} + \frac{ U_\phi\left(\phi^{(m-1)};\widehat{\boldsymbol{\beta}}\right) }{ J_{\phi\phi}\left(\phi^{(m-1)};\widehat{\boldsymbol{\beta}}\right) }
+$$
+
+- O processo é repetido até $\left|\phi^{(m)}-\phi^{(m-1)}\right|<\varepsilon$. Obtendo-se, então,
+$$
+\widehat{\phi}=\phi^{(m)}
+$$
+
+
+
+
+## Método escore de Fisher
+
+- O método escore de Fisher é uma variação do método de Newton-Raphson em que a informação de Fisher observada é substituída pela informação de Fisher esperada.
+
+- Assim, para obter $\widehat{\boldsymbol{\beta}}$, $\boldsymbol{U}_{\boldsymbol{\beta}}(\boldsymbol{\beta})=\boldsymbol{0}$ é resolvida iterativamente por
+$$
+\boldsymbol{\beta}^{(m)} = \boldsymbol{\beta}^{(m-1)} + \boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}}^{-1} \boldsymbol{U}_{\boldsymbol{\beta}},
+$$
+em que $\boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}}$ é a informação de Fisher esperada.
+
+
+
+
+## Método escore de Fisher nos MLGs
+
+- No MLG, $$ \boldsymbol{U}_{\boldsymbol{\beta}} = \phi^{-1} \boldsymbol{X}^{\top} \boldsymbol{W}^{1/2} \boldsymbol{V}^{-1/2} (\boldsymbol{Y}-\boldsymbol{\mu}) $$ e $$ \boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}} = \phi^{-1}\boldsymbol{X}^{\top}\boldsymbol{W}\boldsymbol{X}. $$
+
+- Substituindo na atualização do método escore de Fisher, $$ \boldsymbol{\beta}^{(m)} = \left[ \boldsymbol{X}^{\top} \boldsymbol{W}^{(m-1)} \boldsymbol{X} \right]^{-1} \boldsymbol{X}^{\top} \boldsymbol{W}^{(m-1)} \boldsymbol{z}^{(m-1)}. $$
+
+
+
+
+## Método escore de Fisher nos MLGs
+
+- A variável resposta ajustada é definida por $$\boldsymbol{z}^{(m-1)} = \boldsymbol{\eta}^{(m-1)} + \left[\boldsymbol{W}^{(m-1)}\right]^{-1/2} \left[\boldsymbol{V}^{(m-1)}\right]^{-1/2} \left( \boldsymbol{Y}-\boldsymbol{\mu}^{(m-1)} \right). $$
+
+- Assim, a cada iteração, $$ \boldsymbol{\beta}^{(m)} = \left( \boldsymbol{X}^{\top} \boldsymbol{W}^{(m-1)} \boldsymbol{X} \right)^{-1} \boldsymbol{X}^{\top} \boldsymbol{W}^{(m-1)} \boldsymbol{z}^{(m-1)}.
+$$
+
+- Ou seja, cada atualização de $\boldsymbol{\beta}$ é obtida por **mínimos quadrados ponderados**.
+
+
+
+
+## Algoritmo do método escore de Fisher
+
+1. Escolha uma aproximação inicial $\boldsymbol{\beta}^{(0)}$.
+
+2. Calcule $\boldsymbol{\eta}^{(m-1)} = \boldsymbol{X}\boldsymbol{\beta}^{(m-1)}, \qquad \boldsymbol{\mu}^{(m-1)} = g^{-1}\left(\boldsymbol{\eta}^{(m-1)}\right)$.
+
+3. Calcule $\boldsymbol{V}^{(m-1)}$, $\boldsymbol{W}^{(m-1)}$ e $\boldsymbol{z}^{(m-1)}$.
+
+4. Atualize $$ \boldsymbol{\beta}^{(m)} = \left( \boldsymbol{X}^{\top} \boldsymbol{W}^{(m-1)} \boldsymbol{X} \right)^{-1} \boldsymbol{X}^{\top} \boldsymbol{W}^{(m-1)} \boldsymbol{z}^{(m-1)}. $$
+
+5. Repita até $$ \left\| \boldsymbol{\beta}^{(m)} - \boldsymbol{\beta}^{(m-1)} \right\|<\varepsilon. $$
+
+
+
+
+## Newton-Raphson × Escore de Fisher
+
+- A diferença entre os métodos está na matriz utilizada na atualização:
+$$
+\begin{array}{ccl}
+\text{Newton-Raphson} & & \boldsymbol{J}_{\boldsymbol{\beta}\boldsymbol{\beta}}
+\\[6pt]
+\text{Escore de Fisher} & & \boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}} = E\left[ \boldsymbol{J}_{\boldsymbol{\beta}\boldsymbol{\beta}} \right]
+\end{array}
+$$
+
+- Para uma função de ligação **canônica**, $\boldsymbol{J}_{\boldsymbol{\beta} \boldsymbol{\beta}} = \boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}},$ e, portanto, os dois métodos produzem a **mesma atualização para $\boldsymbol{\beta}$**.
+
+
+
+
+# Fim

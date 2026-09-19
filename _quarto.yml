@@ -32,6 +32,7 @@ website:                  # Configurações específicas do website
       - href: aulas/00-Regressao_linear/conteudo.qmd
       - href: aulas/01-MLG_e_familia_exponencial/conteudo.qmd
       - href: aulas/02-Propriedades_da_familia_exponencial/conteudo.qmd
+      - href: aulas/03-Estimacao_por_maxima_verossimilhanca/conteudo.qmd
       
 
 format:                      # Configurações do formato HTML

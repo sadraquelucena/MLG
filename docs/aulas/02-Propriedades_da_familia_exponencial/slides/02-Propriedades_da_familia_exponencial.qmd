@@ -1,7 +1,7 @@
 ---
 title: "Propriedades da Família Exponencial"
 subtitle: |
-  *Uma linguagem comum para diferentes distribuições*
+  *Como obter a média e a variância a partir da forma da distribuição*
 author:
   name: | # indica que o campo name terá múltiplas linhas
     ESTAT0092 -- Modelos Lineares Generalizados<br>
@@ -161,7 +161,7 @@ Substituindo o valor da primeira derivada:
 $$
 \begin{aligned}
 \frac{\partial^2}{\partial \theta^2} f(y; \theta, \phi) &= f(y; \theta, \phi) \left( \frac{y - b'(\theta)}{\phi} \right)^2  + f(y; \theta, \phi) \left( \frac{-b''(\theta)}{\phi} \right) \\
-&= f(y; \theta, \phi) \left[ \frac{\left(y - b'(\theta)\right)^2}{\phi^2} - \frac{b''(\theta)'}{\phi} \right]
+&= f(y; \theta, \phi) \left[ \frac{\left(y - b'(\theta)\right)^2}{\phi^2} - \frac{b''(\theta)}{\phi} \right]
 \end{aligned}
 $$
 
@@ -171,12 +171,11 @@ $$
 ## Propriedade 2.2: Variância na Família Exponencial
 
 - Sabemos que a integral da densidade em todo o espaço amostral é $1$. 
-- Derivando ambos os lados duas vezes em relação a $\theta$:
+- Derivando ambos os lados duas vezes em relação a $\theta$ e trocando a rodem de derivação e integração:
 $$
 \begin{aligned}
 \int\limits_{-\infty}^{+\infty} f(y; \theta, \phi) dy = 1 &\Rightarrow \int\limits_{-\infty}^{+\infty} \frac{\partial^2}{\partial \theta^2} f(y; \theta, \phi) dy = 0\\
-&\Rightarrow \int\limits_{-\infty}^{+\infty} f(y; \theta, \phi) \left[ \frac{(y - b'(\theta))^2}{\phi^2} - \frac{b''(\theta)}{\phi} \right] dy = 0\\
-\Rightarrow \frac{1}{\phi^2} \int_{-\infty}^{+\infty} & (y - b'(\theta))^2 f(y; \theta, \phi) dy - \frac{b''(\theta)}{\phi} \int_{-\infty}^{+\infty} f(y; \theta, \phi) dy = 0
+&\Rightarrow \int\limits_{-\infty}^{+\infty} f(y; \theta, \phi) \left[ \frac{(y - b'(\theta))^2}{\phi^2} - \frac{b''(\theta)}{\phi} \right] dy = 0
 \end{aligned}
 $$
 
@@ -185,18 +184,42 @@ $$
 
 $$
 \begin{aligned}
+&\Rightarrow \int\limits_{-\infty}^{+\infty} \frac{(y - b'(\theta))^2}{\phi^2} f(y; \theta, \phi) dy - \int\limits_{-\infty}^{+\infty} \frac{b''(\theta)}{\phi} f(y; \theta, \phi) dy = 0\\
+&\Rightarrow \frac{1}{\phi^2} \int_{-\infty}^{+\infty} (y - b'(\theta))^2 f(y; \theta, \phi) dy - \frac{b''(\theta)}{\phi} \int_{-\infty}^{+\infty} f(y; \theta, \phi) dy = 0\\
 &\Rightarrow \frac{1}{\phi^2} \underbrace{\int_{-\infty}^{+\infty} (y - b'(\theta))^2 f(y; \theta, \phi) dy}_{\text{Esperança}} - \frac{b''(\theta)}{\phi} \cdot 1 = 0\\
 &\Rightarrow \frac{1}{\phi^2} E\left[ (Y - b'(\theta))^2 \right] - \frac{b''(\theta)}{\phi} = 0
 \end{aligned}
 $$
 
+
+
+
+## Propriedade 2.2: Variância na Família Exponencial
+
 Pela **Propriedade 2.1**, $E[Y] = b'(\theta)$. Substituindo:
 $$
 \begin{aligned}
-&\frac{1}{\phi^2} \underbrace{E\left[ (Y - E(Y))^2 \right]}_{\text{Definição de Var}(Y)} - \frac{b''(\theta)}{\phi} = 0 \Rightarrow\frac{Var[Y]}{\phi^2} - \frac{b''(\theta)}{\phi} = 0 \\
-&\Rightarrow\frac{Var[Y]}{\phi^2} = \frac{b''(\theta)}{\phi} \Rightarrow Var[Y] = \frac{\phi^2 \cdot b''(\theta)}{\phi} \Rightarrow \boxed{Var[Y] = \phi b''(\theta)}
+\frac{1}{\phi^2} \underbrace{E\left[ (Y - E(Y))^2 \right]}_{\text{Definição de Var}(Y)} - \frac{b''(\theta)}{\phi} = 0 &\Rightarrow\frac{Var[Y]}{\phi^2} - \frac{b''(\theta)}{\phi} = 0 \\
+&\Rightarrow\frac{Var[Y]}{\phi^2} = \frac{b''(\theta)}{\phi}\\
+&\Rightarrow Var[Y] = \frac{\phi^2 \cdot b''(\theta)}{\phi}\\
+&\Rightarrow \boxed{Var[Y] = \phi b''(\theta)}
 \end{aligned}
 $$
+
+
+
+
+## Variância na Família Exponencial
+
+- Note que $$b''(\theta) = \frac{\partial b'(\theta)}{\partial \theta} = \frac{\partial \mu}{\partial \theta}$$
+
+- Chamando $V(\mu) = \frac{\partial\mu}{\partial\theta}$, temos que $$Var[Y] = \phi b''(\theta) = \phi \frac{\partial \mu}{\partial \theta} =  \phi \, V(\mu)$$
+- A função $V(\mu)$ é denominada **função de variância**.
+  - Se $V(\mu)$ é constante, a variância de $Y$ não depende da média.
+  - Se $V(\mu)$ depende de $\mu$, a variância de $Y$ pode variar entre observações com diferentes valores de $\mu$.
+
+
+
 
 ## Exemplo 2.1
 
@@ -209,7 +232,7 @@ com
 - $b(\theta)=e^\theta$
 - $c(y,\phi)=-\ln(y!)$
 
-Calcule $E(Y)$ e $Var(Y)$ usando as propriedades da família exponencial.
+Calcule $E(Y)$ e $Var(Y)$ usando as propriedades da família exponencial e determine a função de variância $V(\mu)$.
 
 
 
@@ -225,7 +248,7 @@ com
 - $b(\theta)=\ln(1+e^\theta)$
 - $c(y,\phi)=0$
 
-Calcule $E(Y)$ e $Var(Y)$ usando as propriedades da família exponencial.
+Calcule $E(Y)$ e $Var(Y)$ usando as propriedades da família exponencial e determine a função de variância $V(\mu)$.
 
 
 
@@ -240,7 +263,7 @@ com
 - $b(\theta)=\frac{\theta^2}{2}$
 - $c(y,\phi)=-\frac{1}{2}\ln(2\pi\phi)-\frac{y^2}{2\phi}$
 
-Calcule $E(Y)$ e $Var(Y)$ usando as propriedades da família exponencial.
+Calcule $E(Y)$ e $Var(Y)$ usando as propriedades da família exponencial e determine a função de variância $V(\mu)$.
 
 
 

@@ -68,5 +68,23 @@
       "Aulas",
       "2. Propriedades da Família Exponencial"
     ]
+  },
+  {
+    "objectID": "aulas/04-Distribuicao_asistotica_e_testes_de_hipoteses/conteudo.html",
+    "href": "aulas/04-Distribuicao_asistotica_e_testes_de_hipoteses/conteudo.html",
+    "title": "3. Estimação dos Parâmetros de um MLG",
+    "section": "",
+    "text": "Nesta aula, vamos explorar a família exponencial como uma estrutura matemática comum a diferentes distribuições de probabilidade. Vamos entender o papel do parâmetro canônico e do parâmetro de dispersão, as condições de regularidade necessárias para obter suas propriedades e, a partir da função \\(b(\\theta)\\), demonstrar como obter diretamente a esperança e a variância da variável resposta.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF\n\n\n\n\nLista de Exercícios:"
+  },
+  {
+    "objectID": "aulas/03-Estimacao_por_maxima_verossimilhanca/conteudo.html",
+    "href": "aulas/03-Estimacao_por_maxima_verossimilhanca/conteudo.html",
+    "title": "3. Estimação dos Parâmetros de um MLG",
+    "section": "",
+    "text": "Nesta aula, vamos estudar a estimação dos parâmetros dos Modelos Lineares Generalizados pelo método da máxima verossimilhança. Vamos construir a função de verossimilhança e a log-verossimilhança, obter a função escore e as matrizes de informação de Fisher observada e esperada e compreender como esses elementos são utilizados para obter os estimadores de \\(\\boldsymbol{\\beta}\\) e \\(\\phi\\). Em seguida, vamos estudar os métodos de Newton-Raphson e do escore de Fisher, incluindo sua aplicação aos MLGs por meio de mínimos quadrados ponderados, e analisar a relação entre os dois métodos quando a função de ligação é canônica.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF\n\n\n\n\nLista de Exercícios:",
+    "crumbs": [
+      "Aulas",
+      "3. Estimação dos Parâmetros de um MLG"
+    ]
   }
 ]

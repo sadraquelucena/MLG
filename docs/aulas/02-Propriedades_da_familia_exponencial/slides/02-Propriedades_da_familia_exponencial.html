@@ -140,7 +140,7 @@
 
 <section id="title-slide" class="quarto-title-block center">
   <h1 class="title">Propriedades da Família Exponencial</h1>
-  <p class="subtitle"><em>Uma linguagem comum para diferentes distribuições</em></p>
+  <p class="subtitle"><em>Como obter a média e a variância a partir da forma da distribuição</em></p>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -250,7 +250,7 @@ f(y;\theta,\phi)\,dy.
 <p><span class="math display">\[
 \begin{aligned}
 \frac{\partial^2}{\partial \theta^2} f(y; \theta, \phi) &amp;= f(y; \theta, \phi) \left( \frac{y - b'(\theta)}{\phi} \right)^2  + f(y; \theta, \phi) \left( \frac{-b''(\theta)}{\phi} \right) \\
-&amp;= f(y; \theta, \phi) \left[ \frac{\left(y - b'(\theta)\right)^2}{\phi^2} - \frac{b''(\theta)'}{\phi} \right]
+&amp;= f(y; \theta, \phi) \left[ \frac{\left(y - b'(\theta)\right)^2}{\phi^2} - \frac{b''(\theta)}{\phi} \right]
 \end{aligned}
 \]</span></p>
 </section>
@@ -258,11 +258,10 @@ f(y;\theta,\phi)\,dy.
 <h2>Propriedade 2.2: Variância na Família Exponencial</h2>
 <ul>
 <li>Sabemos que a integral da densidade em todo o espaço amostral é <span class="math inline">\(1\)</span>.</li>
-<li>Derivando ambos os lados duas vezes em relação a <span class="math inline">\(\theta\)</span>: <span class="math display">\[
+<li>Derivando ambos os lados duas vezes em relação a <span class="math inline">\(\theta\)</span> e trocando a rodem de derivação e integração: <span class="math display">\[
 \begin{aligned}
 \int\limits_{-\infty}^{+\infty} f(y; \theta, \phi) dy = 1 &amp;\Rightarrow \int\limits_{-\infty}^{+\infty} \frac{\partial^2}{\partial \theta^2} f(y; \theta, \phi) dy = 0\\
-&amp;\Rightarrow \int\limits_{-\infty}^{+\infty} f(y; \theta, \phi) \left[ \frac{(y - b'(\theta))^2}{\phi^2} - \frac{b''(\theta)}{\phi} \right] dy = 0\\
-\Rightarrow \frac{1}{\phi^2} \int_{-\infty}^{+\infty} &amp; (y - b'(\theta))^2 f(y; \theta, \phi) dy - \frac{b''(\theta)}{\phi} \int_{-\infty}^{+\infty} f(y; \theta, \phi) dy = 0
+&amp;\Rightarrow \int\limits_{-\infty}^{+\infty} f(y; \theta, \phi) \left[ \frac{(y - b'(\theta))^2}{\phi^2} - \frac{b''(\theta)}{\phi} \right] dy = 0
 \end{aligned}
 \]</span></li>
 </ul>
@@ -271,16 +270,35 @@ f(y;\theta,\phi)\,dy.
 <h2>Propriedade 2.2: Variância na Família Exponencial</h2>
 <p><span class="math display">\[
 \begin{aligned}
+&amp;\Rightarrow \int\limits_{-\infty}^{+\infty} \frac{(y - b'(\theta))^2}{\phi^2} f(y; \theta, \phi) dy - \int\limits_{-\infty}^{+\infty} \frac{b''(\theta)}{\phi} f(y; \theta, \phi) dy = 0\\
+&amp;\Rightarrow \frac{1}{\phi^2} \int_{-\infty}^{+\infty} (y - b'(\theta))^2 f(y; \theta, \phi) dy - \frac{b''(\theta)}{\phi} \int_{-\infty}^{+\infty} f(y; \theta, \phi) dy = 0\\
 &amp;\Rightarrow \frac{1}{\phi^2} \underbrace{\int_{-\infty}^{+\infty} (y - b'(\theta))^2 f(y; \theta, \phi) dy}_{\text{Esperança}} - \frac{b''(\theta)}{\phi} \cdot 1 = 0\\
 &amp;\Rightarrow \frac{1}{\phi^2} E\left[ (Y - b'(\theta))^2 \right] - \frac{b''(\theta)}{\phi} = 0
 \end{aligned}
 \]</span></p>
+</section>
+<section id="propriedade-2.2-variância-na-família-exponencial-4" class="slide level2">
+<h2>Propriedade 2.2: Variância na Família Exponencial</h2>
 <p>Pela <strong>Propriedade 2.1</strong>, <span class="math inline">\(E[Y] = b'(\theta)\)</span>. Substituindo: <span class="math display">\[
 \begin{aligned}
-&amp;\frac{1}{\phi^2} \underbrace{E\left[ (Y - E(Y))^2 \right]}_{\text{Definição de Var}(Y)} - \frac{b''(\theta)}{\phi} = 0 \Rightarrow\frac{Var[Y]}{\phi^2} - \frac{b''(\theta)}{\phi} = 0 \\
-&amp;\Rightarrow\frac{Var[Y]}{\phi^2} = \frac{b''(\theta)}{\phi} \Rightarrow Var[Y] = \frac{\phi^2 \cdot b''(\theta)}{\phi} \Rightarrow \boxed{Var[Y] = \phi b''(\theta)}
+\frac{1}{\phi^2} \underbrace{E\left[ (Y - E(Y))^2 \right]}_{\text{Definição de Var}(Y)} - \frac{b''(\theta)}{\phi} = 0 &amp;\Rightarrow\frac{Var[Y]}{\phi^2} - \frac{b''(\theta)}{\phi} = 0 \\
+&amp;\Rightarrow\frac{Var[Y]}{\phi^2} = \frac{b''(\theta)}{\phi}\\
+&amp;\Rightarrow Var[Y] = \frac{\phi^2 \cdot b''(\theta)}{\phi}\\
+&amp;\Rightarrow \boxed{Var[Y] = \phi b''(\theta)}
 \end{aligned}
 \]</span></p>
+</section>
+<section id="variância-na-família-exponencial" class="slide level2">
+<h2>Variância na Família Exponencial</h2>
+<ul>
+<li><p>Note que <span class="math display">\[b''(\theta) = \frac{\partial b'(\theta)}{\partial \theta} = \frac{\partial \mu}{\partial \theta}\]</span></p></li>
+<li><p>Chamando <span class="math inline">\(V(\mu) = \frac{\partial\mu}{\partial\theta}\)</span>, temos que <span class="math display">\[Var[Y] = \phi b''(\theta) = \phi \frac{\partial \mu}{\partial \theta} =  \phi \, V(\mu)\]</span></p></li>
+<li><p>A função <span class="math inline">\(V(\mu)\)</span> é denominada <strong>função de variância</strong>.</p>
+<ul>
+<li>Se <span class="math inline">\(V(\mu)\)</span> é constante, a variância de <span class="math inline">\(Y\)</span> não depende da média.</li>
+<li>Se <span class="math inline">\(V(\mu)\)</span> depende de <span class="math inline">\(\mu\)</span>, a variância de <span class="math inline">\(Y\)</span> pode variar entre observações com diferentes valores de <span class="math inline">\(\mu\)</span>.</li>
+</ul></li>
+</ul>
 </section>
 <section id="exemplo-2.1" class="slide level2">
 <h2>Exemplo 2.1</h2>
@@ -292,7 +310,7 @@ f(y;\theta,\phi)\,dy.
 <li><span class="math inline">\(b(\theta)=e^\theta\)</span></li>
 <li><span class="math inline">\(c(y,\phi)=-\ln(y!)\)</span></li>
 </ul>
-<p>Calcule <span class="math inline">\(E(Y)\)</span> e <span class="math inline">\(Var(Y)\)</span> usando as propriedades da família exponencial.</p>
+<p>Calcule <span class="math inline">\(E(Y)\)</span> e <span class="math inline">\(Var(Y)\)</span> usando as propriedades da família exponencial e determine a função de variância <span class="math inline">\(V(\mu)\)</span>.</p>
 </section>
 <section id="exemplo-2.2" class="slide level2">
 <h2>Exemplo 2.2</h2>
@@ -304,7 +322,7 @@ f(y;\theta,\phi)\,dy.
 <li><span class="math inline">\(b(\theta)=\ln(1+e^\theta)\)</span></li>
 <li><span class="math inline">\(c(y,\phi)=0\)</span></li>
 </ul>
-<p>Calcule <span class="math inline">\(E(Y)\)</span> e <span class="math inline">\(Var(Y)\)</span> usando as propriedades da família exponencial.</p>
+<p>Calcule <span class="math inline">\(E(Y)\)</span> e <span class="math inline">\(Var(Y)\)</span> usando as propriedades da família exponencial e determine a função de variância <span class="math inline">\(V(\mu)\)</span>.</p>
 </section>
 <section id="exemplo-2.3" class="slide level2">
 <h2>Exemplo 2.3</h2>
@@ -316,7 +334,7 @@ f(y;\theta,\phi)\,dy.
 <li><span class="math inline">\(b(\theta)=\frac{\theta^2}{2}\)</span></li>
 <li><span class="math inline">\(c(y,\phi)=-\frac{1}{2}\ln(2\pi\phi)-\frac{y^2}{2\phi}\)</span></li>
 </ul>
-<p>Calcule <span class="math inline">\(E(Y)\)</span> e <span class="math inline">\(Var(Y)\)</span> usando as propriedades da família exponencial.</p>
+<p>Calcule <span class="math inline">\(E(Y)\)</span> e <span class="math inline">\(Var(Y)\)</span> usando as propriedades da família exponencial e determine a função de variância <span class="math inline">\(V(\mu)\)</span>.</p>
 </section>
 <section id="fim" class="title-slide slide level1 center">
 <h1>Fim</h1>
