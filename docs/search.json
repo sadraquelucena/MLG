@@ -7,6 +7,35 @@
     "text": "Este espaço reúne todo o material da disciplina ESTAT0092 — Modelos Lineares Generalizados, ofertada pelo Departamento de Estatística e Ciências Atuariais da Universidade Federal de Sergipe e ministrada pelo Prof. Dr. Sadraque E. F. Lucena.\nAo longo do semestre, estudaremos como construir modelos de regressão capazes de representar diferentes tipos de respostas e situações de pesquisa. Partiremos do modelo de regressão normal linear para compreender suas limitações e, a partir delas, desenvolveremos uma estrutura mais geral baseada em três componentes: componente aleatório, componente sistemático e função de ligação. A família exponencial fornecerá a estrutura matemática que permite tratar, de forma unificada, diferentes distribuições para a variável resposta.\nMais do que aplicar técnicas, o objetivo da disciplina é desenvolver a capacidade de especificar, estimar, avaliar e interpretar modelos estatísticos, compreendendo as relações entre os dados, as distribuições de probabilidade e a estrutura do modelo.\nNeste ambiente você encontrará o cronograma da disciplina, notas de aula, listas de exercícios, materiais complementares e demais recursos utilizados ao longo do semestre."
   },
   {
+    "objectID": "aulas/04-Distribuicao_asistotica_e_testes_de_hipoteses/conteudo.html",
+    "href": "aulas/04-Distribuicao_asistotica_e_testes_de_hipoteses/conteudo.html",
+    "title": "3. Estimação dos Parâmetros de um MLG",
+    "section": "",
+    "text": "Nesta aula, vamos explorar a família exponencial como uma estrutura matemática comum a diferentes distribuições de probabilidade. Vamos entender o papel do parâmetro canônico e do parâmetro de dispersão, as condições de regularidade necessárias para obter suas propriedades e, a partir da função \\(b(\\theta)\\), demonstrar como obter diretamente a esperança e a variância da variável resposta.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF\n\n\n\n\nLista de Exercícios:"
+  },
+  {
+    "objectID": "aulas/02-Propriedades_da_familia_exponencial/conteudo.html",
+    "href": "aulas/02-Propriedades_da_familia_exponencial/conteudo.html",
+    "title": "2. Propriedades da Família Exponencial",
+    "section": "",
+    "text": "Nesta aula, vamos explorar a família exponencial como uma estrutura matemática comum a diferentes distribuições de probabilidade. Vamos entender o papel do parâmetro canônico e do parâmetro de dispersão, as condições de regularidade necessárias para obter suas propriedades e, a partir da função \\(b(\\theta)\\), demonstrar como obter diretamente a esperança e a variância da variável resposta.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF\n\n\n\n\nLista de Exercícios:",
+    "crumbs": [
+      "Aulas",
+      "2. Propriedades da Família Exponencial"
+    ]
+  },
+  {
+    "objectID": "aulas/00-Regressao_linear/conteudo.html",
+    "href": "aulas/00-Regressao_linear/conteudo.html",
+    "title": "0. O Modelo Normal Linear",
+    "section": "",
+    "text": "Nesta aula, vamos revisar o Modelo Normal Linear, retomando sua estrutura, os métodos de estimação e os principais critérios de avaliação e diagnóstico. Vamos discutir a diferença entre modelos explicativos e preditivos, a importância de conhecer e preparar os dados antes do ajuste e o papel da análise de resíduos na verificação das suposições do modelo. Também serão abordados gráficos de diagnóstico, alavancagem, distância de Cook, análise de sensibilidade e multicolinearidade. Ao final, vamos conectar o Modelo Normal Linear aos Modelos Lineares Generalizados, mostrando como a distribuição da resposta e a função de ligação permitem ampliar essa estrutura para diferentes tipos de dados.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF",
+    "crumbs": [
+      "Aulas",
+      "0. O Modelo Normal Linear"
+    ]
+  },
+  {
     "objectID": "info.html",
     "href": "info.html",
     "title": "Modelos Lineares Generalizados",
@@ -37,17 +66,6 @@
     ]
   },
   {
-    "objectID": "aulas/00-Regressao_linear/conteudo.html",
-    "href": "aulas/00-Regressao_linear/conteudo.html",
-    "title": "0. O Modelo Normal Linear",
-    "section": "",
-    "text": "Nesta aula, vamos revisar o Modelo Normal Linear, retomando sua estrutura, os métodos de estimação e os principais critérios de avaliação e diagnóstico. Vamos discutir a diferença entre modelos explicativos e preditivos, a importância de conhecer e preparar os dados antes do ajuste e o papel da análise de resíduos na verificação das suposições do modelo. Também serão abordados gráficos de diagnóstico, alavancagem, distância de Cook, análise de sensibilidade e multicolinearidade. Ao final, vamos conectar o Modelo Normal Linear aos Modelos Lineares Generalizados, mostrando como a distribuição da resposta e a função de ligação permitem ampliar essa estrutura para diferentes tipos de dados.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF",
-    "crumbs": [
-      "Aulas",
-      "0. O Modelo Normal Linear"
-    ]
-  },
-  {
     "objectID": "aulas/01-MLG_e_familia_exponencial/conteudo.html",
     "href": "aulas/01-MLG_e_familia_exponencial/conteudo.html",
     "title": "1. MLG e Família Exponencial",
@@ -57,24 +75,6 @@
       "Aulas",
       "1. MLG e Família Exponencial"
     ]
-  },
-  {
-    "objectID": "aulas/02-Propriedades_da_familia_exponencial/conteudo.html",
-    "href": "aulas/02-Propriedades_da_familia_exponencial/conteudo.html",
-    "title": "2. Propriedades da Família Exponencial",
-    "section": "",
-    "text": "Nesta aula, vamos explorar a família exponencial como uma estrutura matemática comum a diferentes distribuições de probabilidade. Vamos entender o papel do parâmetro canônico e do parâmetro de dispersão, as condições de regularidade necessárias para obter suas propriedades e, a partir da função \\(b(\\theta)\\), demonstrar como obter diretamente a esperança e a variância da variável resposta.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF\n\n\n\n\nLista de Exercícios:",
-    "crumbs": [
-      "Aulas",
-      "2. Propriedades da Família Exponencial"
-    ]
-  },
-  {
-    "objectID": "aulas/04-Distribuicao_asistotica_e_testes_de_hipoteses/conteudo.html",
-    "href": "aulas/04-Distribuicao_asistotica_e_testes_de_hipoteses/conteudo.html",
-    "title": "3. Estimação dos Parâmetros de um MLG",
-    "section": "",
-    "text": "Nesta aula, vamos explorar a família exponencial como uma estrutura matemática comum a diferentes distribuições de probabilidade. Vamos entender o papel do parâmetro canônico e do parâmetro de dispersão, as condições de regularidade necessárias para obter suas propriedades e, a partir da função \\(b(\\theta)\\), demonstrar como obter diretamente a esperança e a variância da variável resposta.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF\n\n\n\n\nLista de Exercícios:"
   },
   {
     "objectID": "aulas/03-Estimacao_por_maxima_verossimilhanca/conteudo.html",
