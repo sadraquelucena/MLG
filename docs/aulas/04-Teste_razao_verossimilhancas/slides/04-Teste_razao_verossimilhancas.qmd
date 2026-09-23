@@ -1,0 +1,327 @@
+---
+title: "Teste da razão de verossimilhanças"
+subtitle: |
+  *Testando a significância global do MLG*
+author:
+  name: | # indica que o campo name terá múltiplas linhas
+    ESTAT0092 -- Modelos Lineares Generalizados<br>
+    Prof. Dr. Sadraque E. F. Lucena<br>
+    <a href="http://sadraquelucena.github.io/mlg" style="font-size:.8em;">http://sadraquelucena.github.io/mlg</a><br>
+  
+format:
+  revealjs:
+    theme: meutema.scss
+    width: 1600
+    height: 900
+    margin: 0.1         # margem em torno do conteúdo
+    min-scale: 0.2       # escala mínima permitida
+    max-scale: 2.0       # escala máxima permitida
+    slide-number: true
+    code-line-numbers: false # sem numero das linhas nos code chunks
+    subtitle-style: "font-size: 2em; font-weight: bold;"  # Aqui é onde aumentamos o subtítulo
+    logo: imagens/ufs_principal_positiva.png
+    transition: fade
+    transition-speed: fast
+    scss: meutema.scss
+    include-in-header:
+      text: |
+        <style>
+        .sublist-2col ul ul {
+          column-count: 2;
+          column-gap: 2rem;
+        }
+        .sublist-2col ul ul li {
+          break-inside: avoid; /* Impede que um item quebre entre colunas */
+        }
+        </style>
+
+lang: pt-BR
+---
+
+## Composição de um MLG
+
+**1. Componente aleatório:** A variável resposta $Y_i$ pertence à família exponencial na forma $f(y_i;\theta_i,\phi) = \exp\left\{\frac{y_i\theta_i-b(\theta_i)}{\phi}+c(y_i,\phi)\right\}.$
+
+::::{.columns}
+:::{.column width="3%"}
+:::
+:::{.column width="97%"}
+- A média é $\mu_i = E(Y_i) = b'(\theta_i)$.
+- A variância é $Var(Y_i) = \phi\, b''(\theta_i) = \phi\, V(\mu_i)$.
+:::
+::::
+
+**2. Componente sistemático:** $\eta_i = \beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}= \mathbf{x}_i^\top\boldsymbol{\beta}.$
+
+
+**3. Função de ligação:** $g(\mu_i)=\eta_i$.
+
+
+
+
+## Estimação dos parâmetros
+
+- O vetor de parâmetros $\boldsymbol{\beta}=(\beta_0,\beta_1,\ldots,\beta_p)^\top$ e o parâmetro $\phi$ são estimados por máxima verossimilhança.
+
+- A função de verossimilhança é $L(\boldsymbol{\beta},\phi) = \exp\left\{ \phi^{-1} \left( \sum_{i=1}^n y_i \theta_i - \sum_{i=1}^n b(\theta_i) \right) + \sum_{i=1}^n c(y_i, \phi) \right\}$
+
+- A função de log-verossimilhança é $\ell(\boldsymbol{\beta}, \phi) = \phi^{-1} \left( \sum_{i=1}^n y_i \theta_i - \sum_{i=1}^n b(\theta_i) \right) + \sum_{i=1}^n c(y_i, \phi)$
+
+- Os estimadores são obtidos fazendo $\boldsymbol{U}(\boldsymbol{\beta},\phi) = \left( \boldsymbol{U}^\top_{\boldsymbol{\beta}}, U_\phi \right)^\top = \left( \frac{\partial \ell}{\partial\beta_0}, \frac{\partial \ell}{\partial\beta_1}, \ldots, \frac{\partial \ell}{\partial\beta_p}, \frac{\partial \ell}{\partial\phi} \right)^\top = \boldsymbol{0}$
+
+
+
+
+## Função escore
+
+- As derivadas em $\boldsymbol{U}_\beta$ são $\frac{\partial\ell}{\partial\beta_j} = \sum\limits_{i=1}^n \phi^{-1} \sqrt{\frac{w_i}{V_i}}(y_i - \mu_i)x_{ij}$
+  - com $w_i=\frac{\left(\partial\mu_i/\partial\eta_i\right)^2}{V_i}$ e $V_i=V(\mu_i)$
+  - Notação matricial: $\boldsymbol{U}_\beta = \phi^{-1} \boldsymbol{X}^\top \boldsymbol{W}^{1/2} \boldsymbol{V}^{-1/2} (\boldsymbol{Y}-\boldsymbol{\mu})$
+    - com $\boldsymbol{W}=\text{diag}\{w_1,\ldots,w_n\}$ e $\boldsymbol{V}=\text{diag}\{V_1,\ldots,V_n\}$
+
+- Enquanto $U_\phi = \frac{\partial \ell}{\partial\phi} = -\phi^{-2}\left[ \sum\limits_{i=1}^n y_i\theta_i - \sum\limits_{i=1}^n b(\theta_i) \right] + \sum\limits_{i=1}^n \frac{\partial c(y_i,\phi)}{\partial\phi}$
+
+
+
+
+## Informação de Fisher (observada)
+
+- $\boldsymbol{J}(\boldsymbol{\beta}, \phi) = \begin{pmatrix} \boldsymbol{J}_{\boldsymbol{\beta} \boldsymbol{\beta}} & \boldsymbol{J}_{\boldsymbol{\beta} \phi}\\ \boldsymbol{J}^\top_{\boldsymbol{\beta} \phi} & J_{\phi \phi} \end{pmatrix}$ em que $\phantom{\hrulefill}$
+
+::::{.columns}
+:::{.column width="47%"}
+$$\small \boldsymbol{J}_{\boldsymbol{\beta}\boldsymbol{\beta}}=-\begin{pmatrix} \frac{\partial^2\ell}{\partial\beta_0^2} & \frac{\partial^2\ell}{\partial\beta_0\partial\beta_1} & \cdots & \frac{\partial^2\ell}{\partial\beta_0\partial\beta_p} \\ \frac{\partial^2\ell}{\partial\beta_1\partial\beta_0} & \frac{\partial^2\ell}{\partial\beta_1^2} & \cdots & \frac{\partial^2\ell}{\partial\beta_1\partial\beta_p} \\ \vdots & \vdots & \ddots & \vdots \\ \frac{\partial^2\ell}{\partial\beta_p\partial\beta_0} & \frac{\partial^2\ell}{\partial\beta_p\partial\beta_1} & \cdots & \frac{\partial^2\ell}{\partial\beta_p^2} \end{pmatrix} $$
+:::
+:::{.column width="5%"}
+:::
+:::{.column width="47%"}
+$$\small \begin{aligned} &\boldsymbol{J}_{\boldsymbol{\beta}\phi}=-\left(\frac{\partial^2\ell}{\partial\phi\partial\beta_0},\frac{\partial^2\ell}{\partial\phi\partial\beta_1},\ldots,\frac{\partial^2\ell}{\partial\phi\partial\beta_p}\right)^\top\\ &\quad\;\;\, =\phi^{-2}\boldsymbol{X}^\top\boldsymbol{W}^{1/2}\boldsymbol{V}^{-1/2}(\boldsymbol{Y}-\boldsymbol{\mu})\$$[10pt] &J_{\phi\phi}=-\frac{\partial^2\ell}{\partial\phi^2} \end{aligned} $$
+:::
+::::
+
+
+
+
+## Informação de Fisher (esperada)
+
+- $\boldsymbol{K}(\boldsymbol{\beta}, \phi) = \begin{pmatrix} \boldsymbol{K}_{\beta\beta} & \boldsymbol{0}\\ \boldsymbol{0} & K_{\phi\phi} \end{pmatrix}$ em que $\phantom{\hrulefill}$
+
+  - $\small \boldsymbol{K}_{\boldsymbol{\beta}\boldsymbol{\beta}}=-\begin{pmatrix} E\left[\frac{\partial^2\ell}{\partial\beta_0^2}\right] & E\left[\frac{\partial^2\ell}{\partial\beta_0\partial\beta_1}\right] & \cdots & E\left[\frac{\partial^2\ell}{\partial\beta_0\partial\beta_p}\right] \\ E\left[\frac{\partial^2\ell}{\partial\beta_1\partial\beta_0}\right] & E\left[\frac{\partial^2\ell}{\partial\beta_1^2}\right] & \cdots & E\left[\frac{\partial^2\ell}{\partial\beta_1\partial\beta_p}\right] \\ \vdots & \vdots & \ddots & \vdots \\ E\left[\frac{\partial^2\ell}{\partial\beta_p\partial\beta_0}\right] & E\left[\frac{\partial^2\ell}{\partial\beta_p\partial\beta_1}\right] & \cdots & E\left[\frac{\partial^2\ell}{\partial\beta_p^2}\right] \end{pmatrix} = \phi^{-1}\boldsymbol{X}^\top\boldsymbol{W}\boldsymbol{X}$
+
+  - $\small K_{\phi\phi}=-E\left[\frac{\partial^2\ell}{\partial\phi^2}\right]$
+
+  - $\boldsymbol{0}$ é o vetor-coluna de zeros de dimensão $p+1$
+
+
+
+
+## Testando o Modelo Globalmente
+
+- Após obter as estimativas de máxima verossimilhança para os parâmetros do modelo, precisamos avaliar se o conjunto de preditores utilizados ($\mathbf{x}_1, \dots, \mathbf{x}_p$) realmente ajuda a explicar a variável resposta $Y$.
+
+- A primeira coisa que fazemos é avaliar se o modelo proposto é globalmente superior a um modelo que contém apenas a constante $\beta_0$ (intercepto).
+
+
+
+
+## Hipóteses do Teste Global
+
+- As hipóteses para a significância global do MLG são:
+$$
+\begin{cases}
+H_0: \beta_1=\beta_2=\cdots=\beta_p=0\\
+H_1: \beta_j\neq 0, \quad \text{para pelo menos um } j\in\{1,2,\ldots,p\}
+\end{cases}
+$$
+
+::::{.columns}
+:::{.column width="48%"}
+
+#### Sob $H_0$ (*modelo nulo*)
+
+- $\eta_i = \beta_0 \rightarrow \mu_i = g^{-1}(\beta_0)$
+- A média da resposta é constante e não depende das covariáveis.
+- O modelo possui apenas 2 parâmetros: $\beta_0$ e $\phi$.
+:::
+
+:::{.column width="4%"}
+:::
+
+:::{.column width="48%"}
+
+#### Sob $H_1$ (*modelo completo*)
+
+- $\eta_i = \beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip}$
+- Existe associação entre $Y$ e ao menos uma covariável.
+- O modelo possui $p + 2$ parâmetros: $\beta_0, \beta_1, \dots, \beta_p$ e $\phi$.
+:::
+::::
+
+
+
+
+## Teste da Razão de Verossimilhanças (LRT)
+
+- O teste avalia a plausibilidade de $H_0$ comparando o valor máximo da log-verossimilhança do modelo completo com o do modelo nulo.
+- Sejam:
+  - $\ell(\widehat{\boldsymbol{\beta}}, \widehat{\phi})$: o máximo da log-verossimilhança sob o modelo completo.
+  - $\ell(\widehat{\boldsymbol{\beta}}^0_0, \widehat{\phi}^0_0)$: o máximo da log-verossimilhança sob o modelo nulo ($H_0$).
+- A estatística da razão de verossimilhanças é dada por: $$T_{RV} = 2 \left\{ \ell(\hat{\boldsymbol{\beta}}, \hat{\phi}) - \ell(\hat{\beta}_0^0, \hat{\phi}_0^0) \right\}$$
+- Quanto maior o valor de $T_{RV}$, maior é o ganho de ajuste ao incluir as preditoras e maior a evidência contra $H_0$.
+
+
+
+
+## Teste da Razão de Verossimilhanças (LRT)
+
+- *Distribuição assintótica:* Se $n$ for suficientemente grande, sob $H_0$, a estatística $T_{RV}$ segue a distribuição Qui-Quadrado com $p$ graus de liberdade (diferença na quantidade de coeficientes de regressão): $$T_{RV} \stackrel{\text{aprox.}}{\sim} \chi^2_p$$
+- *Regra de decisão:* Rejeita-se $H_0$ ao nível de significância $\alpha$ se:   $$t_{RV} > \chi_p^2(1 - \alpha) \quad \text{ou se} \quad p\text{-valor} = P(\chi_p^2 > t_{RV}) < \alpha$$
+
+
+
+
+## Caso particular: $\phi$ conhecido
+
+- Se o parâmetro de dispersão $\phi$ for conhecido (ex: distribuições Poisson e Binomial em que $\phi = 1$), ele não precisa ser estimado.
+- O número de parâmetros reduz-se para $p+1$ no modelo completo e $1$ ($\beta_0$) no modelo nulo.
+- A estatística da razão de verossimilhanças simplifica para: $$T_{RV} = 2 \left\{ \ell(\hat{\boldsymbol{\beta}}) - \ell(\hat{\beta}_0^0) \right\}$$
+- As propriedades assintóticas e a distribuição $\chi_p^2$ permanecem exatamente as mesmas.
+
+
+
+
+## Exemplo 4.1
+#### Regressão Gama (Variável Resposta Contínua Positiva)
+
+- *Dataset:* `trees` (disponível no R base)
+- *Descrição:* Dados de 31 cerejeiras-negras, com medições a 4 pés e 6 polegadas (aprox. 1,37 m) acima do solo.
+- *Variáveis:*
+  - `Girth`: embora *girth* signifcque cirunferência, é dado o diâmetro da árvore, em polegadas
+  - `Height`: altura, em pés
+  - `Volume`: volume de madeira, em pés³
+
+**Objetivo:** Ajustar um MLG com distribuição Gama e ligação logarítmica para modelar o volume de madeira em função da altura e do diâmetro da árvore.
+
+
+
+
+## Exemplo 4.1
+
+Testando diretamente as verossimilhanças.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Conjunto de dados
+data(trees)
+
+# Ajuste do modelo completo e nulo
+mod_gama_completo <- glm(Volume ~ Height + Girth, family = Gamma(link = "log"), data = trees)
+mod_gama_nulo <- glm(Volume ~ 1, family = Gamma(link = "log"), data = trees)
+
+# Extração das log-verossimilhanças
+( l_gama_completo <- logLik(mod_gama_completo) )
+( l_gama_nulo <- logLik(mod_gama_nulo) )
+
+# Estatística TRV
+( T_rv <- as.numeric(2 * (l_gama_completo - l_gama_nulo)) )
+
+# Cálculo do p-valor via distribuição Qui-Quadrado (df = p = 2)
+( p_valor <- pchisq(T_rv, df = 2, lower.tail = FALSE) )
+
+```
+
+
+
+
+## Exemplo 4.1
+
+Usando uma função nativa do R:
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Teste da razão de verossimilhanças usando a função
+# lrtest do pacote lmtext
+lmtest::lrtest(mod_gama_completo, mod_gama_nulo)
+
+
+# p-valor exato
+lmtest::lrtest(mod_gama_completo, mod_gama_nulo)$`Pr(>Chisq)`[2]
+```
+
+
+
+## Exemplo 4.2
+#### Regressão Logística (Variável Resposta Binária)
+
+- *Dataset:* `birthwt` (pacote MASS)
+- *Descrição:* O conjunto possui 189 linhas e 10 colunas. Os dados foram coletados no Baystate Medical Center, Springfield, Massachusetts, em 1986.
+- *Variáveis:*
+  - `low`: Indicador de peso ao nascer inferior a 2,5 kg.
+  - `lwt`: Peso da mãe, em libras, no momento da última menstruação.
+  - `smoke`: Status de tabagismo durante a gravidez.
+
+**Objetivo:** Ajustar um MLG com distribuição Binomial e ligação logit para modelar a probabilidade de um bebê nascer com baixo peso (`low`) em função do peso da mãe (`lwt`) e hábito de fumar (`smoke`).
+
+
+
+
+## Exemplo 4.3
+#### Regressão de Poisson (Contagem)
+
+- *Dataset:* `warpbreaks` (disponível no R base)
+- *Descrição:* O conjunto de dados apresenta o número de rompimentos dos fios de urdidura por tear, em que um tear corresponde a um comprimento fixo de fio.
+- *Variáveis:*
+  - `breaks`: Número de rompimentos
+  - `wool`: Tipo de lã (A ou B)
+  - `tension`: Nível de tensão (L, M, H)
+
+**Objetivo:** Ajustar um MLG com distribuição de Poisson e ligação log para modelar o número de quebras de fios (`breaks`) em função do tipo de lã (`wool`) e da tensão (`tension`).
+
+
+
+## Exemplo 4.4
+#### Regressão Logística  (Variável Resposta Binária)
+
+- *Dataset:* `Pima.tr` (pacote MASS)
+- *Descrição:* Dados de mulheres com pelo menos 21 anos de idade, de ascendência indígena Pima e residentes próximo a Phoenix, Arizona, testadas para diabetes de acordo com os critérios da Organização Mundial da Saúde (OMS).
+- *Variáveis:*
+  - `type`: `Yes` (Sim) ou `No` (Não), para diabética segundo os critérios da OMS.
+  - `glu`: Concentração de glicose no plasma em um teste oral de tolerância à glicose.
+  - `bmi`: Índice de massa corporal (peso em kg / (altura em m)$^2$).
+  - `age`: Idade em anos.
+
+**Objetivo:** Ajustar um modelo de regressão logística para testar a presença de diabetes (`type`) em função da glicose (`glu`), IMC (`bmi`) e idade (`age`).
+
+
+
+
+
+
+## Próximos Passos
+
+- **$H_0$ foi rejeitada?**
+  - Concluímos que ao menos uma variável preditora é importante para o modelo.
+  
+- **Pergunta seguinte:**
+  - *Quais* variáveis individualmente possuem efeito estatisticamente significativo sobre a resposta?
+
+- **Próxima Aula:**
+  - Avaliação da significância individual dos coeficientes de regressão via **Teste de Wald** e **Intervalos de Confiança**.
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Fim

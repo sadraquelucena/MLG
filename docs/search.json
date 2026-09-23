@@ -7,11 +7,15 @@
     "text": "Este espaço reúne todo o material da disciplina ESTAT0092 — Modelos Lineares Generalizados, ofertada pelo Departamento de Estatística e Ciências Atuariais da Universidade Federal de Sergipe e ministrada pelo Prof. Dr. Sadraque E. F. Lucena.\nAo longo do semestre, estudaremos como construir modelos de regressão capazes de representar diferentes tipos de respostas e situações de pesquisa. Partiremos do modelo de regressão normal linear para compreender suas limitações e, a partir delas, desenvolveremos uma estrutura mais geral baseada em três componentes: componente aleatório, componente sistemático e função de ligação. A família exponencial fornecerá a estrutura matemática que permite tratar, de forma unificada, diferentes distribuições para a variável resposta.\nMais do que aplicar técnicas, o objetivo da disciplina é desenvolver a capacidade de especificar, estimar, avaliar e interpretar modelos estatísticos, compreendendo as relações entre os dados, as distribuições de probabilidade e a estrutura do modelo.\nNeste ambiente você encontrará o cronograma da disciplina, notas de aula, listas de exercícios, materiais complementares e demais recursos utilizados ao longo do semestre."
   },
   {
-    "objectID": "aulas/04-Distribuicao_asistotica_e_testes_de_hipoteses/conteudo.html",
-    "href": "aulas/04-Distribuicao_asistotica_e_testes_de_hipoteses/conteudo.html",
-    "title": "3. Estimação dos Parâmetros de um MLG",
+    "objectID": "aulas/04-Teste_razao_verossimilhancas/conteudo.html",
+    "href": "aulas/04-Teste_razao_verossimilhancas/conteudo.html",
+    "title": "4. Teste da razão de verossimilhanças",
     "section": "",
-    "text": "Nesta aula, vamos explorar a família exponencial como uma estrutura matemática comum a diferentes distribuições de probabilidade. Vamos entender o papel do parâmetro canônico e do parâmetro de dispersão, as condições de regularidade necessárias para obter suas propriedades e, a partir da função \\(b(\\theta)\\), demonstrar como obter diretamente a esperança e a variância da variável resposta.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF\n\n\n\n\nLista de Exercícios:"
+    "text": "Nesta aula, vamos abordar o Teste da Razão de Verossimilhanças (LRT) para avaliar a significância global de um Modelo Linear Generalizado.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF",
+    "crumbs": [
+      "Aulas",
+      "4. Teste da razão de verossimilhanças"
+    ]
   },
   {
     "objectID": "aulas/02-Propriedades_da_familia_exponencial/conteudo.html",
