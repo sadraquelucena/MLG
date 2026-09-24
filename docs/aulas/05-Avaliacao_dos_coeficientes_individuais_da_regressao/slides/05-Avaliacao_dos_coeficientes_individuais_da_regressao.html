@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/clipboard/clipboard.min.js"></script>
+<script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/quarto-html/tabby.min.js"></script>
+<script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/quarto-html/popper.min.js"></script>
+<script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.9.38">
+
+  <meta name="author" content="ESTAT0092 – Modelos Lineares Generalizados  Prof.&nbsp;Dr.&nbsp;Sadraque E. F. Lucena  http://sadraquelucena.github.io/mlg">
+  <title>Avaliação dos coeficientes individuais da regressão</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/dist/reveal.css">
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/dist/theme/quarto-8f3bab2b47a2fb207b0eb83edec323e9.css">
+  <link href="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+  <style>
+  .sublist-2col ul ul {
+    column-count: 2;
+    column-gap: 2rem;
+  }
+  .sublist-2col ul ul li {
+    break-inside: avoid; /* Impede que um item quebre entre colunas */
+  }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Avaliação dos coeficientes individuais da regressão</h1>
+  <p class="subtitle"><em>Teste de Wald e intervalos de confiança</em></p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+<p>ESTAT0092 – Modelos Lineares Generalizados<br> Prof.&nbsp;Dr.&nbsp;Sadraque E. F. Lucena<br> <a href="http://sadraquelucena.github.io/mlg" style="font-size:.8em;">http://sadraquelucena.github.io/mlg</a><br></p> 
+</div>
+</div>
+</div>
+
+</section>
+<section id="introdução" class="slide level2">
+<h2>Introdução</h2>
+<ul>
+<li>Na aula anterior, utilizamos o <strong>Teste da Razão de Verossimilhanças (TRV)</strong> para avaliar a significância global dos coeficientes de regressão, comparando o modelo completo com o modelo nulo.</li>
+<li>O teste global avalia as hipóteses:</li>
+</ul>
+<p><span class="math display">\[
+\begin{cases}
+  H_0: \beta_1=\beta_2=\cdots=\beta_p=0\\
+  H_1: \beta_j\neq 0, \quad \text{para pelo menos um } j.
+\end{cases}
+\]</span></p>
+<ul>
+<li>Quando <span class="math inline">\(H_0\)</span> é rejeitada no TRV, concluímos que <em>pelo menos um dos coeficientes associados às variáveis preditoras é diferente de zero</em>.
+<ul>
+<li>Ou seja, <em>pelo menos uma das variáveis preditoras é importante para o modelo.</em></li>
+</ul></li>
+<li>Isso leva a pergunta: <em>Quais coeficientes são diferentes de zero?</em>
+<ul>
+<li>Isto é, <em>quais variáveis individualmente possuem efeito estatisticamente significativo sobre a resposta?</em></li>
+</ul></li>
+</ul>
+</section>
+<section id="teste-de-wald-para-a-significância-individual" class="slide level2">
+<h2>Teste de Wald para a significância individual</h2>
+<ul>
+<li><p>Seja <span class="math inline">\(Y\)</span> a variável resposta e sejam <span class="math inline">\(x_1,\ldots,x_p\)</span> as variáveis preditoras.</p></li>
+<li><p>Supõe-se que a relação entre <span class="math inline">\(Y\)</span> e as preditoras seja descrita por um MLG:</p></li>
+</ul>
+<p><span class="math display">\[ \eta_i = \beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip} = \mathbf{x}_i^\top\boldsymbol{\beta}, \]</span></p>
+<p>com</p>
+<p><span class="math display">\[ g(\mu_i)=\eta_i, \qquad \mu_i=E(Y_i). \]</span></p>
+<ul>
+<li>O vetor de coeficientes é</li>
+</ul>
+<p><span class="math display">\[ \boldsymbol{\beta} = (\beta_0,\beta_1,\ldots,\beta_p)^\top. \]</span></p>
+<ul>
+<li><strong>Objetivo:</strong> avaliar, para cada <span class="math inline">\(j\)</span>, se o coeficiente <span class="math inline">\(\beta_j\)</span> é estatisticamente diferente de zero.</li>
+</ul>
+</section>
+<section id="hipóteses-do-teste" class="slide level2">
+<h2>Hipóteses do teste</h2>
+<ul>
+<li>Para avaliar a significância individual de <span class="math inline">\(\beta_j\)</span>, consideramos</li>
+</ul>
+<p><span class="math display">\[
+\begin{cases}
+  H_0:\beta_j=0\\
+  H_1:\beta_j\neq0
+\end{cases}
+\]</span></p>
+<ul>
+<li><p>Sob <span class="math inline">\(H_0\)</span>, a variável preditora <span class="math inline">\(x_j\)</span> não está associada à resposta por meio do coeficiente <span class="math inline">\(\beta_j\)</span>.</p></li>
+<li><p>Se <span class="math inline">\(H_0\)</span> for rejeitada, há evidência estatística de que <span class="math inline">\(\beta_j\neq 0\)</span>.</p></li>
+<li><p>Para testarmos essas hipóteses precisamos da distribuição de probabilidade de <span class="math inline">\(\widehat{\beta}_j\)</span>. Para isso usaremos resultados assintóticos.</p></li>
+</ul>
+</section>
+<section id="distribuição-assintótica-dos-estimadores" class="slide level2">
+<h2>Distribuição assintótica dos estimadores</h2>
+<ul>
+<li><p>Sejam <span class="math inline">\(\widehat{\boldsymbol{\beta}} = (\beta_0, \beta_1, \ldots, \beta_p)^\top\)</span> e <span class="math inline">\(\widehat{\phi}\)</span> os estimadores de máxima verossimilhança.</p></li>
+<li><p>Para <span class="math inline">\(n\)</span> suficientemente grande, os estimadores de máxima verossimilhança têm distribuição normal assintótica:</p></li>
+</ul>
+<p><span class="math display">\[
+  \widehat{\boldsymbol{\beta}} \overset{a}{\sim} N_{p+1}\left(\boldsymbol{\beta}, \boldsymbol{K}_{\beta\beta}^{-1}\right)
+\]</span></p>
+<ul>
+<li>Portanto, para cada <span class="math inline">\(j=0,\ldots,p\)</span>,</li>
+</ul>
+<p><span class="math display">\[
+\widehat{\beta}_j \overset{a}{\sim} N\left(\beta_j, Var(\widehat{\beta}_j)\right),
+\]</span> em que <span class="math inline">\(Var(\widehat{\beta}_j) = \left[\boldsymbol{K}^{-1}_{\beta\beta}\right]_{j+1,j+1}\)</span></p>
+</section>
+<section id="estatística-do-teste-de-wald" class="slide level2">
+<h2>Estatística do teste de Wald</h2>
+<ul>
+<li><p>Como <span class="math inline">\(\widehat{\beta}_j \overset{a}{\sim} N\left(\beta_j, Var(\widehat{\beta}_j)\right)\)</span>, temos que <span class="math display">\[
+\frac{\widehat{\beta}_j - \beta_j}{\sqrt{Var(\widehat{\beta}_j)}} \overset{a}{\sim} N(0,1).
+\]</span></p></li>
+<li><p>Soba a hipótese nula <span class="math inline">\(H_0: \beta_j=0\)</span>, temos que a estatística <span class="math display">\[
+W_j = \frac{\widehat{\beta}_j}{\sqrt{Var(\widehat{\beta}_j)}} = \frac{\widehat{\beta}_j}{SE(\widehat{\beta}_j)}\overset{a}{\sim} N(0,1)
+\]</span> para <span class="math inline">\(n\)</span> suficientemente grande.</p>
+<ul>
+<li><span class="math inline">\(SE(\widehat{\beta}_j)=\sqrt{Var(\widehat{\beta}_j)}\)</span> é o erro padrão do estimador <span class="math inline">\(\widehat{\beta}_j\)</span>.</li>
+</ul></li>
+</ul>
+</section>
+<section id="interpretação-da-estatística-de-wald" class="slide level2">
+<h2>Interpretação da estatística de Wald</h2>
+<ul>
+<li>A estatística de Wald <span class="math inline">\(W_j\)</span> expressa o coeficiente estimado em <em>unidades do seu erro-padrão</em>.</li>
+<li>Isso significa que:
+<ul>
+<li><span class="math inline">\(W_j \approx 0\)</span>: <span class="math inline">\(\widehat{\beta}_j\)</span> está próximo de zero em relação à sua incerteza;</li>
+<li><span class="math inline">\(|W_j|\)</span> grande: <span class="math inline">\(\widehat{\beta}_j\)</span> está distante de zero em relação ao seu erro-padrão.</li>
+</ul></li>
+<li>Assim, <strong>quanto maior <span class="math inline">\(|W_j|\)</span>, maior a evidẽncia contra <span class="math inline">\(H_0\)</span>.</strong>
+<ul>
+<li>Isto é, maior a evidência de que o preditor <span class="math inline">\(x_j\)</span> está associado à variável resposta.</li>
+</ul></li>
+</ul>
+</section>
+<section id="regra-de-decisão-no-teste-de-wald" class="slide level2">
+<h2>Regra de decisão no teste de Wald</h2>
+<ul>
+<li><p>Como <span class="math inline">\(W_j \overset{a}{\sim} N(0,1)\)</span> sob <span class="math inline">\(H_0\)</span>, para um teste bilateral de nível <span class="math inline">\(\alpha\)</span>, rejeitamos <span class="math inline">\(H_0\)</span> se <span class="math display">\[
+|W_j| &gt; z_{1-\alpha/2}.
+\]</span></p></li>
+<li><p>Equivalentemente, rejeitamos <span class="math inline">\(H_0\)</span> se <span class="math display">\[
+p-\text{valor} = 2 P(Z&gt;|w_j|) &lt; \alpha, \quad Z\sim N(0,1).
+\]</span></p></li>
+<li><p><strong>Observação:</strong> No <code>summary()</code> do R, a referência utilizada para o <span class="math inline">\(p\)</span>-valor depende da dispersão. Quando a dispersão é conhecida ou fixada, utiliza-se a Normal padrão; quando é estimada (modelos Poisson e Binomial), utiliza-se a distribuição <span class="math inline">\(t\)</span> de Student com <span class="math inline">\(n-p\)</span> graus de liberdade.</p></li>
+</ul>
+</section>
+<section id="intervalo-de-confiança-para-beta_j" class="slide level2">
+<h2>Intervalo de confiança para <span class="math inline">\(\beta_j\)</span></h2>
+<ul>
+<li><p>A mesma distribuição assintótica utilizada no teste de Wald permite construir um intervalo de confiança para <span class="math inline">\(\beta_j\)</span>.</p></li>
+<li><p>Como <span class="math display">\[
+\frac{\hat\beta_j-\beta_j} {SE(\hat\beta_j)} \overset{aprox.}{\sim} N(0,1),
+\]</span> temos <span class="math display">\[
+IC_{1-\alpha}(\beta_j) = \hat\beta_j \pm z_{1-\alpha/2} SE(\hat\beta_j)
+\]</span></p></li>
+<li><p>Ou, equivalentemente, <span class="math display">\[
+\left( \widehat{\beta}_j - z_{1-\alpha/2} SE(\widehat{\beta}_j), ~\widehat{\beta}_j + z_{1-\alpha/2} SE(\widehat{\beta}_j) \right).
+\]</span></p></li>
+</ul>
+</section>
+<section id="teste-de-wald-e-intervalo-de-confiança" class="slide level2">
+<h2>Teste de Wald e intervalo de confiança</h2>
+<ul>
+<li><p>Para um teste bilateral de nível <span class="math inline">\(\alpha\)</span>, a hipótese <span class="math display">\[
+H_0: \beta_j = 0
+\]</span> é rejeitada quando <span class="math display">\[
+0 \notin IC_{1-\alpha}(\beta_j).
+\]</span></p></li>
+<li><p>De forma equivalente, <span class="math display">\[
+p-\text{valor} &lt; \alpha.
+\]</span></p></li>
+<li><p>Portanto, o teste de Wald e o intervalo de confiança são duas formas de utilizar a mesma aproximação normal assintótica.</p></li>
+</ul>
+</section>
+<section id="exemplo-5.1" class="slide level2">
+<h2>Exemplo 5.1</h2>
+<h4 id="regressão-gama-variável-resposta-contínua-positiva">Regressão Gama (Variável Resposta Contínua Positiva)</h4>
+<ul>
+<li><p><em>Dataset:</em> <code>trees</code> (R base)</p></li>
+<li><p><em>Descrição:</em> 31 cerejeiras-negras, com medições realizadas a 1,37 m do solo.</p></li>
+<li><p><em>Variáveis:</em></p>
+<ul>
+<li><code>Girth</code>: diâmetro da árvore, em polegadas</li>
+<li><code>Height</code>: altura, em pés</li>
+<li><code>Volume</code>: volume de madeira, em pés³</li>
+</ul></li>
+</ul>
+<p><strong>Modelo:</strong> MLG Gama com ligação logarítmica, tendo <code>Volume</code> como resposta e <code>Girth</code> e <code>Height</code> como preditoras.</p>
+<p><strong>Objetivo:</strong> O teste da razão de verossimilhanças indicou significância global do modelo <span class="math inline">\((p&lt;0{,}05)\)</span>. <strong>Agora, avalie a significância individual dos coeficientes por meio do teste de Wald, ao nível de 5%.</strong></p>
+</section>
+<section id="exemplo-5.1-1" class="slide level2">
+<h2>Exemplo 5.1</h2>
+<p>Teste de avaliação global do modelo:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajuste do modelo completo e nulo</span></span>
+<span id="cb1-2"><a href="" aria-hidden="true" tabindex="-1"></a>mod_gama_completo <span class="ot">&lt;-</span> <span class="fu">glm</span>(Volume <span class="sc">~</span> Height <span class="sc">+</span> Girth, <span class="at">family =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">"log"</span>), <span class="at">data =</span> trees)</span>
+<span id="cb1-3"><a href="" aria-hidden="true" tabindex="-1"></a>mod_gama_nulo <span class="ot">&lt;-</span> <span class="fu">glm</span>(Volume <span class="sc">~</span> <span class="dv">1</span>, <span class="at">family =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">"log"</span>), <span class="at">data =</span> trees)</span>
+<span id="cb1-4"><a href="" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Teste da razão de verossimilhanças (avaliação global do modelo)</span></span>
+<span id="cb1-6"><a href="" aria-hidden="true" tabindex="-1"></a>lmtest<span class="sc">::</span><span class="fu">lrtest</span>(mod_gama_completo, mod_gama_nulo) <span class="co"># p-valor &lt; 0.05 =&gt; ao menos um β é ≠ de zero</span></span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Likelihood ratio test
+
+Model 1: Volume ~ Height + Girth
+Model 2: Volume ~ 1
+  #Df   LogLik Df  Chisq Pr(&gt;Chisq)    
+1   4  -71.504                         
+2   2 -125.740 -2 108.47  &lt; 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+</section>
+<section id="exemplo-5.1-2" class="slide level2">
+<h2>Exemplo 5.1</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimativas dos coeficientes</span></span>
+<span id="cb3-2"><a href="" aria-hidden="true" tabindex="-1"></a>( beta_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(mod_gama_completo) )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)      Height       Girth 
+ 0.09230458  0.01657788  0.14528119 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Erros-padrão dos estimadores</span></span>
+<span id="cb5-2"><a href="" aria-hidden="true" tabindex="-1"></a>( se_beta_hat <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(mod_gama_completo))) )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)      Height       Girth 
+0.215867640 0.003252454 0.006603923 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Estatísticas de Wald</span></span>
+<span id="cb7-2"><a href="" aria-hidden="true" tabindex="-1"></a>( W <span class="ot">&lt;-</span> beta_hat <span class="sc">/</span> se_beta_hat )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)      Height       Girth 
+   0.427598    5.097039   21.999226 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Graus de liberdade residuais</span></span>
+<span id="cb9-2"><a href="" aria-hidden="true" tabindex="-1"></a>( gl <span class="ot">&lt;-</span> <span class="fu">df.residual</span>(mod_gama_completo) )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 28</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># p-valores do teste bilateral (na Gama o R usa a distribuição t com n-p graus de liberdade)</span></span>
+<span id="cb11-2"><a href="" aria-hidden="true" tabindex="-1"></a>( p_valor <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">pt</span>(<span class="fu">abs</span>(W), <span class="at">df =</span> gl, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>) )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> (Intercept)       Height        Girth 
+6.722145e-01 2.127078e-05 3.286253e-19 </code></pre>
+</div>
+</div>
+</section>
+<section id="exemplo-5.1-3" class="slide level2">
+<h2>Exemplo 5.1</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Resultado do teste de Wald</span></span>
+<span id="cb13-2"><a href="" aria-hidden="true" tabindex="-1"></a>resultado_wald <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Estimativa =</span> beta_hat, <span class="at">SE =</span> se_beta_hat, <span class="at">Wald =</span> W, <span class="at">p.valor =</span> p_valor)</span>
+<span id="cb13-3"><a href="" aria-hidden="true" tabindex="-1"></a>resultado_wald</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Estimativa          SE      Wald      p.valor
+(Intercept) 0.09230458 0.215867640  0.427598 6.722145e-01
+Height      0.01657788 0.003252454  5.097039 2.127078e-05
+Girth       0.14528119 0.006603923 21.999226 3.286253e-19</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Saída nativa do R</span></span>
+<span id="cb15-2"><a href="" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod_gama_completo)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = Volume ~ Height + Girth, family = Gamma(link = "log"), 
+    data = trees)
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 0.092305   0.215868   0.428    0.672    
+Height      0.016578   0.003252   5.097 2.13e-05 ***
+Girth       0.145281   0.006604  21.999  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for Gamma family taken to be 0.009410213)
+
+    Null deviance: 8.31720  on 30  degrees of freedom
+Residual deviance: 0.26247  on 28  degrees of freedom
+AIC: 151.01
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div>
+</section>
+<section id="exemplo-5.1-4" class="slide level2">
+<h2>Exemplo 5.1</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Intervalos de confiança de 95%</span></span>
+<span id="cb17-2"><a href="" aria-hidden="true" tabindex="-1"></a><span class="fu">confint.default</span>(mod_gama_completo)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  2.5 %     97.5 %
+(Intercept) -0.33078822 0.51539738
+Height       0.01020319 0.02295258
+Girth        0.13233774 0.15822464</code></pre>
+</div>
+</div>
+</section>
+<section id="exemplo-5.1-5" class="slide level2">
+<h2>Exemplo 5.1</h2>
+<ul>
+<li>Forma de apresentação dos resultados em uma tabela:</li>
+</ul>
+<p><strong>Tabela 5.1.</strong> Estimativas dos coeficientes do modelo de regressão Gama para o volume de madeira das cerejeiras-negras</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 16%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 11%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variável</th>
+<th style="text-align: right;"><span class="math inline">\(\widehat{\boldsymbol{\beta}}\)</span></th>
+<th style="text-align: right;">EP</th>
+<th style="text-align: right;">Wald</th>
+<th style="text-align: right;">p-valor</th>
+<th style="text-align: right;">IC 95%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Intercepto</td>
+<td style="text-align: right;">0,0923</td>
+<td style="text-align: right;">0,2159</td>
+<td style="text-align: right;">0,428</td>
+<td style="text-align: right;">0,672</td>
+<td style="text-align: right;">[−0,3308; 0,5134]</td>
+</tr>
+<tr class="even">
+<td>Height</td>
+<td style="text-align: right;">0,0166</td>
+<td style="text-align: right;">0,0033</td>
+<td style="text-align: right;">5,097</td>
+<td style="text-align: right;">&lt;0,001</td>
+<td style="text-align: right;">[0,0099; 0,0233]</td>
+</tr>
+<tr class="odd">
+<td>Girth</td>
+<td style="text-align: right;">0,1453</td>
+<td style="text-align: right;">0,0066</td>
+<td style="text-align: right;">21,999</td>
+<td style="text-align: right;">&lt;0,001</td>
+<td style="text-align: right;">[0,1318; 0,1588]</td>
+</tr>
+</tbody>
+</table>
+<p>Nota: Variável resposta: Volume (pés³). Modelo: regressão Gama com função de ligação logarítmica. <span class="math inline">\(n=31\)</span>. Os <span class="math inline">\(p\)</span>-valores e intervalos de confiança foram obtidos utilizando a distribuição <span class="math inline">\(t\)</span> de Student com 28 graus de liberdade.</p>
+</section>
+<section id="exemplo-5.2" class="slide level2">
+<h2>Exemplo 5.2</h2>
+<h4 id="regressão-logística-variável-resposta-binária">Regressão Logística (Variável Resposta Binária)</h4>
+<ul>
+<li><em>Dataset:</em> <code>birthwt</code> (pacote MASS)</li>
+<li><em>Descrição:</em> Dados de bebês nascidos no Baystate Medical Center, Springfield, Massachusetts, em 1986.</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:10%;">
+<ul>
+<li><em>Variáveis:</em></li>
+</ul>
+</div><div class="column" style="width:3%;">
+
+</div><div class="column" style="width:87%;">
+<ul>
+<li><code>low</code>: Indicador de peso ao nascer inferior a 2,5 kg.</li>
+<li><code>lwt</code>: Peso da mãe, em libras, no momento da última menstruação.</li>
+<li><code>smoke</code>: Status de tabagismo durante a gravidez.</li>
+</ul>
+</div></div>
+<p><strong>Modelo:</strong> MLG Binomial com ligação logit, tendo <code>low</code> como resposta e <code>lwt</code> e <code>smoke</code> como preditoras.</p>
+<p><strong>Objetivo:</strong> O teste da razão de verossimilhanças indicou significância global do modelo <span class="math inline">\((p&lt;0{,}05)\)</span>. <strong>Agora, avalie a significância individual dos coeficientes por meio do teste de Wald, ao nível de 5%.</strong></p>
+</section>
+<section id="exemplo-5.2-1" class="slide level2">
+<h2>Exemplo 5.2</h2>
+<p>Teste de avaliação global do modelo:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajuste do modelo completo e nulo</span></span>
+<span id="cb19-2"><a href="" aria-hidden="true" tabindex="-1"></a>mod_logit_completo <span class="ot">&lt;-</span> <span class="fu">glm</span>(low <span class="sc">~</span> lwt <span class="sc">+</span> smoke, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>),</span>
+<span id="cb19-3"><a href="" aria-hidden="true" tabindex="-1"></a>                          <span class="at">data =</span> MASS<span class="sc">::</span>birthwt)</span>
+<span id="cb19-4"><a href="" aria-hidden="true" tabindex="-1"></a>mod_logit_nulo <span class="ot">&lt;-</span> <span class="fu">glm</span>(low <span class="sc">~</span> <span class="dv">1</span>, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>), <span class="at">data =</span> MASS<span class="sc">::</span>birthwt)</span>
+<span id="cb19-5"><a href="" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Teste da razão de verossimilhanças (avaliação global do modelo)</span></span>
+<span id="cb19-7"><a href="" aria-hidden="true" tabindex="-1"></a>lmtest<span class="sc">::</span><span class="fu">lrtest</span>(mod_logit_completo, mod_logit_nulo) <span class="co"># p-valor &lt; 0.05 =&gt; ao menos um β é ≠ de zero</span></span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Likelihood ratio test
+
+Model 1: low ~ lwt + smoke
+Model 2: low ~ 1
+  #Df  LogLik Df  Chisq Pr(&gt;Chisq)   
+1   3 -112.17                        
+2   1 -117.34 -2 10.331   0.005709 **
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+</section>
+<section id="exemplo-5.2-2" class="slide level2">
+<h2>Exemplo 5.2</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimativas dos coeficientes</span></span>
+<span id="cb21-2"><a href="" aria-hidden="true" tabindex="-1"></a>( beta_hat <span class="ot">&lt;-</span> <span class="fu">coef</span>(mod_logit_completo) )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)         lwt       smoke 
+ 0.62199682 -0.01332433  0.67667325 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Erros-padrão dos estimadores</span></span>
+<span id="cb23-2"><a href="" aria-hidden="true" tabindex="-1"></a>( se_beta_hat <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(mod_logit_completo))) )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)         lwt       smoke 
+0.795916457 0.006089569 0.324698629 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Estatísticas de Wald</span></span>
+<span id="cb25-2"><a href="" aria-hidden="true" tabindex="-1"></a>( W <span class="ot">&lt;-</span> beta_hat <span class="sc">/</span> se_beta_hat )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)         lwt       smoke 
+  0.7814851  -2.1880574   2.0840040 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># p-valores do teste bilateral (na binomial o R a distribuição normal)</span></span>
+<span id="cb27-2"><a href="" aria-hidden="true" tabindex="-1"></a>( p_valor <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">pnorm</span>(<span class="fu">abs</span>(W), <span class="at">lower.tail =</span> <span class="cn">FALSE</span>) )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept)         lwt       smoke 
+ 0.43451726  0.02866542  0.03715980 </code></pre>
+</div>
+</div>
+</section>
+<section id="exemplo-5.2-3" class="slide level2">
+<h2>Exemplo 5.2</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Resultado do teste de Wald</span></span>
+<span id="cb29-2"><a href="" aria-hidden="true" tabindex="-1"></a>resultado_wald <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Estimativa =</span> beta_hat, <span class="at">SE =</span> se_beta_hat, <span class="at">Wald =</span> W, <span class="at">p.valor =</span> p_valor)</span>
+<span id="cb29-3"><a href="" aria-hidden="true" tabindex="-1"></a>resultado_wald</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             Estimativa          SE       Wald    p.valor
+(Intercept)  0.62199682 0.795916457  0.7814851 0.43451726
+lwt         -0.01332433 0.006089569 -2.1880574 0.02866542
+smoke        0.67667325 0.324698629  2.0840040 0.03715980</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Saída nativa do R</span></span>
+<span id="cb31-2"><a href="" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mod_logit_completo)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = low ~ lwt + smoke, family = binomial(link = "logit"), 
+    data = MASS::birthwt)
+
+Coefficients:
+            Estimate Std. Error z value Pr(&gt;|z|)  
+(Intercept)  0.62200    0.79592   0.781   0.4345  
+lwt         -0.01332    0.00609  -2.188   0.0287 *
+smoke        0.67667    0.32470   2.084   0.0372 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 234.67  on 188  degrees of freedom
+Residual deviance: 224.34  on 186  degrees of freedom
+AIC: 230.34
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div>
+</section>
+<section id="exemplo-5.2-4" class="slide level2">
+<h2>Exemplo 5.2</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="" aria-hidden="true" tabindex="-1"></a><span class="co"># Intervalos de confiança de 95%</span></span>
+<span id="cb33-2"><a href="" aria-hidden="true" tabindex="-1"></a><span class="fu">confint.default</span>(mod_logit_completo)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  2.5 %       97.5 %
+(Intercept) -0.93797077  2.181964412
+lwt         -0.02525966 -0.001388991
+smoke        0.04027563  1.313070865</code></pre>
+</div>
+</div>
+</section>
+<section id="exemplo-5.2-5" class="slide level2">
+<h2>Exemplo 5.2</h2>
+<ul>
+<li>Forma de apresentação dos resultados em uma tabela:</li>
+</ul>
+<p><strong>Tabela 5.2.</strong> Estimativas dos coeficientes do modelo de regressão logística para o baixo peso ao nascer</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 16%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 11%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variável</th>
+<th style="text-align: right;"><span class="math inline">\(\widehat{\boldsymbol{\beta}}\)</span></th>
+<th style="text-align: right;">EP</th>
+<th style="text-align: right;">Wald</th>
+<th style="text-align: right;">p-valor</th>
+<th style="text-align: right;">IC 95%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Intercepto</td>
+<td style="text-align: right;">0,6120</td>
+<td style="text-align: right;">0,7959</td>
+<td style="text-align: right;">0,781</td>
+<td style="text-align: right;">0,4345</td>
+<td style="text-align: right;">[−0,9379; 2,1820]</td>
+</tr>
+<tr class="even">
+<td>lwt</td>
+<td style="text-align: right;">−0,0133</td>
+<td style="text-align: right;">0,0061</td>
+<td style="text-align: right;">−2,188</td>
+<td style="text-align: right;">0,0287</td>
+<td style="text-align: right;">[−0,0253; −0,0014]</td>
+</tr>
+<tr class="odd">
+<td>smoke</td>
+<td style="text-align: right;">0,6767</td>
+<td style="text-align: right;">0,3247</td>
+<td style="text-align: right;">2,084</td>
+<td style="text-align: right;">0,0372</td>
+<td style="text-align: right;">[0,0403; 1,3131]</td>
+</tr>
+</tbody>
+</table>
+<p>Nota: Variável resposta: baixo peso ao nascer. Modelo: regressão logística (família Binomial com função de ligação logit). <span class="math inline">\(n=189\)</span>. Os <span class="math inline">\(p\)</span>-valores e intervalos de confiança foram obtidos utilizando a distribuição Normal padrão.</p>
+</section>
+<section id="interpretação-dos-coeficientes-de-regressão" class="slide level2">
+<h2>Interpretação dos coeficientes de regressão</h2>
+<ul>
+<li><p>No MLG, <span class="math display">\[
+g(\mu_i) = \eta_i = \beta_0 + \beta_1x_{i1} + \cdots + \beta_p x_{ip},
+\]</span> onde <span class="math inline">\(\mu_i = E(Y_i)\)</span>.</p></li>
+<li><p>Assim, o coeficiente <span class="math inline">\(\beta_j\)</span> representa a variação no preditor linear (ou seja, no valor transformado <span class="math inline">\(g(\mu)\)</span>) para cada aumento de uma unidade em <span class="math inline">\(x_j\)</span>, mantendo as demais variáveis constantes.</p></li>
+<li><p>Isto implica que a interpretação de <span class="math inline">\(\beta_j\)</span> depende da função de ligação utilizada no modelo.</p></li>
+</ul>
+</section>
+<section id="função-de-ligação-identidade" class="slide level2">
+<h2>Função de ligação identidade</h2>
+<ul>
+<li><p>Se <span class="math inline">\(g(\mu)=\mu\)</span>, então <span class="math display">\[\mu = \beta_0 + \beta_1x_{1} + \cdots + \beta_p x_{p}\]</span></p></li>
+<li><p>Nesse caso, <span class="math inline">\(\beta_j\)</span> representa a variação esperada na média da resposta se aumentarmos uma unidade em <span class="math inline">\(x_j\)</span>, mantendo as demais preditoras constantes.</p>
+<ul>
+<li><span class="math inline">\(\beta_j&gt;0\)</span>: um aumento de uma unidade em <span class="math inline">\(x_j\)</span> está associado a um aumento de <span class="math inline">\(\beta_j\)</span> unidades na média da resposta.</li>
+<li><span class="math inline">\(\beta_j&lt;0\)</span>: um aumento de uma unidade em <span class="math inline">\(x_j\)</span> está associado a uma redução de <span class="math inline">\(|\beta_j|\)</span> unidades na média da resposta.</li>
+</ul></li>
+<li><p><strong>Exemplo:</strong> <span class="math inline">\(\quad \widehat{\mu} = 10 + 2x_1 - 0{,}5 x_2\)</span></p>
+<ul>
+<li>aumento de uma unidade em <span class="math inline">\(x_1\)</span> → aumento de 2 unidades na média de <span class="math inline">\(Y\)</span>.</li>
+<li>aumento de uma unidade em <span class="math inline">\(x_2\)</span> → redução de 0,5 unidade na média de <span class="math inline">\(Y\)</span>.</li>
+</ul></li>
+</ul>
+</section>
+<section id="função-de-ligação-logarítmica" class="slide level2">
+<h2>Função de ligação logarítmica</h2>
+<ul>
+<li><p>Se <span class="math inline">\(g(\mu)=\log(\mu)\)</span>, então <span class="math display">\[\log(\mu) = \beta_0 + \beta_1x_{1} + \cdots + \beta_p x_{p}\]</span></p></li>
+<li><p>Aplicando a funçao exponencial para voltar à escala original da resposta: <span class="math display">\[
+\mu = e^{\beta_0 + \beta_1x_{1} + \cdots + \beta_p x_{p}} = e^{\beta_0}e^{\beta_1x_1}\cdots e^{\beta_px_p}
+\]</span></p></li>
+<li><p>Aqui a média varia multiplicativamente com os preditores.</p></li>
+<li><p>Se <span class="math inline">\(x_j\)</span> aumenta uma unidade: <span class="math display">\[
+\mu(x_j +1) = e^{\beta_0}e^{\beta_1x_1}\cdots e^{\beta_j(x_j+1)}\cdots e^{\beta_px_p} = \underbrace{e^{\beta_0}e^{\beta_1x_1}\cdots e^{\beta_jx_j}\cdots e^{\beta_px_p}}_{\mu(x_j)} \cdot e^{\beta_j} = \mu(x_j) \cdot e^{\beta_j}
+\]</span></p></li>
+<li><p>Portanto, o aumanto de uma unidade em <span class="math inline">\(x_j\)</span> multiplica a média da resposta por <span class="math inline">\(e^{\beta_j}\)</span>, mantidas as demais preditoras constantes.</p></li>
+</ul>
+</section>
+<section id="função-de-ligação-logarítmica-1" class="slide level2">
+<h2>Função de ligação logarítmica</h2>
+<ul>
+<li><strong>Exemplo:</strong> <span class="math inline">\(\quad \log(\mu) = 1 + 0{,}095x_1 - 0{,}223x_2 + 1{,}200x_3\)</span>
+<ul>
+<li><span class="math inline">\(e^{0{,}095} = 1{,}10\)</span>
+<ul>
+<li>aumento de uma unidade em <span class="math inline">\(x_1\, \Rightarrow\)</span> média de <span class="math inline">\(Y\)</span> é multiplicada por <span class="math inline">\(1{,}10\)</span> (aumento de <span class="math inline">\(10\%\)</span>).</li>
+</ul></li>
+<li><span class="math inline">\(e^{-0{,}223} = 0{,}80\)</span>
+<ul>
+<li>aumento de uma unidade em <span class="math inline">\(x_2\,\Rightarrow\)</span> média de <span class="math inline">\(Y\)</span> é multiplicada por <span class="math inline">\(0{,}80\)</span> (<span class="math inline">\(1-0{,}80=0{,}20\)</span>, redução de <span class="math inline">\(20\%\)</span>).</li>
+</ul></li>
+<li><span class="math inline">\(e^{1{,}200} = 3{,}32\)</span>
+<ul>
+<li>aumento de uma unidade em <span class="math inline">\(x_3\,\Rightarrow\)</span> média de <span class="math inline">\(Y\)</span> é multiplicada por <span class="math inline">\(3{,}32\)</span> (<span class="math inline">\(3{,}32-1=2{,}32\)</span>, aumento de <span class="math inline">\(232\%\)</span>).</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="função-de-ligação-logit" class="slide level2">
+<h2>Função de ligação logit</h2>
+<ul>
+<li><p>Na regressão logística a função de ligação é <span class="math inline">\(g(\mu) = \log\left(\frac{\mu}{1-\mu}\right)\)</span>, com <span class="math inline">\(\mu=P(Y=1)\)</span>. Assim, <span class="math display">\[
+\log\left(\frac{\mu}{1-\mu}\right) = \beta_0 + \beta_1x_{1} + \cdots + \beta_p x_{p}
+\]</span></p></li>
+<li><p>Vamos definir <span class="math inline">\(odds(\mu) = \frac{\mu}{1-\mu}\)</span> razão entre a <em>chance</em> (<em>odds</em>) do evento ocorrer sobre não ocorrer. Assim, <span class="math display">\[\log(odds) = \beta_0 + \beta_1x_{1} + \cdots + \beta_p x_{p}\]</span></p></li>
+<li><p>Aplicando a função exponencial: <span class="math display">\[odds = e^{\beta_0 + \beta_1x_{1} + \cdots + \beta_p x_{p}} = e^{\beta_0}e^{\beta_1x_1}\cdots e^{\beta_px_p}\]</span></p></li>
+</ul>
+</section>
+<section id="função-de-ligação-logit-1" class="slide level2">
+<h2>Função de ligação logit</h2>
+<ul>
+<li><p>Se <span class="math inline">\(x_j\)</span> aumenta uma unidade: <span class="math display">\[
+\begin{aligned}
+odds(x_j+1) &amp;= e^{\beta_0}e^{\beta_1x_1}\cdots e^{\beta_j(x_j+1)}\cdots e^{\beta_px_p}\\
+&amp;= \underbrace{e^{\beta_0}e^{\beta_1x_1}\cdots e^{\beta_jx_j}\cdots e^{\beta_px_p}}_{odds(x_j)} \cdot e^{\beta_j} = odds(x_j) \cdot e^{\beta_j}
+\end{aligned}
+\]</span></p></li>
+<li><p>Dividindo ambos os lados, obtemos a <strong>razão de chances (odds ratio – OR)</strong>: <span class="math display">\[
+OR = \frac{odds(x_j+1)}{odds(x_j)} = \frac{odds(x_j)e^{\beta_j}}{odds(x_j)} = e^{\beta_j}
+\]</span></p></li>
+<li><p>Portanto, <span class="math inline">\(e^{\beta_j}\)</span> indica quantas vezes a chance do evento ocorrer aumenta para cada aumento de uma unidade em <span class="math inline">\(x_j\)</span>, mantendo as demais variáveis constantes.</p></li>
+</ul>
+</section>
+<section id="função-de-ligação-logit-2" class="slide level2">
+<h2>Função de ligação logit</h2>
+<ul>
+<li><strong>Exemplo:</strong> <span class="math inline">\(\quad \log\left(\frac{\mu}{1-\mu}\right) = 1 + 1{,}335x_1 - 0{,}357x_2 + 0{,}140x_3\)</span>
+<ul>
+<li><span class="math inline">\(OR = e^{1{,}335} = 3{,}80\)</span>
+<ul>
+<li>aumento de uma unidade em <span class="math inline">\(x_1\, \Rightarrow\)</span> aumenta em 3,8 vezes a chance do evento ocorrer.</li>
+</ul></li>
+<li><span class="math inline">\(OR = e^{-0{,}357} = 0{,}70\)</span>
+<ul>
+<li>aumento de uma unidade em <span class="math inline">\(x_2\,\Rightarrow\)</span> reduz a chance do evento ocorrer em <span class="math inline">\(30\%\)</span> (<span class="math inline">\(1-0{,}70=0{,}30\)</span>).</li>
+</ul></li>
+<li><span class="math inline">\(OR = e^{0{,}140} = 1{,}15\)</span>
+<ul>
+<li>aumento de uma unidade em <span class="math inline">\(x_3\,\Rightarrow\)</span> aumenta em 15% a chance do evento ocorrer.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="interpretação-dos-coeficientes-segundo-a-função-de-ligação" class="slide level2">
+<h2>Interpretação dos coeficientes segundo a função de ligação</h2>
+<table class="caption-top">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 23%">
+<col style="width: 62%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Função de ligação</th>
+<th>Modelo na escala transformada</th>
+<th>Interpretação de <span class="math inline">\(\beta_j\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Identidade</strong></td>
+<td><span class="math inline">\(\mu=\eta\)</span></td>
+<td>Variação de <span class="math inline">\(\beta_j\)</span> unidades na média de <span class="math inline">\(Y\)</span> para +1 unidade em <span class="math inline">\(x_j\)</span></td>
+</tr>
+<tr class="even">
+<td><strong>Log</strong></td>
+<td><span class="math inline">\(\log(\mu)=\eta\)</span></td>
+<td>A média é multiplicada por <span class="math inline">\(e^{\beta_j}\)</span> para +1 unidade em <span class="math inline">\(x_j\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong>Logit</strong></td>
+<td><span class="math inline">\(\log(\text{odds})=\eta\)</span></td>
+<td>As chances são multiplicadas por <span class="math inline">\(e^{\beta_j}\)</span> para +1 unidade em <span class="math inline">\(x_j\)</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="exemplo-5.3" class="slide level2">
+<h2>Exemplo 5.3</h2>
+<p>Agora vamos interpretar os coeficientes do modelo obtido no Exemplo 5.1 (regressão gama com função de ligação log).</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 16%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 11%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variável</th>
+<th style="text-align: right;"><span class="math inline">\(\widehat{\boldsymbol{\beta}}\)</span></th>
+<th style="text-align: right;">EP</th>
+<th style="text-align: right;">Wald</th>
+<th style="text-align: right;">p-valor</th>
+<th style="text-align: right;">IC 95%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Intercepto</td>
+<td style="text-align: right;">0,0923</td>
+<td style="text-align: right;">0,2159</td>
+<td style="text-align: right;">0,428</td>
+<td style="text-align: right;">0,672</td>
+<td style="text-align: right;">[−0,3308; 0,5134]</td>
+</tr>
+<tr class="even">
+<td>Height</td>
+<td style="text-align: right;">0,0166</td>
+<td style="text-align: right;">0,0033</td>
+<td style="text-align: right;">5,097</td>
+<td style="text-align: right;">&lt;0,001</td>
+<td style="text-align: right;">[0,0099; 0,0233]</td>
+</tr>
+<tr class="odd">
+<td>Girth</td>
+<td style="text-align: right;">0,1453</td>
+<td style="text-align: right;">0,0066</td>
+<td style="text-align: right;">21,999</td>
+<td style="text-align: right;">&lt;0,001</td>
+<td style="text-align: right;">[0,1318; 0,1588]</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p><code>Height</code>: <span class="math inline">\(e^{0{,}0166} = 1{,}0167 \, \Rightarrow\)</span> cada aumento de <span class="math inline">\(1\)</span> pé na altura está associado a um aumento de <span class="math inline">\(1{,}67\%\)</span> no volume médio da árvore.</p></li>
+<li><p><code>Girth</code>: <span class="math inline">\(e^{0{,}1453} = 1{,}1564 \, \Rightarrow\)</span> cada aumento de <span class="math inline">\(1\)</span> polegada no diâmetro está associado a um aumento de <span class="math inline">\(15{,}64\%\)</span> no volume médio da árvore.</p></li>
+</ul>
+</section>
+<section id="exemplo-5.4" class="slide level2">
+<h2>Exemplo 5.4</h2>
+<p>Agora vamos interpretar os coeficientes do modelo obtido no Exemplo 5.2 (regressão logística).</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 16%">
+<col style="width: 10%">
+<col style="width: 13%">
+<col style="width: 11%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variável</th>
+<th style="text-align: right;"><span class="math inline">\(\widehat{\boldsymbol{\beta}}\)</span></th>
+<th style="text-align: right;">EP</th>
+<th style="text-align: right;">Wald</th>
+<th style="text-align: right;">p-valor</th>
+<th style="text-align: right;">IC 95%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Intercepto</td>
+<td style="text-align: right;">0,6120</td>
+<td style="text-align: right;">0,7959</td>
+<td style="text-align: right;">0,781</td>
+<td style="text-align: right;">0,4345</td>
+<td style="text-align: right;">[−0,9379; 2,1820]</td>
+</tr>
+<tr class="even">
+<td>lwt</td>
+<td style="text-align: right;">−0,0133</td>
+<td style="text-align: right;">0,0061</td>
+<td style="text-align: right;">−2,188</td>
+<td style="text-align: right;">0,0287</td>
+<td style="text-align: right;">[−0,0253; −0,0014]</td>
+</tr>
+<tr class="odd">
+<td>smoke</td>
+<td style="text-align: right;">0,6767</td>
+<td style="text-align: right;">0,3247</td>
+<td style="text-align: right;">2,084</td>
+<td style="text-align: right;">0,0372</td>
+<td style="text-align: right;">[0,0403; 1,3131]</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p><code>lwt</code>: <span class="math inline">\(OR=e^{-0{,}0133} = 0{,}9868 \, \Rightarrow\)</span> cada <span class="math inline">\(1\)</span> libra a mais no peso da mãe reduz a chance de baixo peso em <span class="math inline">\(1{,}32\%\)</span> (<span class="math inline">\(1 - 0{,}9868 = 0{,}0132\)</span>).</p></li>
+<li><p><code>smoke</code>: <span class="math inline">\(OR=e^{0{,}6767} = 1{,}967 \, \Rightarrow\)</span> mães fumantes têm uma chance de ter bebê com baixo peso quase duas vezes maior (<span class="math inline">\(1{,}97\times\)</span>) do que mães não fumantes.</p></li>
+</ul>
+</section>
+<section id="exemplo-5.5" class="slide level2">
+<h2>Exemplo 5.5</h2>
+<p>Utilizando o banco de dados <code>birthwt</code> do pacote <code>MASS</code> (variável resposta <code>low</code>):</p>
+<ol type="a">
+<li>Ajuste o modelo completo com todas as variáveis.</li>
+<li>Execute o teste de razão de verossimilhanças global (comparando o modelo completo com o modelo nulo).</li>
+<li>Faça a seleção de variáveis via Teste de Wald (removendo as não significativas uma a uma).</li>
+<li>Valide o descarte via TRV parcial (comparando o modelo reduzido com o completo).</li>
+<li>Interprete os <span class="math inline">\(e^{\hat{\beta}}\)</span> apenas do modelo final reduzido.</li>
+</ol>
+<p>Considere um nível de significância de 0,05.</p>
+</section>
+<section id="próximos-passos" class="slide level2">
+<h2>Próximos Passos</h2>
+<ul>
+<li><strong><span class="math inline">\(H_0\)</span> foi rejeitada?</strong>
+<ul>
+<li>Concluímos que ao menos uma variável preditora é importante para o modelo.</li>
+</ul></li>
+<li><strong>Pergunta seguinte:</strong>
+<ul>
+<li><em>Quais</em> variáveis individualmente possuem efeito estatisticamente significativo sobre a resposta?</li>
+</ul></li>
+<li><strong>Próxima Aula:</strong>
+<ul>
+<li>Avaliação da significância individual dos coeficientes de regressão via <strong>Teste de Wald</strong> e <strong>Intervalos de Confiança</strong>.</li>
+</ul></li>
+</ul>
+</section>
+<section id="fim" class="title-slide slide level1 center">
+<h1>Fim</h1>
+
+</section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<p><img src="imagens/ufs_principal_positiva.png" class="slide-logo"></p>
+<div class="footer footer-default">
+
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="05-Avaliacao_dos_coeficientes_individuais_da_regressao_files/libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'fade',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'fast',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1600,
+
+        height: 900,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        // Bounds for smallest/largest possible scale to apply to content
+        minScale: 0.2,
+
+        maxScale: 2,
+
+        math: {
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copiada");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copiada");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>

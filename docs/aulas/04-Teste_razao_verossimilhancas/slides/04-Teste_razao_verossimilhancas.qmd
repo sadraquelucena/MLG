@@ -244,7 +244,7 @@ Usando uma função nativa do R:
 #| eval: true
 
 # Teste da razão de verossimilhanças usando a função
-# lrtest do pacote lmtext
+# lrtest do pacote lmtest
 lmtest::lrtest(mod_gama_completo, mod_gama_nulo)
 
 
