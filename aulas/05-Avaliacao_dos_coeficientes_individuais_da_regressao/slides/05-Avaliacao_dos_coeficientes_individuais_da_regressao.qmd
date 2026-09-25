@@ -122,12 +122,12 @@ em que $Var(\widehat{\beta}_j) = \left[\boldsymbol{K}^{-1}_{\beta\beta}\right]_{
 
 ## Estatística do teste de Wald
 
-- Como $\widehat{\beta}_j \overset{a}{\sim} N\left(\beta_j, Var(\widehat{\beta}_j)\right)$, temos que
+- Como $\widehat{\beta}_j \overset{a}{\sim} N\left(\beta_j, Var(\widehat{\beta}_j)\right)$, temos que $\phantom{aaaaaaaaaaaaaaaaaaaaaaaaaaaa}$
 $$
   \frac{\widehat{\beta}_j - \beta_j}{\sqrt{Var(\widehat{\beta}_j)}} \overset{a}{\sim} N(0,1).
 $$
 
-- Soba a hipótese nula $H_0: \beta_j=0$, temos que a estatística
+- Sob a hipótese nula $H_0: \beta_j=0$, temos que a estatística
 $$
 W_j = \frac{\widehat{\beta}_j}{\sqrt{Var(\widehat{\beta}_j)}} = \frac{\widehat{\beta}_j}{SE(\widehat{\beta}_j)}\overset{a}{\sim} N(0,1)
 $$
@@ -154,6 +154,10 @@ para $n$ suficientemente grande.
 ## Regra de decisão no teste de Wald
 
 - Como $W_j \overset{a}{\sim} N(0,1)$ sob $H_0$, para um teste bilateral de nível $\alpha$, rejeitamos $H_0$ se
+
+::::{.columns}
+
+:::{.column width="50%"}
 $$
 |W_j| > z_{1-\alpha/2}.
 $$
@@ -162,8 +166,17 @@ $$
 $$
 p-\text{valor} = 2 P(Z>|w_j|) < \alpha, \quad Z\sim N(0,1).
 $$
+:::
+:::{.column width="3%"}
+:::
+:::{.column width="47%"}
+<div style="text-align: center;">
+  <img src="imagens/waldtest.png" style="width: 80%; height: auto;">
+</div>
+:::
+::::
 
-- **Observação:** No `summary()` do R, a referência utilizada para o $p$-valor depende da dispersão. Quando a dispersão é conhecida ou fixada, utiliza-se a Normal padrão; quando é estimada (modelos Poisson e Binomial), utiliza-se a distribuição $t$ de Student com $n-p$ graus de liberdade.
+- **Observação:** No `summary()` do R, a referência utilizada para o $p$-valor depende da dispersão. Quando a dispersão é conhecida ou fixada, utiliza-se a Normal padrão; - utiliza-se a distribuição $t$ de Student com $n-p$ graus de liberdade.
 
 
 ## Intervalo de confiança para $\beta_j$
@@ -200,10 +213,31 @@ $$
 
 - De forma equivalente,
 $$
-  p-\text{valor} < \alpha.
+  p\text{-valor} < \alpha.
 $$
 
 - Portanto, o teste de Wald e o intervalo de confiança são duas formas de utilizar a mesma aproximação normal assintótica.
+
+
+
+
+## Procedimento de seleção de variáveis
+
+Para um nível de significância $\alpha$:
+
+1. Ajustamos o **modelo completo**, contendo todas as variáveis de interesse, e avaliamos o ajuste global pelo **teste da razão de verossimilhanças (TRV)**.
+  
+    - $p\text{-valor}<\alpha$: rejeitamos $H_0$, havendo evidência de que pelo menos um $\beta_j\neq 0$.
+
+2. Avaliamos individualmente os coeficientes pelo **teste de Wald**.
+
+    - Em uma estratégia de *eliminação backward*, a variável com maior $p\text{-valor}$ pode ser removida.
+
+    - Reajustamos o modelo e repetimos o procedimento até que todas as variáveis restantes apresentem $p\text{-valor}\leq\alpha$.
+
+3. Após a seleção, comparamos o **modelo completo** e o **modelo reduzido** pelo TRV.
+
+    - $p\text{-valor}\geq\alpha$: não rejeitamos $H_0$; não há evidência de diferença estatisticamente significativa entre os modelos (não há perda de ajuste ao usar o modelo reduzido).
 
 
 
@@ -304,7 +338,6 @@ summary(mod_gama_completo)
 
 # Intervalos de confiança de 95%
 confint.default(mod_gama_completo)
-
 ```
 
 
