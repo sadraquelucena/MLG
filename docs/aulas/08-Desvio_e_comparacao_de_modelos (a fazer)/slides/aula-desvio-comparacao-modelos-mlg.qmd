@@ -1,0 +1,1394 @@
+---
+title: "Desvio e comparação de modelos"
+subtitle: |
+  *Como medir a discrepância entre um MLG ajustado e os dados?*
+author:
+  name: | # indica que o campo name terá múltiplas linhas
+    ESTAT0092 -- Modelos Lineares Generalizados<br>
+    Prof. Dr. Sadraque E. F. Lucena<br>
+    <a href="http://sadraquelucena.github.io/mlg" style="font-size:.8em;">http://sadraquelucena.github.io/mlg</a><br>
+
+format:
+  revealjs:
+    theme: meutema.scss
+    width: 1600
+    height: 900
+    margin: 0.1
+    min-scale: 0.2
+    max-scale: 2.0
+    slide-number: true
+    code-line-numbers: false
+    subtitle-style: "font-size: 2em; font-weight: bold;"
+    logo: imagens/ufs_principal_positiva.png
+    transition: fade
+    transition-speed: fast
+    scss: meutema.scss
+    include-in-header:
+      text: |
+        <style>
+        .sublist-2col ul ul {
+          column-count: 2;
+          column-gap: 2rem;
+        }
+        .sublist-2col ul ul li {
+          break-inside: avoid;
+        }
+        </style>
+
+lang: pt-BR
+---
+
+## Onde estamos?
+
+A construção de um MLG envolve decisões sucessivas:
+
+1. **Especificar** quais variáveis entram no modelo.
+2. **Representar** corretamente essas variáveis no preditor linear.
+3. **Comparar** modelos.
+4. **Diagnosticar** o ajuste.
+5. **Predizer** a resposta para novos indivíduos.
+
+Nas aulas anteriores, discutimos a **construção do modelo** e a representação de **variáveis qualitativas por meio de dummies**.
+
+Agora, mudamos a pergunta:
+
+> **Quão distante está o modelo ajustado dos dados?**
+
+---
+
+## A ideia central
+
+Um MLG é uma **aproximação** da relação entre a resposta e as variáveis preditoras.
+
+Se o modelo não reproduz exatamente os dados, precisamos de uma medida que quantifique essa discrepância.
+
+A ideia será comparar três referências:
+
+- **modelo nulo** — estrutura extremamente simples;
+- **modelo ajustado** — o modelo que estamos estudando;
+- **modelo saturado** — reproduz perfeitamente os dados observados.
+
+---
+
+## Três modelos, três níveis de complexidade
+
+Visualmente:
+
+$$
+\boxed{\text{Modelo nulo}}
+\quad\longrightarrow\quad
+\boxed{\text{Modelo ajustado}}
+\quad\longrightarrow\quad
+\boxed{\text{Modelo saturado}}
+$$
+
+À medida que adicionamos parâmetros, o modelo pode representar estruturas cada vez mais complexas.
+
+Mas **mais complexo não significa automaticamente melhor**.
+
+Precisamos quantificar quanto o modelo se aproxima dos dados.
+
+---
+
+## O modelo nulo
+
+O modelo nulo contém apenas o intercepto:
+
+$$
+\eta_i=\beta_0.
+$$
+
+Não há preditoras no componente sistemático.
+
+Consequentemente,
+
+$$
+\mu_i=g^{-1}(\beta_0),
+$$
+
+para todo $i$.
+
+### Interpretação
+
+O modelo nulo atribui a todas as observações a **mesma média esperada**, na escala da resposta.
+
+---
+
+## O que o modelo nulo está dizendo?
+
+O modelo nulo é a referência mais simples para perguntar:
+
+> **As preditoras acrescentam informação em relação a uma estrutura sem preditoras?**
+
+Por exemplo, em um modelo Poisson:
+
+$$
+\log(\mu_i)=\beta_0
+$$
+
+implica
+
+$$
+\mu_i=e^{\beta_0},
+$$
+
+a mesma média esperada para todas as observações.
+
+No caso Bernoulli:
+
+$$
+\operatorname{logit}(\pi_i)=\beta_0
+$$
+
+implica
+
+$$
+\pi_i=\frac{e^{\beta_0}}{1+e^{\beta_0}},
+$$
+
+a mesma probabilidade para todos.
+
+---
+
+## O modelo saturado
+
+No extremo oposto está o **modelo saturado**.
+
+Ele possui parâmetros suficientes para reproduzir perfeitamente os valores observados.
+
+Seja $\tilde\mu_i$ o estimador de máxima verossimilhança da média sob o modelo saturado.
+
+Então:
+
+$$
+\tilde\mu_i=Y_i.
+$$
+
+Ou seja, o modelo saturado reproduz os dados exatamente.
+
+---
+
+## O que significa “saturado”?
+
+O modelo saturado não é, em geral, um modelo que desejamos utilizar para fazer inferência ou predição.
+
+Ele funciona como uma **referência teórica de ajuste perfeito**.
+
+No modelo saturado:
+
+$$
+\hat\mu_i=Y_i
+$$
+
+para cada observação.
+
+Portanto, a discrepância entre os valores observados e ajustados é nula.
+
+---
+
+## O problema da comparação
+
+Considere um modelo ajustado $M$ com médias estimadas $\hat\mu_i$.
+
+Temos:
+
+$$
+Y_i
+\quad\text{versus}\quad
+\hat\mu_i
+\quad\text{versus}\quad
+\tilde\mu_i.
+$$
+
+Como $\tilde\mu_i=Y_i$, podemos perguntar:
+
+> **Quão próxima está a verossimilhança do modelo ajustado da verossimilhança do modelo saturado?**
+
+Essa comparação conduz ao conceito de **deviance**.
+
+---
+
+## A log-verossimilhança como medida de ajuste
+
+Para um modelo ajustado, a estimação por máxima verossimilhança procura os parâmetros que maximizam
+
+$$
+\ell(\hat\mu,\hat\phi).
+$$
+
+Quanto maior a log-verossimilhança, melhor o modelo explica os dados observados **entre os modelos comparáveis considerados**.
+
+O modelo saturado possui a maior log-verossimilhança possível dentro da classe de modelos considerada.
+
+---
+
+## Da log-verossimilhança ao desvio
+
+Sejam:
+
+- $\ell(\tilde\mu,\phi)$ — log-verossimilhança do modelo saturado;
+- $\ell(\hat\mu,\phi)$ — log-verossimilhança do modelo ajustado.
+
+Na notação adotada no material da disciplina, o **desvio escalonado** é
+
+$$
+\boxed{
+D^*(Y;\hat\mu)
+=
+2\left\{\ell(\tilde\mu,\phi)-\ell(\hat\mu,\phi)\right\}.
+}
+$$
+
+Quando a log-verossimilhança contém explicitamente o fator $1/\phi$, essa quantidade pode ser escrita como
+
+$$
+D^*(Y;\hat\mu)=\frac{D(Y;\hat\mu)}{\phi},
+$$
+
+em que $D(Y;\hat\mu)$ é o **desvio**.
+
+---
+
+## A definição que devemos guardar
+
+O desvio é
+
+$$
+\boxed{
+D(Y;\hat\mu)=\phi D^*(Y;\hat\mu)
+}
+$$
+
+ou, equivalentemente,
+
+$$
+\boxed{
+D(Y;\hat\mu)
+=
+2\sum_{i=1}^n d_i(Y_i;\hat\mu_i)
+}
+$$
+
+com a forma específica de cada componente determinada pela distribuição da resposta.
+
+Para **Poisson e Binomial**, no MLG usual,
+
+$$
+\phi=1
+$$
+
+logo,
+
+$$
+\boxed{D^*=D}.
+$$
+
+---
+
+## Uma interpretação geométrica
+
+Podemos imaginar o ajuste como uma distância entre dois pontos de referência:
+
+$$
+\text{dados}
+\longleftrightarrow
+\text{modelo ajustado}.
+$$
+
+O modelo saturado representa o ajuste perfeito.
+
+Assim, o desvio não é simplesmente uma soma de erros quadráticos.
+
+Ele é construído a partir da **verossimilhança da distribuição assumida para a resposta**.
+
+---
+
+## Deviance não é erro quadrático
+
+Na regressão linear normal, estamos acostumados a medidas baseadas em
+
+$$
+\sum_i(Y_i-\hat Y_i)^2.
+$$
+
+Nos MLGs, a escala e a forma da discrepância dependem da distribuição da resposta.
+
+Por isso, o desvio:
+
+- é definido a partir da log-verossimilhança;
+- respeita a distribuição especificada para $Y$;
+- pode ser usado para comparar modelos adequadamente definidos.
+
+---
+
+## O desvio é uma soma de contribuições
+
+Em um MLG, o desvio pode ser escrito como
+
+$$
+D(Y;\hat\mu)=\sum_{i=1}^n d_i(Y_i;\hat\mu_i),
+$$
+
+em que $d_i$ é a contribuição da observação $i$ para o desvio total.
+
+Isso é importante porque permite interpretar o desvio como uma medida global construída a partir das discrepâncias individuais.
+
+---
+
+## Caso Poisson
+
+Considere
+
+$$
+Y_i\sim\operatorname{Poisson}(\mu_i).
+$$
+
+A função de ligação canônica é
+
+$$
+\log(\mu_i)=\eta_i.
+$$
+
+Para $Y_i>0$, a contribuição para o desvio é
+
+$$
+ d_i
+=
+2\left[
+Y_i\log\left(\frac{Y_i}{\hat\mu_i}\right)
+-Y_i+\hat\mu_i
+\right].
+$$
+
+Quando $Y_i=0$:
+
+$$
+ d_i=2\hat\mu_i.
+$$
+
+---
+
+## Deviance Poisson
+
+Portanto,
+
+$$
+\boxed{
+D
+=
+2\sum_{i=1}^n
+\left[
+Y_i\log\left(\frac{Y_i}{\hat\mu_i}\right)
+-Y_i+\hat\mu_i
+\right]
+}
+$$
+
+com a convenção de que o termo
+
+$$
+Y_i\log(Y_i/\hat\mu_i)
+$$
+
+é igual a zero quando $Y_i=0$.
+
+### O ponto importante
+
+O desvio é pequeno quando $\hat\mu_i$ está próximo de $Y_i$, de acordo com a geometria da verossimilhança Poisson.
+
+---
+
+## Caso Binomial
+
+Considere
+
+$$
+Y_i\sim\operatorname{Binomial}(m_i,\pi_i),
+$$
+
+com
+
+$$
+\mu_i=m_i\pi_i.
+$$
+
+Sob a ligação logit,
+
+$$
+\operatorname{logit}(\pi_i)=\eta_i.
+$$
+
+O modelo saturado reproduz a proporção observada:
+
+$$
+\tilde\pi_i=\frac{Y_i}{m_i}.
+$$
+
+---
+
+## Deviance Binomial
+
+A contribuição da observação $i$ para o desvio é
+
+$$
+ d_i
+=
+2\left[
+Y_i\log\left(\frac{Y_i}{m_i\hat\pi_i}\right)
++
+(m_i-Y_i)\log\left(
+\frac{m_i-Y_i}{m_i(1-\hat\pi_i)}
+\right)
+\right].
+$$
+
+Assim,
+
+$$
+D=\sum_{i=1}^n d_i.
+$$
+
+Termos do tipo $0\log(0)$ são definidos pelo limite e contribuem com zero.
+
+---
+
+## O caso Bernoulli
+
+Quando $m_i=1$,
+
+$$
+Y_i\sim\operatorname{Bernoulli}(\pi_i).
+$$
+
+A contribuição é
+
+$$
+ d_i
+=
+2\left[
+Y_i\log\left(\frac{Y_i}{\hat\pi_i}\right)
++
+(1-Y_i)\log\left(
+\frac{1-Y_i}{1-\hat\pi_i}
+\right)
+\right].
+$$
+
+Como $Y_i$ só pode assumir 0 ou 1, a expressão reduz-se a
+
+$$
+ d_i=
+\begin{cases}
+-2\log(1-\hat\pi_i), & Y_i=0,\\
+-2\log(\hat\pi_i), & Y_i=1.
+\end{cases}
+$$
+
+---
+
+## O que acontece quando o modelo se ajusta perfeitamente?
+
+Se
+
+$$
+\hat\mu_i=Y_i
+$$
+
+para todas as observações, então o modelo ajustado coincide com o modelo saturado.
+
+Nesse caso,
+
+$$
+\ell(\hat\mu)=\ell(\tilde\mu)
+$$
+
+and
+
+$$
+\boxed{D=0.}
+$$
+
+Portanto, **zero é o valor mínimo possível do desvio**.
+
+---
+
+## O que o desvio não diz sozinho
+
+Um valor de desvio menor indica menor discrepância com o modelo saturado.
+
+Mas isso **não significa automaticamente** que o modelo seja:
+
+- causalmente correto;
+- cientificamente adequado;
+- bem especificado em todos os aspectos;
+- superior para previsão fora da amostra;
+- isento de problemas de diagnóstico.
+
+O desvio é uma medida de **ajuste por verossimilhança**.
+
+---
+
+## Modelo nulo e modelo ajustado
+
+Agora considere dois modelos:
+
+$$
+M_0:\quad \eta_i=\beta_0
+$$
+
+versus
+
+$$
+M_1:\quad \eta_i=\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}.
+$$
+
+O modelo $M_0$ é o modelo nulo.
+
+O modelo $M_1$ contém as preditoras.
+
+A pergunta passa a ser:
+
+> **Quanto a inclusão das preditoras reduz o desvio?**
+
+---
+
+## Redução do desvio
+
+Sejam $D_0$ e $D_1$ os desvios dos modelos nulo e ajustado.
+
+A redução do desvio é
+
+$$
+\boxed{
+\Delta D=D_0-D_1.
+}
+$$
+
+Como $M_1$ contém todos os termos de $M_0$, temos um par de modelos **aninhados**.
+
+Ao adicionar parâmetros por máxima verossimilhança,
+
+$$
+D_1\leq D_0.
+$$
+
+Logo,
+
+$$
+\Delta D\geq0.
+$$
+
+---
+
+## Por que a redução do desvio faz sentido?
+
+Adicionar preditoras amplia o espaço de modelos possíveis.
+
+O modelo maior pode reproduzir os dados pelo menos tão bem quanto o modelo menor.
+
+Portanto:
+
+$$
+\text{mais parâmetros}
+\quad\Rightarrow\quad
+\text{maior ou igual verossimilhança}
+$$
+
+que implica
+
+$$
+\text{mais parâmetros}
+\quad\Rightarrow\quad
+\text{menor ou igual desvio}.
+$$
+
+Mas uma redução pequena pode ser apenas o preço de adicionar parâmetros.
+
+É aí que entra o teste da razão de verossimilhanças.
+
+---
+
+## Modelos aninhados
+
+Dois modelos são **aninhados** quando o modelo menor pode ser obtido como um caso particular do modelo maior.
+
+Por exemplo:
+
+$$
+M_R:
+\quad
+\eta_i=\beta_0+\beta_1x_i
+$$
+
+é aninhado em
+
+$$
+M_C:
+\quad
+\eta_i=\beta_0+\beta_1x_i+\beta_2z_i+\beta_3w_i.
+$$
+
+Basta impor
+
+$$
+\beta_2=\beta_3=0
+$$
+
+no modelo completo.
+
+---
+
+## O que estamos testando?
+
+Considere:
+
+- $M_R$: modelo reduzido;
+- $M_C$: modelo completo.
+
+Com $q>p$ parâmetros, testamos:
+
+$$
+\begin{cases}
+H_0:\text{os termos adicionais não são necessários},\\
+H_1:\text{pelo menos um termo adicional contribui para o modelo}.
+\end{cases}
+$$
+
+Em termos de parâmetros adicionais:
+
+$$
+H_0:\beta_{p+1}=\cdots=\beta_q=0.
+$$
+
+---
+
+## Teste da razão de verossimilhanças
+
+A estatística do teste é
+
+$$
+\operatorname{TRV}
+=
+2\left\{
+\ell(\hat\theta_C)-\ell(\hat\theta_R)
+\right\}.
+$$
+
+Como o desvio é construído a partir da distância até o modelo saturado,
+
+$$
+\boxed{
+\operatorname{TRV}
+=
+D_R-D_C
+}
+$$
+
+quando $\phi=1$.
+
+Mais geralmente:
+
+$$
+\boxed{
+\operatorname{TRV}
+=
+\frac{D_R-D_C}{\phi}.
+}
+$$
+
+---
+
+## A distribuição assintótica da TRV
+
+Sob $H_0$ e sob as condições usuais de regularidade,
+
+$$
+\operatorname{TRV}
+\overset{a}{\sim}
+\chi^2_{q-p}.
+$$
+
+Os graus de liberdade são
+
+$$
+q-p,
+$$
+
+isto é, o **número de parâmetros adicionais** do modelo completo.
+
+Portanto, uma redução de desvio de 8 unidades não possui a mesma interpretação quando foram adicionados 1, 2 ou 8 parâmetros.
+
+---
+
+## Regra de decisão
+
+Para um nível de significância $\alpha$:
+
+$$
+\text{Rejeitar }H_0
+\quad\text{se}\quad
+\operatorname{TRV}>\chi^2_{q-p,1-\alpha}.
+$$
+
+Equivalentemente, rejeitamos $H_0$ quando
+
+$$
+\text{p-valor}<\alpha.
+$$
+
+### Interpretação
+
+A rejeição indica que o modelo completo produz uma melhora de ajuste estatisticamente detectável em relação ao modelo reduzido.
+
+---
+
+## Atenção: redução de desvio não é automaticamente evidência suficiente
+
+Uma redução de desvio é uma **diferença de ajuste**.
+
+O teste da razão de verossimilhanças pergunta se essa diferença é grande em relação à variação esperada sob $H_0$.
+
+Portanto, são conceitos distintos:
+
+$$
+\boxed{\text{redução de desvio}}
+\neq
+\boxed{\text{teste de significância}}
+$$
+
+A primeira é uma medida descritiva de melhora do ajuste.
+
+A segunda adiciona uma referência probabilística para uma hipótese nula.
+
+---
+
+## Exemplo: modelo Poisson
+
+Considere dados de contagem e dois modelos:
+
+$$
+M_R:\quad
+\log(\mu_i)=\beta_0+\beta_1x_i
+$$
+
+versus
+
+$$
+M_C:\quad
+\log(\mu_i)=\beta_0+\beta_1x_i+\beta_2z_i.
+$$
+
+O modelo completo adiciona apenas uma preditora.
+
+Logo:
+
+$$
+df=1.
+$$
+
+A comparação pode ser feita pela redução do desvio:
+
+$$
+\Delta D=D_R-D_C.
+$$
+
+---
+
+## Exemplo em R: Poisson
+
+```r
+modelo_reduzido <- glm(
+  y ~ x,
+  family = poisson(link = "log"),
+  data = dados
+)
+
+modelo_completo <- glm(
+  y ~ x + z,
+  family = poisson(link = "log"),
+  data = dados
+)
+```
+
+Desvios:
+
+```r
+deviance(modelo_reduzido)
+deviance(modelo_completo)
+```
+
+Redução:
+
+```r
+deviance(modelo_reduzido) -
+  deviance(modelo_completo)
+```
+
+---
+
+## Comparação diretamente no R
+
+Para modelos Poisson ou Binomial ajustados por máxima verossimilhança:
+
+```r
+anova(
+  modelo_reduzido,
+  modelo_completo,
+  test = "Chisq"
+)
+```
+
+O R apresenta a **análise de deviance** e o teste da razão de verossimilhanças.
+
+A coluna `Resid. Dev` corresponde ao desvio residual de cada modelo.
+
+A diferença entre os desvios é justamente a estatística do teste, quando $\phi=1$.
+
+---
+
+## O que `deviance()` está calculando?
+
+Para um objeto ajustado por `glm()`:
+
+```r
+deviance(modelo)
+```
+
+retorna o **desvio residual** do modelo.
+
+Em outras palavras:
+
+$$
+D_R
+=
+D(Y;\hat\mu_R).
+$$
+
+Ele mede a distância entre o modelo ajustado e o modelo saturado.
+
+---
+
+## E o `null.deviance`?
+
+Um objeto `glm` também contém:
+
+```r
+modelo$null.deviance
+```
+
+Esse é o desvio do **modelo nulo**.
+
+Assim, temos:
+
+$$
+D_0=\text{null.deviance}
+$$
+
+para o modelo nulo, e
+
+$$
+D_M=\text{deviance(modelo)}
+$$
+
+para o modelo ajustado.
+
+---
+
+## A redução em relação ao modelo nulo
+
+A diferença
+
+$$
+D_0-D_M
+$$
+
+mede quanto o modelo ajustado reduziu o desvio em relação ao modelo nulo.
+
+Em R:
+
+```r
+modelo$null.deviance - deviance(modelo)
+```
+
+Essa diferença pode ser usada como estatística de uma comparação entre o modelo nulo e o modelo ajustado, desde que os modelos sejam comparáveis e as condições do teste sejam atendidas.
+
+---
+
+## Exemplo: modelo Binomial
+
+Considere um modelo logístico:
+
+$$
+\operatorname{logit}(\pi_i)
+=
+\beta_0+\beta_1x_i+\beta_2z_i.
+$$
+
+Compare com
+
+$$
+\operatorname{logit}(\pi_i)
+=
+\beta_0+\beta_1x_i.
+$$
+
+A pergunta é:
+
+> **A inclusão de $z$ produz uma redução de desvio suficientemente grande para justificar a complexidade adicional, segundo o TRV?**
+
+---
+
+## Exemplo em R: Binomial
+
+```r
+modelo_reduzido <- glm(
+  resposta ~ x,
+  family = binomial(link = "logit"),
+  data = dados
+)
+
+modelo_completo <- glm(
+  resposta ~ x + z,
+  family = binomial(link = "logit"),
+  data = dados
+)
+```
+
+Comparação:
+
+```r
+anova(
+  modelo_reduzido,
+  modelo_completo,
+  test = "Chisq"
+)
+```
+
+---
+
+## Lendo uma tabela de análise de deviance
+
+Uma tabela típica pode apresentar:
+
+| Modelo | Resid. Dev | Df | Diferença | Pr(>Chi) |
+|---|---:|---:|---:|---:|
+| reduzido | 182,4 | 198 | — | — |
+| completo | 174,1 | 197 | 8,3 | 0,004 |
+
+A diferença de desvios é
+
+$$
+182,4-174,1=8,3.
+$$
+
+Como foi adicionado um parâmetro:
+
+$$
+df=198-197=1.
+$$
+
+O valor de 8,3 é comparado à distribuição $\chi^2_1$.
+
+---
+
+## Como interpretar a tabela?
+
+A redução do desvio foi de
+
+$$
+\Delta D=8,3.
+$$
+
+Isso significa que o modelo completo apresenta **menor discrepância com o modelo saturado**.
+
+O p-valor do TRV avalia se uma redução dessa magnitude é compatível com $H_0$.
+
+A conclusão estatística deve ser formulada em termos da comparação entre os modelos — não como uma afirmação causal sobre a variável adicionada.
+
+---
+
+## Um ponto fundamental: os modelos precisam ser aninhados
+
+O teste da razão de verossimilhanças baseado na diferença de desvios, como apresentado aqui, exige modelos comparáveis e aninhados.
+
+Por exemplo:
+
+$$
+Y\sim x_1+x_2
+$$
+
+versus
+
+$$
+Y\sim x_1+x_2+x_3
+$$
+
+é uma comparação aninhada.
+
+Já
+
+$$
+Y\sim x_1+x_2
+$$
+
+versus
+
+$$
+Y\sim x_3+x_4
+$$
+
+não é uma comparação aninhada.
+
+---
+
+## O que fazer com modelos não aninhados?
+
+A diferença de desvios continua sendo uma descrição do ajuste, mas **não devemos tratá-la automaticamente como um teste da razão de verossimilhanças**.
+
+Para modelos não aninhados, critérios como o AIC podem ser utilizados para comparação relativa, desde que os modelos sejam apropriados e comparáveis para esse objetivo.
+
+Essa é uma distinção importante em relação à aula anterior sobre seleção de modelos.
+
+---
+
+## Deviance e AIC respondem à mesma pergunta?
+
+Não.
+
+### Deviance
+
+Pergunta principalmente:
+
+> **Quão distante está o modelo dos dados, em termos da verossimilhança?**
+
+### AIC
+
+Pergunta, de forma comparativa:
+
+> **Como equilibrar ajuste e complexidade entre modelos?**
+
+O AIC acrescenta uma penalização pela complexidade:
+
+$$
+AIC=-2\ell(\hat\theta)+2k.
+$$
+
+---
+
+## Deviance e seleção de modelos
+
+O desvio é especialmente útil para:
+
+- avaliar a redução de discrepância ao adicionar termos;
+- comparar modelos aninhados;
+- construir testes da razão de verossimilhanças;
+- acompanhar a análise de deviance.
+
+Mas a decisão de construir um modelo não deve ser reduzida a:
+
+> “Escolha o modelo com menor deviance.”
+
+O modelo saturado teria desvio zero.
+
+O objetivo não é simplesmente minimizar o desvio a qualquer custo.
+
+---
+
+## A relação entre complexidade e ajuste
+
+Temos uma sequência conceitual:
+
+$$
+\text{modelo nulo}
+\longrightarrow
+\text{modelos intermediários}
+\longrightarrow
+\text{modelo saturado}
+$$
+
+Ao aumentar a complexidade:
+
+- o desvio não aumenta;
+- a verossimilhança não diminui;
+- o ajuste melhora ou permanece igual.
+
+Mas isso não significa que devemos continuar adicionando parâmetros indefinidamente.
+
+---
+
+## Um exemplo conceitual
+
+Imagine:
+
+| Modelo | Nº de parâmetros | Deviance |
+|---|---:|---:|
+| Nulo | 1 | 250 |
+| A | 2 | 220 |
+| B | 3 | 205 |
+| C | 8 | 198 |
+| Saturado | muitos | 0 |
+
+A sequência mostra uma redução contínua do desvio.
+
+Mas a tabela, sozinha, não informa:
+
+- se B é significativamente melhor que A;
+- se C é justificável cientificamente;
+- se C prediz melhor dados novos;
+- se algum modelo apresenta problemas de diagnóstico.
+
+---
+
+## A pergunta correta ao comparar dois modelos
+
+Não basta perguntar:
+
+> **Qual possui menor deviance?**
+
+Precisamos perguntar:
+
+1. Os modelos são adequados?
+2. São aninhados?
+3. Quantos parâmetros foram adicionados?
+4. Qual foi a redução do desvio?
+5. A redução é estatisticamente detectável pelo TRV?
+6. Há justificativa científica para a mudança?
+7. O modelo resultante passa pelo diagnóstico?
+
+---
+
+## Uma observação sobre o parâmetro de dispersão
+
+Para Poisson e Binomial, no MLG usual,
+
+$$
+\phi=1.
+$$
+
+Por isso:
+
+$$
+D^*=D
+$$
+
+nesses casos.
+
+Em distribuições como Gamma e Normal, a situação é diferente: o parâmetro de dispersão precisa ser considerado na relação entre desvio e desvio escalonado.
+
+### Portanto
+
+Não generalize automaticamente a igualdade
+
+$$
+D^*=D
+$$
+
+para todos os MLGs.
+
+---
+
+## Uma observação sobre sobredispersão
+
+Nos modelos Poisson e Binomial, a suposição de dispersão unitária pode ser inadequada em algumas aplicações.
+
+Por exemplo, na presença de **sobredispersão**, a variabilidade observada pode ser maior do que aquela prevista pelo modelo Poisson ou Binomial padrão.
+
+Nesse caso, a interpretação de testes baseados diretamente na referência $\chi^2$ precisa ser reavaliada.
+
+O diagnóstico de dispersão será aprofundado posteriormente.
+
+---
+
+## Análise de deviance: a lógica completa
+
+Podemos resumir o procedimento:
+
+$$
+\boxed{
+\text{ajustar}
+\rightarrow
+\text{calcular deviance}
+\rightarrow
+\text{comparar}
+\rightarrow
+\text{testar}
+}
+$$
+
+Para modelos aninhados:
+
+$$
+\boxed{
+\Delta D=D_R-D_C
+}
+$$
+
+E, para $\phi=1$:
+
+$$
+\boxed{
+\Delta D\overset{a}{\sim}\chi^2_{q-p}
+}
+$$
+
+sob $H_0$ e as condições usuais.
+
+---
+
+## O fluxo no R
+
+```r
+# 1. Ajustar os modelos
+modelo_R <- glm(...)
+modelo_C <- glm(...)
+
+# 2. Ver os desvios
+deviance(modelo_R)
+deviance(modelo_C)
+
+# 3. Calcular a redução
+deviance(modelo_R) - deviance(modelo_C)
+
+# 4. Fazer o TRV
+anova(modelo_R, modelo_C, test = "Chisq")
+```
+
+O código traduz diretamente a teoria:
+
+$$
+D_R,\quad D_C,\quad \Delta D,\quad TRV.
+$$
+
+---
+
+## O que entra no artigo?
+
+Ao reportar uma comparação de modelos, não basta apresentar apenas o p-valor.
+
+É informativo apresentar:
+
+- modelos comparados;
+- desvios residuais;
+- diferença de desvios;
+- graus de liberdade da diferença;
+- p-valor do TRV;
+- distribuição assumida para a resposta;
+- função de ligação;
+- justificativa para a comparação.
+
+Isso permite que o leitor reconstrua a lógica da comparação.
+
+---
+
+## O que o aluno precisa saber ao final?
+
+### Modelo nulo
+
+$$
+\eta_i=\beta_0.
+$$
+
+### Modelo saturado
+
+$$
+\tilde\mu_i=Y_i.
+$$
+
+### Deviance
+
+$$
+D=2\{\ell(\tilde\mu)-\ell(\hat\mu)\}
+$$
+
+para $\phi=1$.
+
+### Comparação aninhada
+
+$$
+\Delta D=D_R-D_C.
+$$
+
+### TRV
+
+$$
+\Delta D\overset{a}{\sim}\chi^2_{q-p}.
+$$
+
+---
+
+## A ideia que deve permanecer
+
+> **O desvio mede quão distante o modelo ajustado está do ajuste perfeito representado pelo modelo saturado.**
+
+E, quando comparamos modelos aninhados:
+
+> **A redução do desvio quantifica o ganho de ajuste obtido ao passar do modelo reduzido para o modelo completo.**
+
+O teste da razão de verossimilhanças transforma essa diferença em uma decisão inferencial sob as hipóteses e condições apropriadas.
+
+---
+
+## Próxima etapa
+
+Já sabemos:
+
+$$
+\text{construir}
+\rightarrow
+\text{representar}
+\rightarrow
+\text{comparar}
+$$
+
+O próximo passo é perguntar:
+
+> **Onde o modelo está errando e como esses erros se comportam?**
+
+Na próxima aula:
+
+# **Resíduos em Modelos Lineares Generalizados**
+
+---
+
+## Referências
+
+- DOBSON, A. J.; BARNETT, A. G. *An Introduction to Generalized Linear Models*. 4. ed. Chapman & Hall/CRC.
+- MCCULLAGH, P.; NELDER, J. A. *Generalized Linear Models*. 2. ed. Chapman & Hall.
+- AGRESTI, A. *Foundations of Linear and Generalized Linear Models*. Wiley.
+- R CORE TEAM. *R: A Language and Environment for Statistical Computing*.
+
+---
+
+## Exercício de consolidação
+
+Considere dois modelos logísticos ajustados aos mesmos dados:
+
+$$
+M_R:
+\quad
+\operatorname{logit}(\pi_i)=\beta_0+\beta_1x_i
+$$
+
+$$
+M_C:
+\quad
+\operatorname{logit}(\pi_i)=\beta_0+\beta_1x_i+\beta_2z_i+\beta_3w_i.
+$$
+
+Suponha que:
+
+$$
+D_R=214,6
+$$
+
+$$
+D_C=205,8.
+$$
+
+### Perguntas
+
+1. Qual foi a redução do desvio?
+2. Quantos parâmetros foram adicionados?
+3. Qual é a distribuição assintótica da estatística do TRV sob $H_0$?
+4. Como você faria essa comparação no R?
+5. O que a redução do desvio informa e o que ela não informa?

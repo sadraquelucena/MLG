@@ -7,6 +7,27 @@
     "text": "Este espaço reúne todo o material da disciplina ESTAT0092 — Modelos Lineares Generalizados, ofertada pelo Departamento de Estatística e Ciências Atuariais da Universidade Federal de Sergipe e ministrada pelo Prof. Dr. Sadraque E. F. Lucena.\nAo longo do semestre, estudaremos como construir modelos de regressão capazes de representar diferentes tipos de respostas e situações de pesquisa. Partiremos do modelo de regressão normal linear para compreender suas limitações e, a partir delas, desenvolveremos uma estrutura mais geral baseada em três componentes: componente aleatório, componente sistemático e função de ligação. A família exponencial fornecerá a estrutura matemática que permite tratar, de forma unificada, diferentes distribuições para a variável resposta.\nMais do que aplicar técnicas, o objetivo da disciplina é desenvolver a capacidade de especificar, estimar, avaliar e interpretar modelos estatísticos, compreendendo as relações entre os dados, as distribuições de probabilidade e a estrutura do modelo.\nNeste ambiente você encontrará o cronograma da disciplina, notas de aula, listas de exercícios, materiais complementares e demais recursos utilizados ao longo do semestre."
   },
   {
+    "objectID": "aulas/11-Predicao (a fazer)/conteudo.html",
+    "href": "aulas/11-Predicao (a fazer)/conteudo.html",
+    "title": "5. Avaliação dos coeficientes individuais da regressão",
+    "section": "",
+    "text": "Nesta aula, vamos abordar o Teste de Wald, os intervalos de confiança para os coeficientes de regressão e a interpretação dos coeficientes de acordo com as funções de ligação identidade, logarítmica e logit.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF"
+  },
+  {
+    "objectID": "aulas/09-Residuos (a fazer)/conteudo.html",
+    "href": "aulas/09-Residuos (a fazer)/conteudo.html",
+    "title": "5. Avaliação dos coeficientes individuais da regressão",
+    "section": "",
+    "text": "Nesta aula, vamos abordar o Teste de Wald, os intervalos de confiança para os coeficientes de regressão e a interpretação dos coeficientes de acordo com as funções de ligação identidade, logarítmica e logit.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF"
+  },
+  {
+    "objectID": "aulas/07-Variaveis_qualitativas_e_variaveis_dummies (a fazer)/conteudo.html",
+    "href": "aulas/07-Variaveis_qualitativas_e_variaveis_dummies (a fazer)/conteudo.html",
+    "title": "5. Avaliação dos coeficientes individuais da regressão",
+    "section": "",
+    "text": "Nesta aula, vamos abordar o Teste de Wald, os intervalos de confiança para os coeficientes de regressão e a interpretação dos coeficientes de acordo com as funções de ligação identidade, logarítmica e logit.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF"
+  },
+  {
     "objectID": "aulas/05-Avaliacao_dos_coeficientes_individuais_da_regressao/conteudo.html",
     "href": "aulas/05-Avaliacao_dos_coeficientes_individuais_da_regressao/conteudo.html",
     "title": "5. Avaliação dos coeficientes individuais da regressão",
@@ -101,5 +122,30 @@
       "Aulas",
       "4. Teste da razão de verossimilhanças"
     ]
+  },
+  {
+    "objectID": "aulas/06-selecao_de_variaveis/conteudo.html",
+    "href": "aulas/06-selecao_de_variaveis/conteudo.html",
+    "title": "6. Seleção de variáveis",
+    "section": "",
+    "text": "Nesta aula, são apresentados os principais métodos para seleção de variáveis e construção de Modelos Lineares Generalizados (MLG), incluindo os critérios baseados em p-valores, AIC e conhecimento científico, além das estratégias de busca exaustiva, forward, backward e stepwise.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF",
+    "crumbs": [
+      "Aulas",
+      "6. Seleção de variáveis"
+    ]
+  },
+  {
+    "objectID": "aulas/08-Desvio_e_comparacao_de_modelos (a fazer)/conteudo.html",
+    "href": "aulas/08-Desvio_e_comparacao_de_modelos (a fazer)/conteudo.html",
+    "title": "5. Avaliação dos coeficientes individuais da regressão",
+    "section": "",
+    "text": "Nesta aula, vamos abordar o Teste de Wald, os intervalos de confiança para os coeficientes de regressão e a interpretação dos coeficientes de acordo com as funções de ligação identidade, logarítmica e logit.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF"
+  },
+  {
+    "objectID": "aulas/10-Diagnostico (a fazer)/conteudo.html",
+    "href": "aulas/10-Diagnostico (a fazer)/conteudo.html",
+    "title": "5. Avaliação dos coeficientes individuais da regressão",
+    "section": "",
+    "text": "Nesta aula, vamos abordar o Teste de Wald, os intervalos de confiança para os coeficientes de regressão e a interpretação dos coeficientes de acordo com as funções de ligação identidade, logarítmica e logit.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF"
   }
 ]

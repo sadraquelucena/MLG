@@ -1,0 +1,1453 @@
+---
+title: "Variáveis qualitativas e variáveis dummy"
+subtitle: |
+  *Como representar categorias no preditor linear dos MLGs*
+author:
+  name: | # indica que o campo name terá múltiplas linhas
+    ESTAT0092 -- Modelos Lineares Generalizados<br>
+    Prof. Dr. Sadraque E. F. Lucena<br>
+    <a href="http://sadraquelucena.github.io/mlg" style="font-size:.8em;">http://sadraquelucena.github.io/mlg</a><br>
+
+format:
+  revealjs:
+    theme: meutema.scss
+    width: 1600
+    height: 900
+    margin: 0.1
+    min-scale: 0.2
+    max-scale: 2.0
+    slide-number: true
+    code-line-numbers: false
+    subtitle-style: "font-size: 2em; font-weight: bold;"
+    logo: imagens/ufs_principal_positiva.png
+    transition: fade
+    transition-speed: fast
+    scss: meutema.scss
+    include-in-header:
+      text: |
+        <style>
+        .sublist-2col ul ul {
+          column-count: 2;
+          column-gap: 2rem;
+        }
+        .sublist-2col ul ul li {
+          break-inside: avoid;
+        }
+        </style>
+
+lang: pt-BR
+---
+
+## Onde estamos?
+
+A construção de um MLG envolve decisões sucessivas:
+
+1. **Especificar** quais variáveis entram no modelo.
+2. **Representar** corretamente essas variáveis no preditor linear.
+3. **Comparar** modelos.
+4. **Diagnosticar** o ajuste.
+5. **Predizer** a resposta para novos indivíduos.
+
+Na aula anterior, discutimos **seleção de variáveis e construção do modelo**.
+
+Agora, a pergunta é:
+
+> **Como representar uma variável qualitativa dentro do preditor linear?**
+
+---
+
+## O problema da especificação
+
+Em um MLG,
+
+$$
+g(\mu_i)=\eta_i
+$$
+
+e o preditor linear tem a forma
+
+$$
+\eta_i=\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}.
+$$
+
+O preditor linear utiliza **soma e multiplicação**.
+
+Portanto, cada componente que entra em $\eta_i$ precisa possuir uma representação numérica coerente com a estrutura do modelo.
+
+### E quando uma variável é qualitativa?
+
+---
+
+## Uma categoria não é um número
+
+Considere uma variável `grupo` com três categorias:
+
+- Controle;
+- Tratamento A;
+- Tratamento B.
+
+Não podemos simplesmente codificá-las como
+
+$$
+\text{Controle}=1,\qquad
+\text{Tratamento A}=2,\qquad
+\text{Tratamento B}=3.
+$$
+
+Esses números seriam apenas **rótulos**.
+
+A diferença
+
+$$
+3-2=1
+$$
+
+não representa uma distância entre categorias.
+
+Da mesma forma,
+
+$$
+\frac{3}{2}
+$$
+
+não possui interpretação substantiva.
+
+---
+
+## Por que a codificação 1, 2, 3 é problemática?
+
+Se fizermos
+
+$$
+\eta=\beta_0+\beta_1x
+$$
+
+e codificarmos
+
+$$
+x\in\{1,2,3\},
+$$
+
+o modelo implica que:
+
+$$
+\eta(2)-\eta(1)=\beta_1
+$$
+
+e
+
+$$
+\eta(3)-\eta(2)=\beta_1.
+$$
+
+Ou seja, a codificação impõe uma estrutura de **efeito linear e espaçamento igual** entre as categorias.
+
+Essa estrutura não decorre do fato de a variável ser qualitativa.
+
+> **O problema não é usar números. O problema é atribuir aos números um significado que a variável não possui.**
+
+---
+
+## A solução: variáveis dummy
+
+Uma variável qualitativa pode ser representada por **variáveis dummy**.
+
+Uma dummy assume apenas dois valores:
+
+$$
+0\quad\text{ou}\quad1.
+$$
+
+Em uma representação categórica, esses valores indicam a presença ou ausência de uma determinada categoria.
+
+Por exemplo:
+
+$$
+x=
+\begin{cases}
+0,&\text{grupo de referência},\\
+1,&\text{grupo de interesse}.
+\end{cases}
+$$
+
+Assim, a categoria passa a participar do preditor linear por meio de uma variável numérica.
+
+---
+
+## Variável binária $\rightarrow$ uma dummy
+
+Considere:
+
+- `controle`;
+- `tratamento`.
+
+Escolhemos **Controle** como categoria de referência e definimos
+
+$$
+x_{\text{trat}}=
+\begin{cases}
+0,&\text{Controle},\\
+1,&\text{Tratamento}.
+\end{cases}
+$$
+
+O preditor linear pode ser escrito como
+
+$$
+\eta_i=\beta_0+\beta_1x_{\text{trat},i}.
+$$
+
+Então:
+
+$$
+\eta_{\text{Controle}}=\beta_0
+$$
+
+e
+
+$$
+\eta_{\text{Tratamento}}=\beta_0+\beta_1.
+$$
+
+---
+
+## O que significa $\beta_1$?
+
+A diferença entre os dois preditores lineares é
+
+$$
+\eta_{\text{Tratamento}}-\eta_{\text{Controle}}
+=
+\beta_1.
+$$
+
+Portanto,
+
+> **$\beta_1$ representa a diferença entre Tratamento e Controle na escala do preditor linear.**
+
+Essa frase é fundamental.
+
+O coeficiente de uma dummy **não é simplesmente “o efeito da categoria”**.
+
+Ele representa uma **comparação com a categoria de referência**.
+
+---
+
+## A categoria de referência
+
+A categoria de referência é aquela que corresponde a
+
+$$
+x_{\text{trat}}=0.
+$$
+
+Ela é incorporada ao modelo pelo intercepto:
+
+$$
+\eta=\beta_0+\beta_1x_{\text{trat}}.
+$$
+
+Para a referência:
+
+$$
+\eta=\beta_0.
+$$
+
+Para a outra categoria:
+
+$$
+\eta=\beta_0+\beta_1.
+$$
+
+Assim, o intercepto também depende da escolha da referência.
+
+---
+
+## Mudar a referência muda os coeficientes
+
+Suponha duas categorias:
+
+- Controle;
+- Tratamento.
+
+Com Controle como referência:
+
+$$
+\beta_1
+=
+\eta_{\text{Tratamento}}
+-
+\eta_{\text{Controle}}.
+$$
+
+Se Tratamento for a referência, o novo coeficiente será
+
+$$
+\beta_1^\ast
+=
+\eta_{\text{Controle}}
+-
+\eta_{\text{Tratamento}}
+=
+-\beta_1.
+$$
+
+Portanto:
+
+> **A escolha da referência altera a parametrização, mas não altera as comparações que o modelo representa.**
+
+---
+
+## Variável com $k$ categorias $\rightarrow k-1$ dummies
+
+Considere uma variável qualitativa $X$ com $k$ categorias.
+
+Para representá-la no modelo com intercepto, utilizamos
+
+$$
+\boxed{k-1\text{ variáveis dummy}}.
+$$
+
+Uma categoria fica como referência.
+
+### Exemplo
+
+Se
+
+$$
+X\in\{\text{A},\text{B},\text{C}\},
+$$
+
+podemos escolher A como referência e definir:
+
+$$
+x_B=
+\begin{cases}
+1,&X=\text{B}\\
+0,&\text{caso contrário}
+\end{cases}
+\qquad
+x_C=
+\begin{cases}
+1,&X=\text{C}\\
+0,&\text{caso contrário}.
+\end{cases}
+$$
+
+---
+
+## Como as categorias são representadas?
+
+| Categoria | $x_B$ | $x_C$ |
+|:---|---:|---:|
+| A — referência | 0 | 0 |
+| B | 1 | 0 |
+| C | 0 | 1 |
+
+A combinação
+
+$$
+(x_B,x_C)=(0,0)
+$$
+
+não significa “ausência da variável”.
+
+Significa:
+
+> **o indivíduo pertence à categoria de referência A.**
+
+---
+
+## Por que não usar $k$ dummies?
+
+Se criarmos uma dummy para cada categoria e mantivermos o intercepto, teremos:
+
+$$
+x_A+x_B+\cdots+x_k=1.
+$$
+
+Consequentemente, existe dependência linear perfeita entre as colunas do modelo.
+
+O modelo fica **não identificável**.
+
+Por isso, com intercepto, usamos:
+
+$$
+\boxed{k-1\text{ dummies}}.
+$$
+
+Uma categoria é absorvida pelo intercepto.
+
+---
+
+## Forma geral
+
+Se $X$ possui $k$ categorias e a categoria 1 é a referência:
+
+$$
+x_2,\ldots,x_k
+$$
+
+são as $k-1$ variáveis dummy.
+
+O preditor linear fica
+
+$$
+\eta_i
+=
+\beta_0+
+\beta_2x_{i2}
++\beta_3x_{i3}
++\cdots+
+\beta_kx_{ik}.
+$$
+
+Para a categoria 1:
+
+$$
+\eta_i=\beta_0.
+$$
+
+Para a categoria $j$:
+
+$$
+\eta_i=\beta_0+\beta_j.
+$$
+
+---
+
+## Interpretação geral dos coeficientes
+
+Para cada $j\in\{2,\ldots,k\}$,
+
+$$
+\beta_j
+=
+\eta_{\text{categoria }j}
+-
+\eta_{\text{referência}}.
+$$
+
+Logo:
+
+- $\beta_j>0$: a categoria $j$ possui maior valor do preditor linear;
+- $\beta_j<0$: possui menor valor;
+- $\beta_j=0$: os dois grupos têm o mesmo valor na escala do preditor linear.
+
+**Sempre pergunte:**
+
+> “Em relação a qual categoria?”
+
+---
+
+## Um exemplo com três categorias
+
+Considere:
+
+$$
+X\in\{\text{Outra},\text{Branca},\text{Negra}\}
+$$
+
+e escolha **Outra** como referência.
+
+Defina:
+
+$$
+x_B=
+\begin{cases}
+1,&\text{Branca}\\
+0,&\text{caso contrário}
+\end{cases}
+$$
+
+e
+
+$$
+x_N=
+\begin{cases}
+1,&\text{Negra}\\
+0,&\text{caso contrário}.
+\end{cases}
+$$
+
+O preditor linear é
+
+$$
+\eta=\beta_0+\beta_Bx_B+\beta_Nx_N.
+$$
+
+---
+
+## As três equações
+
+| Categoria | $x_B$ | $x_N$ | Preditor linear |
+|:---|---:|---:|:---|
+| Outra | 0 | 0 | $\beta_0$ |
+| Branca | 1 | 0 | $\beta_0+\beta_B$ |
+| Negra | 0 | 1 | $\beta_0+\beta_N$ |
+
+Logo,
+
+$$
+\beta_B
+=
+\eta_{\text{Branca}}
+-
+\eta_{\text{Outra}}
+$$
+
+e
+
+$$
+\beta_N
+=
+\eta_{\text{Negra}}
+-
+\eta_{\text{Outra}}.
+$$
+
+A estrutura é exatamente a mesma apresentada no material anterior para variáveis qualitativas com três categorias. fileciteturn15file3
+
+---
+
+## Comparar duas categorias que não são a referência
+
+Os coeficientes individuais comparam cada categoria com a referência.
+
+Mas podemos comparar duas categorias diretamente.
+
+Por exemplo:
+
+$$
+\eta_{\text{Branca}}-\eta_{\text{Negra}}
+=
+(\beta_0+\beta_B)-(\beta_0+\beta_N)
+$$
+
+e, portanto,
+
+$$
+\boxed{
+\eta_{\text{Branca}}-\eta_{\text{Negra}}
+=
+\beta_B-\beta_N
+}.
+$$
+
+A comparação não precisa ter a categoria de referência como um dos grupos.
+
+---
+
+## O papel da função de ligação
+
+Até aqui, falamos de diferenças na escala do preditor linear:
+
+$$
+\eta=g(\mu).
+$$
+
+Mas o interesse científico geralmente está em $\mu$.
+
+A interpretação do coeficiente depende, portanto, da **função de ligação**.
+
+### Três casos importantes
+
+| Ligação | Escala do coeficiente | Transformação |
+|:---|:---|:---|
+| Identidade | diferença em $\mu$ | $\beta_j$ |
+| Log | diferença em $\log(\mu)$ | $e^{\beta_j}$ |
+| Logit | diferença em log-chances | $e^{\beta_j}$ |
+
+---
+
+## Ligação identidade
+
+Na ligação identidade,
+
+$$
+\mu=\eta.
+$$
+
+Para uma dummy:
+
+$$
+\mu_{\text{Tratamento}}
+-
+\mu_{\text{Controle}}
+=
+\beta_1.
+$$
+
+Portanto, $\beta_1$ é uma **diferença na média da resposta**, mantendo constantes as demais variáveis do modelo.
+
+### Exemplo
+
+Se
+
+$$
+\widehat{\beta}_1=4{,}2,
+$$
+
+a média estimada do grupo Tratamento é 4,2 unidades maior que a do grupo Controle, nas mesmas condições das demais covariáveis.
+
+---
+
+## Ligação log
+
+Na ligação log,
+
+$$
+\log(\mu)=\eta.
+$$
+
+Para duas categorias:
+
+$$
+\log(\mu_1)-\log(\mu_0)=\beta_1.
+$$
+
+Logo,
+
+$$
+\log\left(\frac{\mu_1}{\mu_0}\right)=\beta_1
+$$
+
+e
+
+$$
+\boxed{
+\frac{\mu_1}{\mu_0}=e^{\beta_1}
+}.
+$$
+
+Assim, $e^{\beta_1}$ é a **razão entre as médias** das duas categorias, mantendo constantes as demais variáveis.
+
+---
+
+## Ligação logit
+
+Na regressão logística,
+
+$$
+\operatorname{logit}(\mu)
+=
+\log\left(\frac{\mu}{1-\mu}\right)
+=
+\eta.
+$$
+
+Para uma dummy:
+
+$$
+\operatorname{logit}(\mu_1)
+-
+\operatorname{logit}(\mu_0)
+=
+\beta_1.
+$$
+
+Logo,
+
+$$
+\boxed{
+\frac{\operatorname{odds}_1}
+{\operatorname{odds}_0}
+=
+e^{\beta_1}
+}.
+$$
+
+Portanto, no modelo logístico:
+
+> **$e^{\beta_1}$ é a razão de chances (odds ratio) da categoria 1 em relação à categoria de referência.**
+
+---
+
+## Exemplo: interpretação de um odds ratio
+
+Suponha que, em um modelo logístico,
+
+$$
+\widehat{\beta}_{\text{trat}}=0{,}60.
+$$
+
+Então:
+
+$$
+e^{0{,}60}\approx1{,}82.
+$$
+
+A interpretação é:
+
+> Mantendo constantes as demais variáveis, as **odds** do desfecho no grupo Tratamento são aproximadamente **1,82 vezes** as odds no grupo Controle.
+
+Não dizemos que a probabilidade é 1,82 vezes maior.
+
+**Odds e probabilidade não são a mesma quantidade.**
+
+---
+
+## Um cuidado importante: odds $\neq$ probabilidade
+
+Se
+
+$$
+OR=1{,}82,
+$$
+
+isso significa
+
+$$
+\frac{\text{odds}_1}{\text{odds}_0}=1{,}82.
+$$
+
+Não significa, em geral,
+
+$$
+\frac{P(Y=1\mid X=1)}
+{P(Y=1\mid X=0)}
+=1{,}82.
+$$
+
+A razão de chances e a razão de probabilidades são medidas diferentes.
+
+Essa distinção é especialmente importante na interpretação de variáveis dummy em regressão logística.
+
+---
+
+## Exemplo aplicado: `birthwt`
+
+O conjunto `birthwt`, do pacote `MASS`, contém informações sobre nascimentos.
+
+Considere:
+
+- `low`: peso ao nascer inferior a 2,5 kg;
+- `lwt`: peso da mãe;
+- `smoke`: tabagismo durante a gravidez;
+- `race`: categoria de raça.
+
+A variável `race` é codificada numericamente no conjunto de dados, mas seu significado é **categórico**.
+
+Isso é exatamente o tipo de situação em que não devemos interpretar os códigos numéricos como uma escala quantitativa.
+
+---
+
+## Preparando as variáveis no R
+
+Vamos tornar explícito o significado categórico:
+
+```{r}
+#| echo: true
+#| eval: false
+
+library(MASS)
+
+dados <- birthwt
+
+dados$smoke_f <- factor(
+  dados$smoke,
+  levels = c(0, 1),
+  labels = c("Não fuma", "Fuma")
+)
+
+dados$race_f <- factor(
+  dados$race,
+  levels = c(1, 2, 3),
+  labels = c("Branca", "Negra", "Outra")
+)
+```
+
+A variável `race` não será tratada como uma variável quantitativa.
+
+Ela será tratada como um **fator com três categorias**.
+
+---
+
+## A escolha da referência no R
+
+Podemos definir explicitamente a categoria de referência:
+
+```{r}
+#| echo: true
+#| eval: false
+
+dados$race_f <- relevel(
+  dados$race_f,
+  ref = "Outra"
+)
+
+levels(dados$race_f)
+```
+
+Agora:
+
+- `Outra` = referência;
+- `Branca` = comparação 1;
+- `Negra` = comparação 2.
+
+A parametrização do modelo dependerá dessa escolha.
+
+---
+
+## O modelo logístico
+
+Considere:
+
+$$
+\operatorname{logit}(\mu_i)
+=
+\beta_0
++
+\beta_1\,\text{lwt}_i
++
+\beta_2\,\text{Fuma}_i
++
+\beta_3\,\text{Branca}_i
++
+\beta_4\,\text{Negra}_i.
+$$
+
+O modelo compara:
+
+- fumantes com não fumantes;
+- Branca e Negra com a categoria de referência Outra;
+
+sempre **mantendo `lwt` constante**.
+
+---
+
+## O mesmo modelo no R
+
+```{r}
+#| echo: true
+#| eval: false
+
+modelo <- glm(
+  low ~ lwt + smoke_f + race_f,
+  family = binomial(link = "logit"),
+  data = dados
+)
+
+summary(modelo)
+```
+
+O R faz a expansão das variáveis fatoriais automaticamente.
+
+Não precisamos criar manualmente cada dummy.
+
+Mas precisamos **entender a parametrização que o R está utilizando**.
+
+---
+
+## Como verificar as dummies utilizadas pelo R?
+
+```{r}
+#| echo: true
+#| eval: false
+
+contrasts(dados$smoke_f)
+contrasts(dados$race_f)
+```
+
+Para uma variável com três categorias e uma categoria de referência, aparecem duas colunas de contraste.
+
+A regra estrutural permanece:
+
+$$
+\boxed{k-1\text{ parâmetros para }k\text{ categorias}}
+$$
+
+quando o modelo contém intercepto e utiliza a parametrização de referência.
+
+---
+
+## O intercepto também tem interpretação
+
+Com `Outra` como referência e `Não fuma` como referência, o intercepto representa o preditor linear do indivíduo que está:
+
+- na categoria `Outra`;
+- na categoria `Não fuma`;
+- com `lwt = 0`, se `lwt` permanecer sem centralização.
+
+Portanto, o intercepto nem sempre corresponde a um indivíduo cientificamente típico.
+
+Isso não é um problema de dummy.
+
+É uma consequência da **codificação e da escala das covariáveis**.
+
+---
+
+## Interpretação do coeficiente de `smoke_f`
+
+Suponha que o coeficiente estimado de `Fuma` seja $\widehat{\beta}_{\text{fuma}}$.
+
+Na escala do preditor linear:
+
+$$
+\widehat{\beta}_{\text{fuma}}
+=
+\operatorname{logit}(\widehat{\mu}_{\text{fuma}})
+-
+\operatorname{logit}(\widehat{\mu}_{\text{não fuma}}).
+$$
+
+Na escala das odds:
+
+$$
+\boxed{
+OR_{\text{fuma,não fuma}}
+=
+e^{\widehat{\beta}_{\text{fuma}}}
+}.
+$$
+
+A comparação é condicional às demais variáveis do modelo.
+
+---
+
+## Interpretação de `race_f`
+
+Com `Outra` como referência:
+
+$$
+\widehat{\beta}_{\text{Branca}}
+=
+\eta_{\text{Branca}}
+-
+\eta_{\text{Outra}}
+$$
+
+e
+
+$$
+\widehat{\beta}_{\text{Negra}}
+=
+\eta_{\text{Negra}}
+-
+\eta_{\text{Outra}}.
+$$
+
+Na regressão logística:
+
+$$
+e^{\widehat{\beta}_{\text{Branca}}}
+=
+OR(\text{Branca},\text{Outra})
+$$
+
+e
+
+$$
+e^{\widehat{\beta}_{\text{Negra}}}
+=
+OR(\text{Negra},\text{Outra}).
+$$
+
+---
+
+## Comparando Branca e Negra diretamente
+
+Como:
+
+$$
+\eta_{\text{Branca}}
+=
+\beta_0+\beta_{\text{Branca}}+\cdots
+$$
+
+e
+
+$$
+\eta_{\text{Negra}}
+=
+\beta_0+\beta_{\text{Negra}}+\cdots,
+$$
+
+temos:
+
+$$
+\eta_{\text{Branca}}-\eta_{\text{Negra}}
+=
+\beta_{\text{Branca}}
+-
+\beta_{\text{Negra}}.
+$$
+
+Na escala de odds:
+
+$$
+\boxed{
+OR(\text{Branca},\text{Negra})
+=
+e^{\beta_{\text{Branca}}-\beta_{\text{Negra}}}
+}.
+$$
+
+Portanto, uma comparação entre duas categorias pode exigir uma **combinação linear de coeficientes**.
+
+---
+
+## A referência não é uma categoria “melhor”
+
+A escolha da referência é uma escolha de parametrização.
+
+Não existe, matematicamente, uma categoria que seja “mais importante” por ser a referência.
+
+Podemos escolher uma referência por razões:
+
+- científicas;
+- clínicas;
+- políticas;
+- interpretativas;
+- ou simplesmente porque facilita a comunicação.
+
+O que muda é a forma como os coeficientes são expressos.
+
+As previsões do modelo não dependem da escolha da referência quando a parametrização representa o mesmo modelo.
+
+---
+
+## E se houver duas variáveis qualitativas?
+
+Suponha:
+
+- $X_1$: gênero;
+- $X_2$: raça.
+
+Podemos incluir seus efeitos principais:
+
+$$
+\eta
+=
+\beta_0
++
+\beta_1X_1
++
+\beta_2X_2
++\cdots
+$$
+
+Mas isso assume que a diferença associada a uma categoria de $X_2$ é a mesma nos níveis de $X_1$.
+
+### E se isso não for razoável?
+
+Precisamos considerar uma **interação**.
+
+---
+
+## O que é uma interação?
+
+Existe interação quando:
+
+> **o efeito de uma variável depende do nível da outra variável.**
+
+Exemplo:
+
+O efeito de raça sobre a resposta pode ser diferente entre os grupos de gênero.
+
+Nesse caso, não é suficiente dizer apenas:
+
+$$
+\text{efeito de raça}=\text{constante}.
+$$
+
+O modelo deve permitir que esse efeito varie conforme o gênero.
+
+Essa é exatamente a interpretação conceitual de interação apresentada no material anterior. fileciteturn15file2
+
+---
+
+## Interação entre duas dummies
+
+Considere duas variáveis binárias:
+
+$$
+x_1=
+\begin{cases}
+0,&A\\
+1,&B
+\end{cases}
+$$
+
+e
+
+$$
+x_2=
+\begin{cases}
+0,&C\\
+1,&D.
+\end{cases}
+$$
+
+O modelo com interação é:
+
+$$
+\boxed{
+\eta
+=
+\beta_0+\beta_1x_1+\beta_2x_2+\beta_{12}x_1x_2
+}.
+$$
+
+O termo
+
+$$
+x_1x_2
+$$
+
+é a variável de interação.
+
+---
+
+## As quatro combinações
+
+| $x_1$ | $x_2$ | $\eta$ |
+|---:|---:|:---|
+| 0 | 0 | $\beta_0$ |
+| 1 | 0 | $\beta_0+\beta_1$ |
+| 0 | 1 | $\beta_0+\beta_2$ |
+| 1 | 1 | $\beta_0+\beta_1+\beta_2+\beta_{12}$ |
+
+Observe o que acontece com o efeito de $x_2$.
+
+Quando $x_1=0$:
+
+$$
+\Delta\eta_{x_2}=\beta_2.
+$$
+
+Quando $x_1=1$:
+
+$$
+\Delta\eta_{x_2}=\beta_2+\beta_{12}.
+$$
+
+---
+
+## O significado de $\beta_{12}$
+
+A interação mede a **mudança no efeito de uma variável quando passamos para outro nível da outra variável**.
+
+Aqui:
+
+$$
+\boxed{
+\beta_{12}
+=
+(\text{efeito de }x_2\text{ quando }x_1=1)
+-
+(\text{efeito de }x_2\text{ quando }x_1=0)
+}.
+$$
+
+Portanto:
+
+- $\beta_{12}=0$: o efeito de $x_2$ é o mesmo nos dois níveis de $x_1$;
+- $\beta_{12}>0$: o efeito de $x_2$ aumenta quando $x_1$ passa de 0 para 1;
+- $\beta_{12}<0$: o efeito de $x_2$ diminui.
+
+---
+
+## Interação em um MLG
+
+A lógica é a mesma independentemente da função de ligação.
+
+O modelo continua sendo:
+
+$$
+g(\mu)=
+\beta_0+\beta_1x_1+\beta_2x_2+\beta_{12}x_1x_2.
+$$
+
+Mas a interpretação ocorre na **escala do preditor linear**.
+
+Para a ligação logit, por exemplo, os efeitos podem ser expressos em termos de odds e odds ratios.
+
+Para a ligação log, podem ser expressos em termos de razões entre médias.
+
+---
+
+## Interação entre variáveis qualitativas com várias categorias
+
+Se uma variável possui $k$ categorias, ela gera $k-1$ dummies.
+
+Se outra possui $m$ categorias, ela gera $m-1$ dummies.
+
+A interação entre as duas variáveis envolve os produtos entre essas dummies.
+
+Assim, o número de termos de interação é:
+
+$$
+\boxed{(k-1)(m-1)}.
+$$
+
+### Exemplo
+
+Uma variável com 3 categorias e outra com 4 categorias produzem:
+
+$$
+(3-1)(4-1)=6
+$$
+
+termos de interação.
+
+---
+
+## Interação: interpretação por efeitos condicionais
+
+Considere novamente:
+
+$$
+\eta
+=
+\beta_0+\beta_1x_1+\beta_2x_2+\beta_{12}x_1x_2.
+$$
+
+O efeito de $x_2$ é:
+
+$$
+\frac{\partial\eta}{\partial x_2}
+=
+\beta_2+\beta_{12}x_1.
+$$
+
+Como $x_1$ é uma dummy:
+
+- se $x_1=0$, o efeito é $\beta_2$;
+- se $x_1=1$, o efeito é $\beta_2+\beta_{12}$.
+
+Essa forma de escrever o modelo torna a interpretação da interação explícita.
+
+---
+
+## Interação: o erro mais comum
+
+Com interação, não devemos interpretar $\beta_2$ como:
+
+> “o efeito geral de $x_2$”.
+
+O coeficiente $\beta_2$ representa o efeito de $x_2$ **quando $x_1=0**, isto é, no nível de referência de $x_1$.
+
+Da mesma forma, $\beta_1$ representa o efeito de $x_1$ **quando $x_2=0**.
+
+Com interação, os efeitos principais são **efeitos condicionais à referência da outra variável**.
+
+---
+
+## A forma matricial ajuda a organizar
+
+O MLG continua sendo:
+
+$$
+g(\boldsymbol{\mu})=\mathbf{X}\boldsymbol{\beta}.
+$$
+
+As variáveis dummy simplesmente determinam algumas colunas da matriz de planejamento $\mathbf{X}$.
+
+Por exemplo:
+
+$$
+\mathbf{X}
+=
+\begin{bmatrix}
+1 & x_{1} & x_{2} & x_{1}x_{2}\\
+1 & x_{1} & x_{2} & x_{1}x_{2}\\
+\vdots & \vdots & \vdots & \vdots
+\end{bmatrix}.
+$$
+
+A interação acrescenta uma nova coluna.
+
+Portanto, dummy e interação são, em última análise, **formas de construir o preditor linear**.
+
+---
+
+## O que o R está fazendo?
+
+Quando escrevemos:
+
+```{r}
+#| echo: true
+#| eval: false
+
+glm(
+  low ~ lwt + smoke_f + race_f,
+  family = binomial(link = "logit"),
+  data = dados
+)
+```
+
+o R:
+
+1. reconhece `smoke_f` e `race_f` como fatores;
+2. aplica uma codificação de contrastes;
+3. cria as colunas correspondentes na matriz de planejamento;
+4. estima os coeficientes associados a essas colunas.
+
+Podemos inspecionar essa matriz com:
+
+```{r}
+#| echo: true
+#| eval: false
+
+model.matrix(~ smoke_f + race_f, data = dados)
+```
+
+---
+
+## E uma interação no R?
+
+A fórmula
+
+```{r}
+#| echo: true
+#| eval: false
+
+low ~ lwt + smoke_f * race_f
+```
+
+é equivalente a incluir:
+
+```{r}
+#| echo: true
+#| eval: false
+
+low ~ lwt + smoke_f + race_f + smoke_f:race_f
+```
+
+O operador `*` inclui:
+
+- efeitos principais;
+- interação.
+
+Já `:` representa apenas a interação.
+
+---
+
+## O que devemos perguntar ao interpretar um fator?
+
+Diante de um coeficiente associado a uma variável qualitativa, siga esta sequência:
+
+1. **Qual é a categoria de referência?**
+2. **Qual categoria está sendo comparada com ela?**
+3. **Qual é a função de ligação?**
+4. **Em qual escala o coeficiente está sendo interpretado?**
+5. **Há interação com outra variável?**
+6. **Se houver interação, qual é o nível da outra variável na comparação?**
+
+Sem essas informações, a interpretação do coeficiente fica incompleta.
+
+---
+
+## Síntese
+
+### Variável binária
+
+$$
+\boxed{1\text{ dummy}}
+$$
+
+### Variável com $k$ categorias
+
+$$
+\boxed{k-1\text{ dummies}}
+$$
+
+### Coeficiente de uma dummy
+
+É uma **comparação com a categoria de referência**, na escala do preditor linear.
+
+### Função de ligação
+
+Determina como essa comparação se traduz para a escala da média da resposta.
+
+### Interação
+
+Permite que o efeito de uma variável **dependa do nível da outra**.
+
+---
+
+## A estrutura conceitual da aula
+
+$$
+\boxed{
+\text{Categoria}
+\longrightarrow
+\text{Dummy}
+\longrightarrow
+\text{Preditor linear}
+\longrightarrow
+\text{Comparação}
+}
+$$
+
+E, quando existe interação:
+
+$$
+\boxed{
+\text{Efeito}
+\longrightarrow
+\text{depende de outra variável}
+}
+$$
+
+A ideia central é simples:
+
+> **A dummy não é o efeito. Ela é a representação numérica que permite que a categoria participe do modelo.**
+
+---
+
+## Exercício de consolidação
+
+Considere um MLG com:
+
+- resposta binária $Y$;
+- ligação logit;
+- variável `tratamento` com categorias Controle e Tratamento;
+- variável `sexo` com categorias Masculino e Feminino.
+
+Escolha Controle e Masculino como categorias de referência.
+
+O modelo é:
+
+$$
+\operatorname{logit}(\mu)
+=
+\beta_0
++\beta_1x_{\text{trat}}
++\beta_2x_{\text{fem}}
++\beta_3x_{\text{trat}}x_{\text{fem}}.
+$$
+
+### Perguntas
+
+1. Escreva o preditor linear para cada uma das quatro combinações.
+2. Qual é o efeito de tratamento entre homens?
+3. Qual é o efeito de tratamento entre mulheres?
+4. Qual é o significado de $\beta_3$?
+5. Qual é o odds ratio de tratamento entre homens?
+6. Qual é o odds ratio de tratamento entre mulheres?
+
+---
+
+## Próxima etapa
+
+Agora que sabemos **representar variáveis qualitativas no preditor linear**, podemos avançar para a comparação de modelos.
+
+Na próxima aula:
+
+# **Desvio e comparação de modelos**
+
+A pergunta passa a ser:
+
+> **Quanto o ajuste do modelo melhora quando acrescentamos ou retiramos termos do preditor linear?**
+
+---
+
+## Referências
+
+- Agresti, A. *An Introduction to Categorical Data Analysis*. Wiley.
+- Dobson, A. J.; Barnett, A. G. *An Introduction to Generalized Linear Models*. CRC Press.
+- McCullagh, P.; Nelder, J. A. *Generalized Linear Models*. Chapman & Hall.
+- R Core Team. *R: A Language and Environment for Statistical Computing*.
+- Material da disciplina **Modelos Lineares Generalizados — Aulas 19 e 20: variáveis dummy e análise do desvio**. fileciteturn14file0L9-L25

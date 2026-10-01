@@ -1,0 +1,1231 @@
+---
+title: "Predição em Modelos Lineares Generalizados"
+
+subtitle: |
+  *Dado um novo indivíduo com determinadas características, o que o MLG nos permite prever?*
+
+author:
+
+  name: | # indica que o campo name terá múltiplas linhas
+
+    ESTAT0092 -- Modelos Lineares Generalizados<br>
+
+    Prof. Dr. Sadraque E. F. Lucena<br>
+
+    <a href="http://sadraquelucena.github.io/mlg" style="font-size:.8em;">http://sadraquelucena.github.io/mlg</a><br>
+
+format:
+
+  revealjs:
+
+    theme: meutema.scss
+
+    width: 1600
+
+    height: 900
+
+    margin: 0.1         # margem em torno do conteúdo
+
+    min-scale: 0.2       # escala mínima permitida
+
+    max-scale: 2.0       # escala máxima permitida
+
+    slide-number: true
+
+    code-line-numbers: false # sem numero das linhas nos code chunks
+
+    subtitle-style: "font-size: 2em; font-weight: bold;"  # Aqui é onde aumentamos o subtítulo
+
+    logo: imagens/ufs_principal_positiva.png
+
+    transition: fade
+
+    transition-speed: fast
+
+    scss: meutema.scss
+
+    include-in-header:
+
+      text: |
+
+        <style>
+
+        .sublist-2col ul ul {
+
+          column-count: 2;
+
+          column-gap: 2rem;
+
+        }
+
+        .sublist-2col ul ul li {
+
+          break-inside: avoid; /* Impede que um item quebre entre colunas */
+
+        }
+
+        </style>
+
+lang: pt-BR
+---
+
+## Introdução
+
+- Nas aulas anteriores, aprendemos a **estimar os parâmetros**, avaliar o **ajuste global do modelo**, testar a significância individual dos coeficientes e interpretar os parâmetros de acordo com a função de ligação.
+
+- Agora queremos utilizar o modelo ajustado para responder a uma pergunta diferente:
+
+> **Dado um novo indivíduo com determinadas características, qual resposta o modelo prevê?**
+
+- A ideia central é passar dos **parâmetros estimados** para uma **resposta prevista**.
+
+---
+
+## Da inferência à predição
+
+Até aqui, grande parte das perguntas foi sobre os parâmetros:
+
+$$
+\beta_0,\beta_1,\ldots,\beta_p.
+$$
+
+Agora a pergunta é sobre uma nova unidade com vetor de preditores
+
+$$
+\mathbf{x}_0=(1,x_{01},\ldots,x_{0p})^\top.
+$$
+
+Queremos estimar
+
+$$
+\mu_0=E(Y_0\mid \mathbf{x}_0).
+$$
+
+> **Predizer a resposta média significa estimar a média da distribuição de $Y$ para indivíduos com características $\mathbf{x}_0$.**
+
+---
+
+## O modelo que já conhecemos
+
+Um MLG é definido por
+
+$$
+g(\mu_i)=\eta_i,
+$$
+
+com
+
+$$
+\eta_i
+=
+\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}
+=
+\mathbf{x}_i^\top\boldsymbol{\beta}.
+$$
+
+onde
+
+$$
+\mu_i=E(Y_i\mid\mathbf{x}_i).
+$$
+
+Depois de ajustar o modelo, substituímos os parâmetros desconhecidos por suas estimativas:
+
+$$
+\widehat{\boldsymbol{\beta}}
+=
+(\widehat{\beta}_0,\ldots,\widehat{\beta}_p)^\top.
+$$
+
+---
+
+## O caminho da predição
+
+Para um novo indivíduo $\mathbf{x}_0$:
+
+$$
+\boxed{
+\mathbf{x}_0
+\longrightarrow
+\widehat{\eta}_0
+\longrightarrow
+\widehat{\mu}_0
+}
+$$
+
+Primeiro calculamos o **preditor linear estimado**:
+
+$$
+\boxed{
+\widehat{\eta}_0
+=
+\mathbf{x}_0^\top\widehat{\boldsymbol{\beta}}
+}
+$$
+
+Depois retornamos à escala da resposta:
+
+$$
+\boxed{
+\widehat{\mu}_0
+=
+g^{-1}(\widehat{\eta}_0)
+}
+$$
+
+> A função de ligação determina como passamos da escala linear para a escala da resposta.
+
+---
+
+## Predição da resposta média
+
+A fórmula fundamental da aula é
+
+$$
+\boxed{
+\widehat{\mu}_0
+=
+g^{-1}
+\left(
+\mathbf{x}_0^\top\widehat{\boldsymbol{\beta}}
+\right)
+}
+$$
+
+Ela vale para qualquer MLG.
+
+O que muda de um modelo para outro é a **função inversa da ligação**.
+
+Assim:
+
+$$
+\text{preditores}
+\rightarrow
+\text{preditor linear}
+\rightarrow
+\text{resposta média}
+$$
+
+---
+
+## A função de ligação determina a predição
+
+| Função de ligação | Relação | Predição da média |
+|:---|:---|:---|
+| Identidade | $\mu=\eta$ | $\widehat{\mu}=\widehat{\eta}$ |
+| Log | $\log(\mu)=\eta$ | $\widehat{\mu}=e^{\widehat{\eta}}$ |
+| Logit | $\log\left(\frac{\mu}{1-\mu}\right)=\eta$ | $\widehat{\mu}=\frac{e^{\widehat{\eta}}}{1+e^{\widehat{\eta}}}$ |
+
+> **A lógica é sempre a mesma: calcular $\widehat{\eta}$ e aplicar $g^{-1}$.**
+
+---
+
+## Exemplo 1 — Regressão Gama
+
+Considere o modelo
+
+$$
+\log(\mu)
+=
+\beta_0+\beta_1\text{Height}+\beta_2\text{Girth},
+$$
+
+para explicar o volume de madeira das cerejeiras-negras.
+
+Suponha que o modelo ajustado forneça
+
+$$
+\widehat{\beta}_0=0{,}0923,
+\qquad
+\widehat{\beta}_1=0{,}0166,
+\qquad
+\widehat{\beta}_2=0{,}1453.
+$$
+
+Para uma árvore com
+
+$$
+\text{Height}=80,
+\qquad
+\text{Girth}=12,
+$$
+
+queremos prever o volume médio.
+
+---
+
+## Exemplo 1 — Primeiro passo: preditor linear
+
+Calculamos
+
+$$
+\begin{aligned}
+\widehat{\eta}
+&=
+0{,}0923
++
+0{,}0166(80)
++
+0{,}1453(12)\\
+&\approx 3{,}169.
+\end{aligned}
+$$
+
+Esse valor ainda está na **escala logarítmica**.
+
+---
+
+## Exemplo 1 — Segundo passo: voltar à escala original
+
+Como a ligação é logarítmica,
+
+$$
+\widehat{\mu}
+=
+e^{\widehat{\eta}}.
+$$
+
+Logo,
+
+$$
+\widehat{\mu}
+=
+e^{3{,}169}
+\approx 23{,}8.
+$$
+
+> O volume médio previsto para árvores com essas características é de aproximadamente **23,8 pés³**.
+
+---
+
+## O que significa essa predição?
+
+O valor
+
+$$
+\widehat{\mu}=23{,}8
+$$
+
+não significa que uma nova árvore necessariamente terá volume de 23,8 pés³.
+
+Significa:
+
+> **Entre árvores com essas características, o modelo estima um volume médio de aproximadamente 23,8 pés³.**
+
+Essa distinção será fundamental quando discutirmos a incerteza da predição.
+
+---
+
+## Exemplo 2 — Regressão logística
+
+Considere agora um MLG Binomial com ligação logit:
+
+$$
+\operatorname{logit}(\mu)
+=
+\beta_0+\beta_1x_1+\cdots+\beta_px_p,
+$$
+
+onde
+
+$$
+\mu=P(Y=1\mid\mathbf{x}).
+$$
+
+Para um modelo ajustado:
+
+$$
+\operatorname{logit}(\mu)
+=
+4{,}20-0{,}065\,\text{idade}.
+$$
+
+Queremos estimar a probabilidade para uma pessoa de 60 anos.
+
+---
+
+## Exemplo 2 — Preditor linear
+
+Para $\text{idade}=60$:
+
+$$
+\widehat{\eta}
+=
+4{,}20-0{,}065(60)
+=
+0{,}30.
+$$
+
+Mas $0,30$ **não é uma probabilidade**.
+
+Ele está na escala do **logit**.
+
+Precisamos aplicar a função inversa:
+
+$$
+g^{-1}(\eta)
+=
+\frac{e^\eta}{1+e^\eta}.
+$$
+
+---
+
+## Exemplo 2 — Predição da probabilidade
+
+Assim,
+
+$$
+\widehat{\mu}
+=
+\frac{e^{0{,}30}}{1+e^{0{,}30}}
+\approx 0{,}574.
+$$
+
+Portanto,
+
+$$
+\boxed{
+\widehat{P}(Y=1\mid\text{idade}=60)
+\approx57{,}4\%
+}
+$$
+
+> O modelo estima uma probabilidade média de aproximadamente **57,4%** para indivíduos com essa característica.
+
+---
+
+## Três modelos, mesma lógica
+
+### Poisson
+
+$$
+\log(\mu)=\mathbf{x}^\top\boldsymbol{\beta}
+$$
+
+$$
+\boxed{
+\widehat{\mu}
+=
+e^{\mathbf{x}^\top\widehat{\boldsymbol{\beta}}}
+}
+$$
+
+### Gama com ligação log
+
+$$
+\log(\mu)=\mathbf{x}^\top\boldsymbol{\beta}
+$$
+
+$$
+\boxed{
+\widehat{\mu}
+=
+e^{\mathbf{x}^\top\widehat{\boldsymbol{\beta}}}
+}
+$$
+
+### Logístico
+
+$$
+\operatorname{logit}(\mu)
+=
+\mathbf{x}^\top\boldsymbol{\beta}
+$$
+
+$$
+\boxed{
+\widehat{\mu}
+=
+\frac{
+e^{\mathbf{x}^\top\widehat{\boldsymbol{\beta}}}
+}{
+1+
+e^{\mathbf{x}^\top\widehat{\boldsymbol{\beta}}}
+}
+}
+$$
+
+---
+
+## Predição pontual não é suficiente
+
+A estimativa
+
+$$
+\widehat{\mu}_0
+$$
+
+é uma **predição pontual**.
+
+Mas ela depende de
+
+$$
+\widehat{\boldsymbol{\beta}},
+$$
+
+e $\widehat{\boldsymbol{\beta}}$ foi obtido a partir de uma amostra.
+
+Portanto, existe incerteza:
+
+$$
+\widehat{\boldsymbol{\beta}}
+\Rightarrow
+\widehat{\eta}_0
+\Rightarrow
+\widehat{\mu}_0.
+$$
+
+> **Uma predição estatística deve ser acompanhada de uma medida de incerteza quando queremos quantificar a precisão da estimativa.**
+
+---
+
+## De onde vem a incerteza?
+
+Para amostras suficientemente grandes, o estimador de máxima verossimilhança possui distribuição normal assintótica:
+
+$$
+\widehat{\boldsymbol{\beta}}
+\overset{a}{\sim}
+N_{p+1}
+\left(
+\boldsymbol{\beta},
+\operatorname{Var}(\widehat{\boldsymbol{\beta}})
+\right).
+$$
+
+A matriz de variâncias e covariâncias pode ser estimada por
+
+$$
+\widehat{\operatorname{Var}}
+(\widehat{\boldsymbol{\beta}}).
+$$
+
+A incerteza da predição decorre, portanto, da incerteza na estimação dos parâmetros.
+
+---
+
+## Variância do preditor linear
+
+Como
+
+$$
+\widehat{\eta}_0
+=
+\mathbf{x}_0^\top
+\widehat{\boldsymbol{\beta}},
+$$
+
+temos, aproximadamente,
+
+$$
+\operatorname{Var}(\widehat{\eta}_0)
+=
+\mathbf{x}_0^\top
+\operatorname{Var}(\widehat{\boldsymbol{\beta}})
+\mathbf{x}_0.
+$$
+
+Na prática:
+
+$$
+\boxed{
+\widehat{\operatorname{Var}}(\widehat{\eta}_0)
+=
+\mathbf{x}_0^\top
+\widehat{\operatorname{Var}}
+(\widehat{\boldsymbol{\beta}})
+\mathbf{x}_0
+}
+$$
+
+e
+
+$$
+SE(\widehat{\eta}_0)
+=
+\sqrt{
+\widehat{\operatorname{Var}}(\widehat{\eta}_0)
+}.
+$$
+
+---
+
+## Intervalo de confiança para $\eta_0$
+
+Pela aproximação normal assintótica,
+
+$$
+\frac{
+\widehat{\eta}_0-\eta_0
+}{
+SE(\widehat{\eta}_0)
+}
+\overset{a}{\sim}
+N(0,1).
+$$
+
+Assim, um intervalo de confiança de nível $1-\alpha$ para $\eta_0$ é
+
+$$
+\boxed{
+\widehat{\eta}_0
+\pm
+z_{1-\alpha/2}
+SE(\widehat{\eta}_0)
+}
+$$
+
+ou
+
+$$
+(L_\eta,U_\eta).
+$$
+
+---
+
+## Voltando à escala da resposta
+
+Como
+
+$$
+\mu_0=g^{-1}(\eta_0),
+$$
+
+transformamos os limites do intervalo pela função inversa da ligação:
+
+$$
+\boxed{
+IC_{1-\alpha}(\mu_0)
+=
+\left[
+g^{-1}(L_\eta),
+g^{-1}(U_\eta)
+\right]
+}
+$$
+
+Isso é especialmente importante para ligações **log** e **logit**.
+
+> O intervalo é construído na escala do preditor linear e depois transformado para a escala da resposta.
+
+---
+
+## Por que não transformar apenas o erro-padrão?
+
+Na escala do preditor linear:
+
+$$
+\widehat{\eta}_0
+\pm
+z_{1-\alpha/2}SE(\widehat{\eta}_0)
+$$
+
+é um intervalo aproximadamente simétrico.
+
+Depois de aplicar uma função não linear,
+
+$$
+g^{-1}(\cdot),
+$$
+
+os limites deixam de ser necessariamente simétricos em torno de $\widehat{\mu}_0$.
+
+Isso é esperado.
+
+No modelo logístico, por exemplo, a transformação também garante que
+
+$$
+0\leq \mu\leq1.
+$$
+
+---
+
+## Exemplo 3 — Intervalo para uma probabilidade
+
+No exemplo logístico:
+
+$$
+\widehat{\eta}=0{,}30.
+$$
+
+Suponha que o erro-padrão do preditor linear seja
+
+$$
+SE(\widehat{\eta})=0{,}20.
+$$
+
+Para 95%:
+
+$$
+0{,}30
+\pm
+1{,}96(0{,}20).
+$$
+
+Logo,
+
+$$
+IC_{95\%}(\eta)
+=
+[-0{,}092;\,0{,}692].
+$$
+
+---
+
+## Exemplo 3 — Transformando para a escala da probabilidade
+
+Aplicando a inversa do logit:
+
+$$
+g^{-1}(\eta)
+=
+\frac{e^\eta}{1+e^\eta},
+$$
+
+obtemos
+
+$$
+IC_{95\%}(\mu)
+=
+\left[
+g^{-1}(-0{,}092),
+g^{-1}(0{,}692)
+\right].
+$$
+
+Aproximadamente:
+
+$$
+\boxed{
+IC_{95\%}(\mu)
+=
+[0{,}477;\,0{,}666]
+}
+$$
+
+Observe que o intervalo não é simétrico em torno de $0{,}574$.
+
+---
+
+## Resposta média × nova observação
+
+Aqui há uma distinção fundamental.
+
+### Pergunta 1
+
+> Qual é a **resposta média** para indivíduos com características $\mathbf{x}_0$?
+
+$$
+\boxed{
+\mu_0=E(Y_0\mid\mathbf{x}_0)
+}
+$$
+
+### Pergunta 2
+
+> Qual será o valor de uma **nova observação** $Y_0$?
+
+Essas perguntas não são equivalentes.
+
+---
+
+## Duas fontes de variabilidade
+
+Para estimar a resposta média, existe incerteza porque $\boldsymbol{\beta}$ é estimado:
+
+$$
+\boxed{
+\text{incerteza da estimação}
+}
+$$
+
+Para prever uma nova observação, além disso existe a variabilidade própria da distribuição de $Y$:
+
+$$
+\boxed{
+\text{incerteza da estimação}
++
+\text{variabilidade aleatória de }Y
+}
+$$
+
+Portanto, um intervalo para $\mu_0$ não deve ser interpretado como um intervalo contendo uma futura observação com 95% de cobertura.
+
+---
+
+## O foco desta aula
+
+Nesta aula, o objeto principal é
+
+$$
+\boxed{
+\mu_0=E(Y_0\mid\mathbf{x}_0)
+}
+$$
+
+e queremos obter:
+
+$$
+\boxed{
+\widehat{\mu}_0
+=
+g^{-1}
+(\mathbf{x}_0^\top\widehat{\boldsymbol{\beta}})
+}
+$$
+
+e um intervalo de confiança para $\mu_0$.
+
+> **Intervalo de confiança para a resposta média $\neq$ intervalo de predição para uma nova observação.**
+
+---
+
+## Predição no R
+
+Depois de ajustar um MLG:
+
+```{r}
+modelo <- glm(
+  low ~ lwt + smoke,
+  family = binomial(link = "logit"),
+  data = MASS::birthwt
+)
+```
+
+criamos os novos indivíduos:
+
+```{r}
+novo <- data.frame(
+  lwt = c(100, 120, 140),
+  smoke = factor(
+    c("no", "no", "yes"),
+    levels = levels(MASS::birthwt$smoke)
+  )
+)
+```
+
+---
+
+## `predict()` na escala do preditor linear
+
+Para obter
+
+$$
+\widehat{\eta}_0,
+$$
+
+usamos:
+
+```{r}
+predict(
+  modelo,
+  newdata = novo,
+  type = "link"
+)
+```
+
+No modelo logístico, os valores retornados estão na escala
+
+$$
+\operatorname{logit}(\mu).
+$$
+
+Eles **não são probabilidades**.
+
+---
+
+## `predict()` na escala da resposta
+
+Para obter
+
+$$
+\widehat{\mu}_0,
+$$
+
+usamos:
+
+```{r}
+predict(
+  modelo,
+  newdata = novo,
+  type = "response"
+)
+```
+
+No modelo logístico:
+
+$$
+\boxed{
+\texttt{type = "response"}
+\Rightarrow
+\widehat{P}(Y=1\mid\mathbf{x}_0)
+}
+$$
+
+No modelo Poisson ou Gama com ligação log:
+
+$$
+\boxed{
+\texttt{type = "response"}
+\Rightarrow
+\widehat{\mu}_0
+}
+$$
+
+na escala original da resposta.
+
+---
+
+## Obtendo o erro-padrão da predição
+
+Para construir um intervalo de confiança para a resposta média, primeiro obtemos a predição na escala do link e seu erro-padrão:
+
+```{r}
+pred <- predict(
+  modelo,
+  newdata = novo,
+  type = "link",
+  se.fit = TRUE
+)
+
+pred$fit
+pred$se.fit
+```
+
+Então:
+
+$$
+\widehat{\eta}_0
+\pm
+z_{1-\alpha/2}SE(\widehat{\eta}_0).
+$$
+
+---
+
+## Construindo o intervalo no R
+
+```{r}
+z <- qnorm(0.975)
+
+eta_hat <- as.vector(pred$fit)
+se_eta  <- as.vector(pred$se.fit)
+
+lim_inf <- eta_hat - z * se_eta
+lim_sup <- eta_hat + z * se_eta
+
+resultado <- data.frame(
+  novo,
+  eta = eta_hat,
+  mu = plogis(eta_hat),
+  IC_inf = plogis(lim_inf),
+  IC_sup = plogis(lim_sup)
+)
+
+resultado
+```
+
+> A lógica computacional é exatamente a lógica matemática da aula.
+
+---
+
+## Exemplo 4 — Predição no modelo Gama
+
+Utilizando o modelo das cerejeiras-negras:
+
+```{r}
+mod_gama <- glm(
+  Volume ~ Height + Girth,
+  family = Gamma(link = "log"),
+  data = trees
+)
+```
+
+Novas árvores:
+
+```{r}
+novo_gama <- data.frame(
+  Height = c(70, 80, 90),
+  Girth  = c(10, 12, 14)
+)
+```
+
+Predições:
+
+```{r}
+predict(
+  mod_gama,
+  newdata = novo_gama,
+  type = "response"
+)
+```
+
+---
+
+## Exemplo 5 — Predição no modelo Poisson
+
+Considere um modelo para uma contagem:
+
+$$
+Y\sim\operatorname{Poisson}(\mu)
+$$
+
+com ligação log:
+
+$$
+\log(\mu)
+=
+\beta_0+\beta_1x_1+\beta_2x_2.
+$$
+
+Para um novo indivíduo:
+
+$$
+\widehat{\eta}
+=
+\widehat{\beta}_0+
+\widehat{\beta}_1x_1+
+\widehat{\beta}_2x_2
+$$
+
+e
+
+$$
+\boxed{
+\widehat{\mu}=e^{\widehat{\eta}}
+}
+$$
+
+A mesma lógica novamente.
+
+---
+
+## Um mapa mental da predição
+
+$$
+\boxed{
+\mathbf{x}_0
+}
+$$
+
+↓
+
+$$
+\boxed{
+\widehat{\eta}_0
+=
+\mathbf{x}_0^\top\widehat{\boldsymbol{\beta}}
+}
+$$
+
+↓
+
+$$
+\boxed{
+\widehat{\mu}_0
+=
+g^{-1}(\widehat{\eta}_0)
+}
+$$
+
+↓
+
+$$
+\boxed{
+\text{intervalo para }\eta_0
+}
+$$
+
+↓
+
+$$
+\boxed{
+\text{intervalo para }\mu_0
+}
+$$
+
+---
+
+## O algoritmo da predição
+
+Para um novo indivíduo $\mathbf{x}_0$:
+
+1. **Calcule o preditor linear**
+
+$$
+\widehat{\eta}_0
+=
+\mathbf{x}_0^\top\widehat{\boldsymbol{\beta}}.
+$$
+
+2. **Aplique a função inversa da ligação**
+
+$$
+\widehat{\mu}_0
+=
+g^{-1}(\widehat{\eta}_0).
+$$
+
+3. **Quantifique a incerteza**
+
+$$
+SE(\widehat{\eta}_0)
+=
+\sqrt{
+\mathbf{x}_0^\top
+\widehat{\operatorname{Var}}(\widehat{\boldsymbol{\beta}})
+\mathbf{x}_0
+}.
+$$
+
+4. **Construa o intervalo na escala do link e transforme os limites.**
+
+---
+
+## O que muda entre os MLGs?
+
+| Etapa | Identidade | Log | Logit |
+|:---|:---|:---|:---|
+| Preditor linear | $\widehat{\eta}$ | $\widehat{\eta}$ | $\widehat{\eta}$ |
+| Retorno à resposta | $\widehat{\mu}=\widehat{\eta}$ | $\widehat{\mu}=e^{\widehat{\eta}}$ | $\widehat{\mu}=\dfrac{e^{\widehat{\eta}}}{1+e^{\widehat{\eta}}}$ |
+| Escala da resposta | original | original | probabilidade |
+| Restrição | nenhuma | $\mu>0$ | $0<\mu<1$ |
+
+> **A estrutura da predição é comum; a função de ligação determina a transformação.**
+
+---
+
+## Predição e extrapolação
+
+Uma predição pode ser matematicamente possível e, ainda assim, ser cientificamente pouco confiável.
+
+Se o novo indivíduo possui valores de preditores muito diferentes daqueles observados na amostra, estamos extrapolando.
+
+> **O modelo não sabe que está extrapolando.**
+
+Por isso, antes de interpretar uma predição, devemos perguntar:
+
+- O novo indivíduo está dentro da região dos dados observados?
+- Há observações semelhantes na amostra?
+- O modelo foi validado nessa região?
+
+---
+
+## Exemplo — Por que extrapolar é perigoso?
+
+Suponha que um modelo tenha sido ajustado usando idades entre 20 e 80 anos.
+
+Predizer para:
+
+$$
+\text{idade}=60
+$$
+
+é uma interpolação dentro da região observada.
+
+Predizer para:
+
+$$
+\text{idade}=150
+$$
+
+pode produzir um número perfeitamente calculável.
+
+Mas isso não significa que a previsão seja cientificamente defensável.
+
+> **Computabilidade não é evidência de validade.**
+
+---
+
+## Predição é uma função do modelo
+
+Uma predição não é simplesmente uma característica dos dados.
+
+Ela depende de:
+
+$$
+\boxed{
+\text{dados}
++
+\text{especificação do modelo}
++
+\text{estimativas dos parâmetros}
+}
+$$
+
+Portanto, mudar:
+
+- as variáveis incluídas;
+- a função de ligação;
+- a família;
+- a forma funcional;
+
+pode mudar as predições.
+
+---
+
+## Síntese
+
+A ideia central da aula pode ser resumida em uma única expressão:
+
+$$
+\boxed{
+\widehat{\mu}_0
+=
+g^{-1}
+\left(
+\mathbf{x}_0^\top
+\widehat{\boldsymbol{\beta}}
+\right)
+}
+$$
+
+O MLG:
+
+1. combina os preditores linearmente;
+2. produz o preditor linear;
+3. aplica a função inversa da ligação;
+4. retorna à escala da resposta;
+5. permite quantificar a incerteza da predição.
+
+---
+
+## O que você precisa saber
+
+Ao final desta aula, você deve ser capaz de:
+
+- explicar o que significa **predizer a resposta média**;
+- calcular $\widehat{\eta}_0$ para um novo indivíduo;
+- obter $\widehat{\mu}_0$ usando $g^{-1}$;
+- explicar o papel da função de ligação na predição;
+- construir um intervalo de confiança para $\mu_0$;
+- distinguir **resposta média** de **nova observação**;
+- realizar predições no R usando `predict()`;
+- reconhecer o problema da **extrapolação**.
+
+---
+
+## Próximos passos
+
+A partir de agora, o MLG pode ser utilizado não apenas para explicar os dados observados, mas também para obter respostas para novos indivíduos.
+
+Na próxima etapa, podemos avançar de:
+
+$$
+\boxed{
+\text{predição}
+}
+$$
+
+para
+
+$$
+\boxed{
+\text{avaliação da qualidade das predições}
+}
+$$
+
+por meio de medidas e gráficos de desempenho preditivo.
+
+---
+
+# Fim

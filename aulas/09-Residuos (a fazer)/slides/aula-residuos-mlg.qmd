@@ -1,0 +1,784 @@
+---
+title: "Resíduos em Modelos Lineares Generalizados"
+subtitle: |
+  *De onde vem a discrepância entre os dados e o modelo?*
+author:
+  name: | # indica que o campo name terá múltiplas linhas
+    ESTAT0092 -- Modelos Lineares Generalizados<br>
+    Prof. Dr. Sadraque E. F. Lucena<br>
+    <a href="http://sadraquelucena.github.io/mlg" style="font-size:.8em;">http://sadraquelucena.github.io/mlg</a><br>
+  
+format:
+  revealjs:
+    theme: meutema.scss
+    width: 1600
+    height: 900
+    margin: 0.1         # margem em torno do conteúdo
+    min-scale: 0.2       # escala mínima permitida
+    max-scale: 2.0       # escala máxima permitida
+    slide-number: true
+    code-line-numbers: false # sem numero das linhas nos code chunks
+    subtitle-style: "font-size: 2em; font-weight: bold;"  # Aqui é onde aumentamos o subtítulo
+    logo: imagens/ufs_principal_positiva.png
+    transition: fade
+    transition-speed: fast
+    scss: meutema.scss
+    include-in-header:
+      text: |
+        <style>
+        .sublist-2col ul ul {
+          column-count: 2;
+          column-gap: 2rem;
+        }
+        .sublist-2col ul ul li {
+          break-inside: avoid; /* Impede que um item quebre entre colunas */
+        }
+        </style>
+
+lang: pt-BR
+---
+
+## Onde estamos?
+
+Na aula anterior, estudamos o **desvio** como uma medida global da discrepância entre os valores observados e aqueles reproduzidos pelo modelo.
+
+$$
+D(Y;\hat\mu)=\sum_{i=1}^n r_{Di}^2.
+$$
+
+Agora damos um passo adiante:
+
+> **Se o desvio mede a discrepância global, quais observações estão contribuindo para essa discrepância?**
+
+Essa é a função dos **resíduos**.
+
+
+## A pergunta central desta aula
+
+Depois de ajustar um MLG, não basta saber se o modelo apresenta uma discrepância global pequena ou grande.
+
+Queremos também saber:
+
+- quais observações estão bem representadas pelo modelo;
+- quais apresentam discrepâncias maiores;
+- em que direção ocorre a discrepância;
+- quais observações contribuem mais para o desvio total.
+
+Assim, os resíduos constituem a ponte entre **ajuste global** e **análise de observações individuais**.
+
+
+## O que é um resíduo?
+
+No modelo de regressão linear normal, o resíduo é definido simplesmente como
+
+$$
+e_i=y_i-\hat y_i.
+$$
+
+Ele representa a diferença entre o valor observado e o valor ajustado pelo modelo.
+
+- $e_i>0$: o modelo **subestima** a resposta;
+- $e_i<0$: o modelo **superestima** a resposta;
+- $e_i=0$: o valor observado coincide com o valor ajustado.
+
+No modelo linear normal, essa definição é particularmente conveniente porque todos os resíduos estão na mesma escala da resposta.
+
+
+## Por que isso não é suficiente em um MLG?
+
+Nos MLGs, a variância da resposta depende, em geral, da própria média:
+
+$$
+\operatorname{Var}(Y_i)=\phi V(\mu_i).
+$$
+
+Portanto, duas diferenças iguais
+
+$$
+y_i-\hat\mu_i
+$$
+
+podem representar discrepâncias de magnitudes muito diferentes dependendo de $\hat\mu_i$ e da distribuição adotada.
+
+> No MLG, precisamos de resíduos que levem em consideração a **estrutura de variância** e, em particular, a forma da distribuição da resposta.
+
+
+## Dois resíduos particularmente importantes
+
+Neste curso, trabalharemos principalmente com dois tipos:
+
+1. **resíduo de Pearson**;
+2. **resíduo componente do desvio**.
+
+Além disso, veremos suas versões **padronizadas**.
+
+A lógica é diferente:
+
+- Pearson compara a discrepância observada com a variabilidade local prevista pelo modelo;
+- o resíduo de desvio mede a contribuição da observação para a discrepância baseada na verossimilhança.
+
+
+## Resíduo de Pearson
+
+O resíduo de Pearson é definido por
+
+$$
+\boxed{
+ r_{Pi}=\frac{y_i-\hat\mu_i}{\sqrt{\hat V_i}}
+}
+$$
+
+em que
+
+$$
+\hat V_i=V(\hat\mu_i)
+$$
+
+é a função de variância avaliada na média ajustada.
+
+A estrutura é intuitiva:
+
+$$
+\text{resíduo de Pearson}
+=
+\frac{\text{diferença observada--ajustada}}
+{\text{desvio-padrão associado ao modelo}}.
+$$
+
+
+## Interpretação do resíduo de Pearson
+
+O numerador mantém a direção da discrepância:
+
+$$
+y_i-\hat\mu_i.
+$$
+
+O denominador coloca essa discrepância em uma escala compatível com a variabilidade esperada pelo modelo.
+
+- $r_{Pi}>0$: $y_i>\hat\mu_i$;
+- $r_{Pi}<0$: $y_i<\hat\mu_i$;
+- $|r_{Pi}|$ grande: discrepância grande em relação à variabilidade esperada.
+
+Portanto, o resíduo de Pearson responde à pergunta:
+
+> **Quão grande é a diferença observada em relação à variabilidade que o modelo considera plausível?**
+
+
+## Exemplos da função de variância
+
+A função $V(\mu)$ depende da distribuição adotada para a resposta.
+
+| Distribuição | $V(\mu)$ | Resíduo de Pearson |
+|---|---:|---:|
+| Normal | $1$ | $y_i-\hat\mu_i$ |
+| Poisson | $\mu$ | $\displaystyle\frac{y_i-\hat\mu_i}{\sqrt{\hat\mu_i}}$ |
+| Binomial | $\mu(1-\mu)$ | $\displaystyle\frac{y_i-\hat\mu_i}{\sqrt{\hat\mu_i(1-\hat\mu_i)}}$ |
+| Gama | $\mu^2$ | $\displaystyle\frac{y_i-\hat\mu_i}{\hat\mu_i}$ |
+
+A definição é a mesma; o que muda é a **estrutura de variância** imposta pelo MLG.
+
+
+## Resíduo componente do desvio
+
+Na aula anterior, vimos que o desvio pode ser decomposto como uma soma das contribuições individuais:
+
+$$
+D(Y;\hat\mu)=\sum_{i=1}^n d_i^2.
+$$
+
+Isso sugere uma definição natural de resíduo: preservar a contribuição de cada observação, mas recuperar também sua direção.
+
+O **resíduo componente do desvio** é
+
+$$
+\boxed{
+ r_{Di}=\operatorname{sign}(y_i-\hat\mu_i)\sqrt{d_i^2}
+}
+$$
+
+ou, equivalentemente,
+
+$$
+ r_{Di}=\operatorname{sign}(y_i-\hat\mu_i)d_i,
+$$
+
+quando $d_i=\sqrt{d_i^2}\geq0$.
+
+
+## O que é $d_i^2$?
+
+O termo $d_i^2$ é a **contribuição da $i$-ésima observação para o desvio**.
+
+Em notação da família exponencial,
+
+$$
+ d_i^2
+ =2\left[
+ y_i(\tilde\theta_i-\hat\theta_i)
+ -b(\tilde\theta_i)+b(\hat\theta_i)
+ \right],
+$$
+
+em que $\tilde\theta_i$ corresponde ao modelo saturado e $\hat\theta_i$ ao modelo ajustado.
+
+Não é necessário memorizar essa expressão para utilizar o resíduo de desvio. O ponto conceitual central é:
+
+> $d_i^2$ mede quanto a observação $i$ contribui para a discrepância entre o modelo ajustado e o modelo saturado.
+
+
+## Por que precisamos do sinal?
+
+A quantidade $d_i^2$ é sempre não negativa.
+
+Se usássemos apenas $\sqrt{d_i^2}$, perderíamos a informação sobre a direção do erro.
+
+Por isso, multiplicamos pelo sinal de
+
+$$
+y_i-\hat\mu_i.
+$$
+
+$$
+\operatorname{sign}(y_i-\hat\mu_i)=
+\begin{cases}
+-1,&y_i-\hat\mu_i<0,\\
+\phantom{-}1,&y_i-\hat\mu_i>0,\\
+\phantom{-}0,&y_i-\hat\mu_i=0.
+\end{cases}
+$$
+
+Assim, o resíduo de desvio combina **magnitude da discrepância** e **direção da discrepância**.
+
+
+## A relação fundamental
+
+Pela própria definição do desvio,
+
+$$
+\boxed{
+D(Y;\hat\mu)=\sum_{i=1}^n r_{Di}^2
+}
+$$
+
+Essa equação conecta diretamente esta aula à anterior.
+
+::: {.callout-tip}
+### A ponte entre as aulas
+**Aula 3:** o desvio mede a discrepância **global** do modelo.
+
+**Aula 4:** os resíduos de desvio mostram **de onde essa discrepância está vindo**.
+:::
+
+Quanto maior $|r_{Di}|$, maior a contribuição da observação $i$ para o desvio total.
+
+
+## Resíduo de Pearson × resíduo de desvio
+
+Os dois resíduos respondem a perguntas relacionadas, mas não idênticas.
+
+| | Pearson | Componente do desvio |
+|---|---|---|
+| Base | Função de variância | Verossimilhança / desvio |
+| Forma | $\displaystyle\frac{y_i-\hat\mu_i}{\sqrt{\hat V_i}}$ | $\operatorname{sign}(y_i-\hat\mu_i)\sqrt{d_i^2}$ |
+| Sinal | Sim | Sim |
+| Usa a contribuição ao desvio | Não diretamente | Sim |
+| Soma dos quadrados = desvio | Não | **Sim** |
+
+Essa distinção será importante quando construirmos os gráficos de diagnóstico.
+
+
+## Exemplo: modelo Poisson
+
+Considere
+
+$$
+Y_i\sim\operatorname{Poisson}(\mu_i),
+$$
+
+com
+
+$$
+\log(\mu_i)=\eta_i.
+$$
+
+Para a distribuição Poisson,
+
+$$
+V(\mu_i)=\mu_i.
+$$
+
+Logo, o resíduo de Pearson é
+
+$$
+\boxed{
+ r_{Pi}=\frac{y_i-\hat\mu_i}{\sqrt{\hat\mu_i}}
+}
+$$
+
+Já o componente do desvio satisfaz
+
+$$
+\boxed{
+ r_{Di}=\operatorname{sign}(y_i-\hat\mu_i)
+\sqrt{2\left[y_i\log\left(\frac{y_i}{\hat\mu_i}\right)-y_i+\hat\mu_i\right]}
+}
+$$
+
+com a convenção $y_i\log(y_i/\hat\mu_i)=0$ quando $y_i=0$.
+
+
+## Um exemplo numérico
+
+Suponha uma observação para a qual
+
+$$
+y_i=12,\qquad \hat\mu_i=8.
+$$
+
+Como a resposta observada é maior que a média ajustada, os dois resíduos serão positivos.
+
+Para Pearson:
+
+$$
+ r_{Pi}=\frac{12-8}{\sqrt{8}}\approx1{,}41.
+$$
+
+Para o resíduo de desvio:
+
+$$
+ r_{Di}
+=\sqrt{2\left[12\log\left(\frac{12}{8}\right)-12+8\right]}
+\approx1{,}25.
+$$
+
+As duas medidas identificam a mesma direção de discrepância, mas quantificam sua magnitude de formas diferentes.
+
+
+## Por que padronizar os resíduos?
+
+Mesmo após a transformação utilizada em Pearson ou no desvio, a variabilidade dos resíduos ainda pode depender de características da observação.
+
+Além disso, algumas observações possuem maior **alavancagem** que outras.
+
+A matriz *hat* do MLG fornece medidas $\hat h_{ii}$ associadas à posição da observação no espaço das preditoras.
+
+Para levar essa alavancagem em consideração, podemos utilizar resíduos padronizados.
+
+> A padronização não cria um novo tipo de discrepância; ela procura tornar a comparação entre observações mais adequada.
+
+
+## Matriz *hat* no MLG
+
+No algoritmo de mínimos quadrados ponderados utilizado no ajuste do MLG, define-se uma matriz *hat* do tipo
+
+$$
+\hat H
+=
+\hat W^{1/2}X
+(X^\top\hat W X)^{-1}
+X^\top\hat W^{1/2}.
+$$
+
+Seu elemento diagonal $\hat h_{ii}$ é a **alavancagem** da observação $i$.
+
+Neste momento, o importante é apenas reconhecer seu papel:
+
+- $\hat h_{ii}$ próximo de zero: pouca alavancagem;
+- $\hat h_{ii}$ maior: observação com posição mais particular nas variáveis preditoras;
+- $1-\hat h_{ii}$ aparece no denominador dos resíduos padronizados.
+
+A análise detalhada de alavancagem ficará para a aula de diagnóstico.
+
+
+## Resíduo de Pearson padronizado
+
+O resíduo de Pearson padronizado é
+
+$$
+\boxed{
+ t_{Pi}
+ =
+ \frac{y_i-\hat\mu_i}
+ {\sqrt{\hat V_i(1-\hat h_{ii})}}
+}
+$$
+
+A diferença em relação ao resíduo de Pearson está no fator
+
+$$
+\sqrt{1-\hat h_{ii}}.
+$$
+
+Assim, a medida leva em consideração não apenas a variabilidade associada à resposta, mas também a posição da observação no espaço das preditoras.
+
+
+## Resíduo de desvio padronizado
+
+De forma análoga, o resíduo de desvio padronizado é definido por
+
+$$
+\boxed{
+ t_{Di}
+ =
+ \frac{r_{Di}}
+ {\sqrt{\hat\phi(1-\hat h_{ii})}}
+}
+$$
+
+em que $\hat\phi$ é a estimativa do parâmetro de dispersão quando este é estimado.
+
+No caso de distribuições como Poisson e Binomial no MLG usual,
+
+$$
+\phi=1,
+$$
+
+portanto a expressão se simplifica para
+
+$$
+ t_{Di}
+ =
+ \frac{r_{Di}}
+ {\sqrt{1-\hat h_{ii}}}.
+$$
+
+
+## O que muda ao padronizar?
+
+Podemos organizar as quatro medidas assim:
+
+| Resíduo | Não padronizado | Padronizado |
+|---|---|---|
+| **Pearson** | $r_{Pi}$ | $t_{Pi}$ |
+| **Desvio** | $r_{Di}$ | $t_{Di}$ |
+
+A pergunta muda pouco:
+
+> **Quanto a observação se afasta do que o modelo prevê?**
+
+O que muda é a escala utilizada para tornar essa discrepância mais comparável entre observações.
+
+
+## Qual resíduo usar nos gráficos?
+
+Tanto $t_{Pi}$ quanto $t_{Di}$ podem ser utilizados na construção de gráficos de diagnóstico.
+
+Entretanto, o material de referência destaca uma diferença importante:
+
+- a distribuição de $t_{Pi}$ pode ser bastante assimétrica, mesmo em amostras grandes;
+- simulações indicam que $t_{Di}$ tende a apresentar comportamento mais próximo da normalidade.
+
+Por isso, gráficos como o **gráfico normal de probabilidades** costumam utilizar os resíduos de desvio padronizados.
+
+::: {.callout-note}
+Isso não significa que $t_{Di}$ seja exatamente normal. A aproximação é uma propriedade assintótica/empírica e deve ser interpretada com cautela.
+:::
+
+
+## Resíduos e qualidade do ajuste
+
+Um resíduo próximo de zero indica que, para aquela observação, o valor observado está relativamente próximo do valor esperado pelo modelo.
+
+Um resíduo de grande magnitude indica uma discrepância maior.
+
+Mas atenção:
+
+> **Um resíduo grande não prova que a observação esteja errada.**
+
+Ele apenas sinaliza que aquela observação merece investigação.
+
+Uma observação pode apresentar um resíduo grande porque:
+
+- é genuinamente atípica;
+- existe erro de registro;
+- o modelo não representa adequadamente aquela região dos dados;
+- falta uma variável explicativa importante;
+- a função de ligação ou a distribuição escolhida não é adequada.
+
+
+## O que um resíduo grande pode estar dizendo?
+
+Considere uma observação com $|t_{Di}|$ elevado.
+
+A interpretação correta não é simplesmente:
+
+> “Essa observação é um outlier.”
+
+A interpretação é:
+
+> “Essa observação apresenta uma discrepância relativamente grande em relação ao que o modelo ajustado prevê e deve ser investigada.”
+
+A investigação posterior poderá envolver:
+
+- identificação de erro de registro;
+- comparação com observações semelhantes;
+- avaliação da especificação do modelo;
+- análise de alavancagem e influência;
+- verificação de variáveis omitidas.
+
+
+## R: resíduos não padronizados
+
+A função `residuals()` permite obter os principais resíduos do objeto produzido por `glm()`.
+
+```{r}
+# Resíduos de Pearson
+residuals(modelo, type = "pearson")
+
+# Resíduos componente do desvio
+residuals(modelo, type = "deviance")
+```
+
+O argumento `type` define qual tipo de resíduo será calculado.
+
+- `type = "pearson"` → $r_{Pi}$;
+- `type = "deviance"` → $r_{Di}$.
+
+
+## R: resíduos padronizados
+
+Para as versões padronizadas, utilizamos `rstandard()`:
+
+```{r}
+# Resíduos de Pearson padronizados
+tPi <- rstandard(modelo, type = "pearson")
+
+# Resíduos de desvio padronizados
+tDi <- rstandard(modelo, type = "deviance")
+```
+
+Assim, temos diretamente as quatro medidas trabalhadas nesta aula:
+
+$$
+ r_P,\qquad r_D,\qquad t_P,\qquad t_D.
+$$
+
+
+## R: reunindo os resíduos em uma tabela
+
+É útil colocar as quatro medidas lado a lado:
+
+```{r}
+residuos <- data.frame(
+  observado = modelo$y,
+  ajustado = fitted(modelo),
+  r_P = residuals(modelo, type = "pearson"),
+  r_D = residuals(modelo, type = "deviance"),
+  t_P = rstandard(modelo, type = "pearson"),
+  t_D = rstandard(modelo, type = "deviance")
+)
+
+head(residuos)
+```
+
+Isso permite comparar, para cada observação,
+
+- o valor observado;
+- o valor ajustado;
+- a discrepância de Pearson;
+- a discrepância baseada no desvio;
+- suas versões padronizadas.
+
+
+## Verificação importante no R
+
+Como o resíduo de desvio é construído para decompor o desvio total, podemos verificar numericamente que
+
+$$
+D(Y;\hat\mu)=\sum_i r_{Di}^2.
+$$
+
+No R:
+
+```{r}
+D <- deviance(modelo)
+rD <- residuals(modelo, type = "deviance")
+
+c(
+  desvio = D,
+  soma_quadrados = sum(rD^2)
+)
+```
+
+Os dois valores devem coincidir, salvo pequenas diferenças numéricas.
+
+> Essa verificação transforma uma identidade teórica em uma propriedade observável diretamente no ajuste.
+
+
+## Uma leitura por observação
+
+Imagine ordenar as observações pelo valor absoluto do resíduo de desvio padronizado:
+
+```{r}
+ordem <- order(abs(tDi), decreasing = TRUE)
+
+residuos[ordem, ] |> head(10)
+```
+
+Isso não constitui, por si só, uma análise de diagnóstico completa.
+
+Mas fornece uma primeira pergunta operacional:
+
+> **Quais observações apresentam as maiores discrepâncias em relação ao modelo?**
+
+A partir daí, a aula seguinte poderá investigar se essas observações também apresentam **alavancagem** ou **influência**.
+
+
+## O que os resíduos não respondem sozinhos?
+
+Os resíduos são fundamentais, mas não resolvem todo o problema de diagnóstico.
+
+Uma observação pode ter:
+
+- resíduo pequeno e alta alavancagem;
+- resíduo grande e baixa alavancagem;
+- resíduo grande e alta influência.
+
+Essas situações não são equivalentes.
+
+Por isso, na próxima etapa da disciplina, combinaremos resíduos com outras medidas, como:
+
+- alavancagem $\hat h_{ii}$;
+- distância de Cook;
+- gráficos de resíduos;
+- avaliação da distribuição da resposta;
+- avaliação da função de ligação;
+- investigação da escala das preditoras.
+
+
+## Síntese conceitual
+
+::: {.sublist-2col}
+- **Resíduo de Pearson**
+  - $\displaystyle r_{Pi}=\frac{y_i-\hat\mu_i}{\sqrt{\hat V_i}}$
+  - Padronização: $t_{Pi}$
+
+- **Resíduo de desvio**
+  - $\displaystyle r_{Di}=\operatorname{sign}(y_i-\hat\mu_i)\sqrt{d_i^2}$
+  - Padronização: $t_{Di}$
+
+- **Relação com o desvio**
+  - $\displaystyle D=\sum_i r_{Di}^2$
+  - Cada $r_{Di}^2$ é uma contribuição individual ao desvio
+
+- **Interpretação**
+  - próximo de zero → observação relativamente bem ajustada
+  - grande em valor absoluto → observação merece investigação
+
+- **Cuidado**
+  - resíduo grande ≠ erro de registro
+  - resíduo grande ≠ influência necessariamente
+  - diagnóstico exige várias medidas
+:::
+
+
+## A lógica que estamos construindo
+
+A sequência das últimas aulas pode ser vista como uma cadeia:
+
+$$
+\boxed{
+\text{Construir}
+\rightarrow
+\text{Representar}
+\rightarrow
+\text{Comparar}
+\rightarrow
+\text{Investigar}
+\rightarrow
+\text{Validar}
+\rightarrow
+\text{Predizer}
+}
+$$
+
+- **Construir:** especificação e seleção do modelo;
+- **Representar:** variáveis qualitativas, dummies e interações;
+- **Comparar:** desvio e comparação de modelos;
+- **Investigar:** resíduos e discrepâncias individuais;
+- **Validar:** diagnóstico do modelo;
+- **Predizer:** obtenção e interpretação de previsões.
+
+Esta aula ocupa exatamente o ponto de transição entre **comparar modelos** e **diagnosticar modelos**.
+
+
+## O ponto central da aula
+
+> **O desvio é uma medida global de discrepância.**
+
+> **O resíduo componente do desvio decompõe essa discrepância por observação.**
+
+Portanto,
+
+$$
+D=\sum_i r_{Di}^2
+$$
+
+não é apenas uma identidade algébrica.
+
+Ela fornece uma interpretação estatística:
+
+> **o desvio total pode ser entendido como a soma das contribuições individuais das observações.**
+
+
+## Agora temos uma nova pergunta
+
+Até aqui conseguimos perguntar:
+
+> **Qual é a discrepância global do modelo?**
+
+e agora conseguimos perguntar:
+
+> **Quais observações estão contribuindo para essa discrepância?**
+
+Mas ainda falta responder:
+
+> **Por que essas observações são discrepantes?**
+
+Essa é a função da **análise de diagnóstico**.
+
+
+## Próxima aula
+
+# Diagnóstico de Modelos Lineares Generalizados
+
+Na próxima aula, vamos combinar os resíduos com outras ferramentas para investigar o ajuste do modelo:
+
+- gráficos de resíduos;
+- alavancagem;
+- observações influentes;
+- distância de Cook;
+- função de ligação;
+- escala das variáveis preditoras;
+- possíveis variáveis omitidas;
+- adequação da distribuição da resposta.
+
+> **Agora temos ferramentas para perguntar se alguma observação está mal ajustada.**
+
+Na próxima aula, vamos investigar **o que pode estar por trás desse mau ajuste**.
+
+
+## Exercício
+
+Considere um MLG ajustado no R e responda:
+
+1. Calcule os resíduos de Pearson e os resíduos componente do desvio.
+2. Calcule os resíduos de Pearson e de desvio padronizados.
+3. Identifique as cinco observações com maior $|t_{Di}|$.
+4. Verifique numericamente que
+   $$
+   D=\sum_i r_{Di}^2.
+   $$
+5. Para as observações identificadas, compare os valores observados e ajustados.
+6. Explique por que um resíduo de grande magnitude **não é suficiente** para concluir que a observação é influente.
+
+
+## Referências
+
+- Cordeiro, G. M.; Demétrio, C. G. B. *Modelos lineares generalizados e extensões*.
+- Paula, G. A. *Modelos lineares generalizados com apoio computacional*.
+- Olsson, U. *Generalized Linear Models: An Applied Approach*.
+
+O material de referência da disciplina destaca, entre os resíduos mais utilizados nos MLGs, os resíduos de Pearson, os resíduos componente do desvio e suas versões padronizadas, além de sua utilização posterior em gráficos de diagnóstico.
+

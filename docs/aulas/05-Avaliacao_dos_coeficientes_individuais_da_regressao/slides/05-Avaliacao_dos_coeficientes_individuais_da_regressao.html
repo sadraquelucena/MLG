@@ -293,10 +293,10 @@
 <section id="estatística-do-teste-de-wald" class="slide level2">
 <h2>Estatística do teste de Wald</h2>
 <ul>
-<li><p>Como <span class="math inline">\(\widehat{\beta}_j \overset{a}{\sim} N\left(\beta_j, Var(\widehat{\beta}_j)\right)\)</span>, temos que <span class="math display">\[
+<li><p>Como <span class="math inline">\(\widehat{\beta}_j \overset{a}{\sim} N\left(\beta_j, Var(\widehat{\beta}_j)\right)\)</span>, temos que <span class="math inline">\(\phantom{aaaaaaaaaaaaaaaaaaaaaaaaaaaa}\)</span> <span class="math display">\[
 \frac{\widehat{\beta}_j - \beta_j}{\sqrt{Var(\widehat{\beta}_j)}} \overset{a}{\sim} N(0,1).
 \]</span></p></li>
-<li><p>Soba a hipótese nula <span class="math inline">\(H_0: \beta_j=0\)</span>, temos que a estatística <span class="math display">\[
+<li><p>Sob a hipótese nula <span class="math inline">\(H_0: \beta_j=0\)</span>, temos que a estatística <span class="math display">\[
 W_j = \frac{\widehat{\beta}_j}{\sqrt{Var(\widehat{\beta}_j)}} = \frac{\widehat{\beta}_j}{SE(\widehat{\beta}_j)}\overset{a}{\sim} N(0,1)
 \]</span> para <span class="math inline">\(n\)</span> suficientemente grande.</p>
 <ul>
@@ -322,13 +322,27 @@ W_j = \frac{\widehat{\beta}_j}{\sqrt{Var(\widehat{\beta}_j)}} = \frac{\widehat{\
 <section id="regra-de-decisão-no-teste-de-wald" class="slide level2">
 <h2>Regra de decisão no teste de Wald</h2>
 <ul>
-<li><p>Como <span class="math inline">\(W_j \overset{a}{\sim} N(0,1)\)</span> sob <span class="math inline">\(H_0\)</span>, para um teste bilateral de nível <span class="math inline">\(\alpha\)</span>, rejeitamos <span class="math inline">\(H_0\)</span> se <span class="math display">\[
+<li>Como <span class="math inline">\(W_j \overset{a}{\sim} N(0,1)\)</span> sob <span class="math inline">\(H_0\)</span>, para um teste bilateral de nível <span class="math inline">\(\alpha\)</span>, rejeitamos <span class="math inline">\(H_0\)</span> se</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><span class="math display">\[
 |W_j| &gt; z_{1-\alpha/2}.
-\]</span></p></li>
-<li><p>Equivalentemente, rejeitamos <span class="math inline">\(H_0\)</span> se <span class="math display">\[
+\]</span></p>
+<ul>
+<li>Equivalentemente, rejeitamos <span class="math inline">\(H_0\)</span> se <span class="math display">\[
 p-\text{valor} = 2 P(Z&gt;|w_j|) &lt; \alpha, \quad Z\sim N(0,1).
-\]</span></p></li>
-<li><p><strong>Observação:</strong> No <code>summary()</code> do R, a referência utilizada para o <span class="math inline">\(p\)</span>-valor depende da dispersão. Quando a dispersão é conhecida ou fixada, utiliza-se a Normal padrão; quando é estimada (modelos Poisson e Binomial), utiliza-se a distribuição <span class="math inline">\(t\)</span> de Student com <span class="math inline">\(n-p\)</span> graus de liberdade.</p></li>
+\]</span></li>
+</ul>
+</div><div class="column" style="width:3%;">
+
+</div><div class="column" style="width:47%;">
+<div style="text-align: center;">
+<p><img src="imagens/waldtest.png" style="width: 80%; height: auto;"></p>
+</div>
+</div></div>
+<ul>
+<li><strong>Observação:</strong> No <code>summary()</code> do R, a referência utilizada para o <span class="math inline">\(p\)</span>-valor depende da dispersão. Quando a dispersão é conhecida ou fixada, utiliza-se a Normal padrão; - utiliza-se a distribuição <span class="math inline">\(t\)</span> de Student com <span class="math inline">\(n-p\)</span> graus de liberdade.</li>
 </ul>
 </section>
 <section id="intervalo-de-confiança-para-beta_j" class="slide level2">
@@ -354,10 +368,29 @@ H_0: \beta_j = 0
 0 \notin IC_{1-\alpha}(\beta_j).
 \]</span></p></li>
 <li><p>De forma equivalente, <span class="math display">\[
-p-\text{valor} &lt; \alpha.
+p\text{-valor} &lt; \alpha.
 \]</span></p></li>
 <li><p>Portanto, o teste de Wald e o intervalo de confiança são duas formas de utilizar a mesma aproximação normal assintótica.</p></li>
 </ul>
+</section>
+<section id="procedimento-de-seleção-de-variáveis" class="slide level2">
+<h2>Procedimento de seleção de variáveis</h2>
+<p>Para um nível de significância <span class="math inline">\(\alpha\)</span>:</p>
+<ol type="1">
+<li><p>Ajustamos o <strong>modelo completo</strong>, contendo todas as variáveis de interesse, e avaliamos o ajuste global pelo <strong>teste da razão de verossimilhanças (TRV)</strong>.</p>
+<ul>
+<li><span class="math inline">\(p\text{-valor}&lt;\alpha\)</span>: rejeitamos <span class="math inline">\(H_0\)</span>, havendo evidência de que pelo menos um <span class="math inline">\(\beta_j\neq 0\)</span>.</li>
+</ul></li>
+<li><p>Avaliamos individualmente os coeficientes pelo <strong>teste de Wald</strong>.</p>
+<ul>
+<li><p>Em uma estratégia de <em>eliminação backward</em>, a variável com maior <span class="math inline">\(p\text{-valor}\)</span> pode ser removida.</p></li>
+<li><p>Reajustamos o modelo e repetimos o procedimento até que todas as variáveis restantes apresentem <span class="math inline">\(p\text{-valor}\leq\alpha\)</span>.</p></li>
+</ul></li>
+<li><p>Após a seleção, comparamos o <strong>modelo completo</strong> e o <strong>modelo reduzido</strong> pelo TRV.</p>
+<ul>
+<li><span class="math inline">\(p\text{-valor}\geq\alpha\)</span>: não rejeitamos <span class="math inline">\(H_0\)</span>; não há evidência de diferença estatisticamente significativa entre os modelos (não há perda de ajuste ao usar o modelo reduzido).</li>
+</ul></li>
+</ol>
 </section>
 <section id="exemplo-5.1" class="slide level2">
 <h2>Exemplo 5.1</h2>

@@ -1,0 +1,3 @@
+project:
+  post-render:
+    - "bash gerar_pdf.sh"

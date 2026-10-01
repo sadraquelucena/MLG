@@ -1,0 +1,1155 @@
+---
+title: "Diagnóstico de Modelos Lineares Generalizados"
+subtitle: |
+  *Como investigar se as escolhas feitas na especificação do MLG são compatíveis com os dados?*
+author:
+  name: | # indica que o campo name terá múltiplas linhas
+    ESTAT0092 -- Modelos Lineares Generalizados<br>
+    Prof. Dr. Sadraque E. F. Lucena<br>
+    <a href="http://sadraquelucena.github.io/mlg" style="font-size:.8em;">http://sadraquelucena.github.io/mlg</a><br>
+  
+format:
+  revealjs:
+    theme: meutema.scss
+    width: 1600
+    height: 900
+    margin: 0.1         # margem em torno do conteúdo
+    min-scale: 0.2       # escala mínima permitida
+    max-scale: 2.0       # escala máxima permitida
+    slide-number: true
+    code-line-numbers: false # sem numero das linhas nos code chunks
+    subtitle-style: "font-size: 2em; font-weight: bold;"  # Aqui é onde aumentamos o subtítulo
+    logo: imagens/ufs_principal_positiva.png
+    transition: fade
+    transition-speed: fast
+    scss: meutema.scss
+    include-in-header:
+      text: |
+        <style>
+        .sublist-2col ul ul {
+          column-count: 2;
+          column-gap: 2rem;
+        }
+        .sublist-2col ul ul li {
+          break-inside: avoid; /* Impede que um item quebre entre colunas */
+        }
+        </style>
+
+lang: pt-BR
+---
+
+## Onde estamos?
+
+Na aula anterior, aprendemos a decompor a discrepância global do MLG em contribuições individuais por meio dos resíduos.
+
+A sequência que estamos construindo é:
+
+$$
+\boxed{
+\text{Construir}
+\rightarrow
+\text{Representar}
+\rightarrow
+\text{Comparar}
+\rightarrow
+\text{Investigar}
+\rightarrow
+\text{Validar}
+\rightarrow
+\text{Predizer}
+}
+$$
+
+Hoje estamos na etapa de **validar**.
+
+---
+
+## O ponto de partida
+
+Na Aula 3, perguntamos:
+
+> **Qual é a discrepância global entre os dados e o modelo?**
+
+Na Aula 4, perguntamos:
+
+> **Quais observações contribuem para essa discrepância?**
+
+Agora avançamos para uma pergunta mais importante:
+
+> **Há evidências de que alguma escolha feita na especificação do MLG esteja inadequada?**
+
+---
+
+## Diagnóstico não é uma coleção de gráficos
+
+Um gráfico de diagnóstico não deve ser interpretado como um objeto isolado.
+
+Cada gráfico deve responder a uma **pergunta estatística**.
+
+Nesta aula, vamos organizar os gráficos assim:
+
+::: {.sublist-2col}
+- **Pergunta 1**
+  - Há observações mal ajustadas?
+- **Pergunta 2**
+  - A distribuição da resposta parece adequada?
+- **Pergunta 3**
+  - A função de ligação está adequada?
+- **Pergunta 4**
+  - A forma das preditoras está adequada?
+- **Pergunta 5**
+  - Há observações com alta alavancagem?
+- **Pergunta 6**
+  - Há observações influentes?
+:::
+
+> **Diagnóstico é investigação orientada por perguntas.**
+
+---
+
+# 1. Há observações mal ajustadas?
+
+## Resíduo de desvio padronizado × ordem das observações
+
+O primeiro gráfico coloca
+
+$$
+t_{Di}
+$$
+
+contra o índice da observação $i$.
+
+Queremos identificar:
+
+- observações com grande $|t_{Di}|$;
+- agrupamentos de resíduos;
+- tendências associadas à ordem dos dados;
+- possíveis sinais de dependência ou estrutura não explicada.
+
+---
+
+## O que procurar?
+
+Um gráfico sem estrutura sistemática tende a apresentar os resíduos distribuídos ao redor de zero.
+
+Por outro lado, podemos investigar:
+
+- sequências longas de sinais positivos ou negativos;
+- tendências crescentes ou decrescentes;
+- grupos de resíduos grandes;
+- observações isoladas muito afastadas dos demais pontos.
+
+::: {.callout-warning}
+A ordem das observações só tem interpretação substantiva quando existe uma ordem relevante: tempo, espaço, sequência de coleta ou outra estrutura conhecida.
+:::
+
+---
+
+## Resíduo grande: o que ele significa?
+
+Um $|t_{Di}|$ grande indica que a observação apresenta uma discrepância relativamente grande em relação ao que o modelo prevê.
+
+Mas isso **não identifica a causa** da discrepância.
+
+Uma observação discrepante pode resultar de:
+
+- erro de registro ou medição;
+- observação legítima, mas rara;
+- variável explicativa omitida;
+- forma funcional inadequada;
+- função de ligação inadequada;
+- distribuição inadequada;
+- combinação incomum de valores das preditoras.
+
+> **Resíduo identifica uma discrepância; diagnóstico investiga sua origem.**
+
+---
+
+## R: gráfico por ordem
+
+```{r}
+#| echo: true
+#| eval: false
+
+modelo <- glm(
+  resposta ~ x1 + x2,
+  family = poisson(link = "log"),
+  data = dados
+)
+
+tDi <- rstandard(modelo, type = "deviance")
+
+plot(
+  tDi,
+  type = "p",
+  pch = 19,
+  xlab = "Índice da observação",
+  ylab = expression(t[Di]),
+  main = "Resíduos de desvio padronizados"
+)
+abline(h = 0, lty = 2)
+```
+
+---
+
+# 2. A distribuição da resposta parece adequada?
+
+## Gráfico normal de probabilidades com envelope
+
+A escolha da distribuição da resposta é uma das decisões centrais na especificação do MLG.
+
+O gráfico normal de probabilidades para $t_{Di}$ compara os resíduos com os quantis da distribuição normal padrão.
+
+Mas, nos MLGs, não basta desenhar uma reta de referência.
+
+> **O envelope deve refletir a variabilidade esperada sob o modelo ajustado.**
+
+---
+
+## Por que usar um envelope?
+
+Mesmo quando o modelo está correto, os resíduos não formarão exatamente uma reta perfeita.
+
+O envelope representa a variabilidade esperada dos resíduos quando dados são gerados de acordo com o modelo ajustado.
+
+Assim, investigamos simultaneamente:
+
+- afastamentos sistemáticos da reta;
+- pontos extremos;
+- pontos fora do envelope;
+- assimetrias ou curvaturas sistemáticas.
+
+::: {.callout-note}
+Para MLGs não normais, o envelope é tipicamente construído por simulação a partir do modelo ajustado. Ele não é uma banda de confiança universal e não deve ser interpretado como um teste automático de adequação.
+:::
+
+---
+
+## Como interpretar o gráfico?
+
+Se o modelo estiver produzindo resíduos com comportamento compatível com o esperado, esperamos aproximadamente:
+
+$$
+\text{quantis observados}
+\approx
+\text{quantis normais esperados}
+$$
+
+com os pontos acompanhando a referência e, em geral, permanecendo dentro do envelope.
+
+Padrões sistemáticos podem indicar que a distribuição adotada não está descrevendo adequadamente a resposta.
+
+---
+
+## O que um ponto fora do envelope significa?
+
+Não significa automaticamente:
+
+> “o modelo está errado”.
+
+É uma **evidência de investigação**.
+
+Devemos perguntar:
+
+1. Qual observação está envolvida?
+2. Há erro de registro?
+3. Há alguma característica substantiva que a torne diferente?
+4. O problema aparece em outros gráficos?
+5. A conclusão muda se a observação for investigada separadamente?
+
+> **Diagnóstico é convergência de evidências, não caça a pontos.**
+
+---
+
+## R: envelope simulado
+
+Uma forma didática de implementar esse gráfico é utilizar o pacote `hnp`, que gera gráficos de meio-normal ou normal com envelopes simulados para diversos modelos.
+
+```{r}
+#| echo: true
+#| eval: false
+
+install.packages("hnp")
+
+library(hnp)
+
+hnp(
+  modelo,
+  resid.type = "deviance",
+  sim = 99,
+  main = "Resíduos de desvio com envelope"
+)
+```
+
+::: {.callout-note}
+A sintaxe e os tipos de resíduos disponíveis dependem da classe do modelo e da versão do pacote. O objetivo estatístico é mais importante que memorizar uma chamada específica.
+:::
+
+---
+
+# 3. A função de ligação está adequada?
+
+## Resíduos × preditor linear
+
+O preditor linear é
+
+$$
+\hat\eta_i=x_i^\top\hat\beta.
+$$
+
+A função de ligação estabelece a relação entre a média e o preditor linear:
+
+$$
+ g(\mu_i)=\eta_i.
+$$
+
+Se a função de ligação estiver adequada, não esperamos encontrar um padrão sistemático nos resíduos associado a $\hat\eta_i$.
+
+---
+
+## O que seria um bom gráfico?
+
+Em termos qualitativos, procuramos uma nuvem de pontos sem estrutura sistemática:
+
+$$
+\boxed{\text{resíduos} \quad\text{sem padrão sistemático em relação a}\quad \hat\eta}
+$$
+
+Sinais de alerta incluem:
+
+- curvatura;
+- tendência crescente ou decrescente;
+- dispersão que muda sistematicamente;
+- regiões com resíduos predominantemente positivos ou negativos.
+
+---
+
+## Por que isso pode indicar problema na ligação?
+
+O MLG impõe uma relação específica entre a média da resposta e o preditor linear.
+
+Se a forma escolhida para
+
+$$
+ g(\mu)
+$$
+
+for inadequada, o modelo pode produzir uma estrutura sistemática nos resíduos.
+
+Isso não significa que qualquer padrão seja causado pela função de ligação.
+
+Também pode haver:
+
+- variável omitida;
+- relação não linear entre uma preditora e a resposta;
+- interação ausente;
+- distribuição inadequada.
+
+> **O gráfico fornece evidência sobre a especificação; não identifica sozinho qual componente está errado.**
+
+---
+
+## R: resíduos × preditor linear
+
+```{r}
+#| echo: true
+#| eval: false
+
+eta_hat <- predict(modelo, type = "link")
+tDi <- rstandard(modelo, type = "deviance")
+
+plot(
+  eta_hat,
+  tDi,
+  pch = 19,
+  xlab = expression(hat(eta)),
+  ylab = expression(t[Di]),
+  main = "Resíduos × preditor linear"
+)
+abline(h = 0, lty = 2)
+```
+
+---
+
+# 4. A forma das preditoras está adequada?
+
+## Resíduos parciais × preditoras
+
+Mesmo com uma função de ligação adequada, podemos ter especificado incorretamente a relação entre uma preditora e a média da resposta.
+
+Por exemplo, podemos ter ajustado
+
+$$
+\eta_i=\beta_0+\beta_1x_i
+$$
+
+quando a relação relevante é aproximadamente curvilínea.
+
+---
+
+## O que o gráfico de resíduos parciais procura?
+
+O objetivo é investigar a contribuição de uma preditora depois de considerar as demais componentes do modelo.
+
+Um padrão aproximadamente linear pode ser compatível com a forma funcional adotada.
+
+Curvaturas sistemáticas podem sugerir:
+
+- transformação de $x$;
+- termo polinomial;
+- spline;
+- outra forma funcional;
+- interação com outra variável.
+
+> **A escala da preditora também é parte da especificação do modelo.**
+
+---
+
+## Um exemplo conceitual
+
+Suponha que o modelo use
+
+$$
+\eta=\beta_0+\beta_1x.
+$$
+
+Mas a relação verdadeira seja aproximadamente
+
+$$
+\eta=\beta_0+\beta_1x+\beta_2x^2.
+$$
+
+O termo linear pode produzir um padrão sistemático nos resíduos.
+
+A análise gráfica pode revelar que o modelo está tentando aproximar uma relação curva com uma reta.
+
+---
+
+## R: resíduos parciais
+
+Uma forma prática é construir resíduos parciais a partir do resíduo de trabalho ou de componente, dependendo do objetivo e da parametrização.
+
+Para modelos com preditoras numéricas, ferramentas especializadas como `car::crPlots()` podem ser úteis:
+
+```{r}
+#| echo: true
+#| eval: false
+
+library(car)
+
+crPlots(modelo)
+```
+
+::: {.callout-warning}
+Gráficos de resíduos parciais são ferramentas de investigação da forma funcional. Eles não devem ser tratados como uma prova formal de linearidade.
+:::
+
+---
+
+## Uma alternativa: efeito parcial com transformação
+
+Para uma preditora $x_j$, podemos comparar formas funcionais candidatas:
+
+$$
+\eta
+=
+\beta_0+\beta_1x_j
+$$
+
+versus
+
+$$
+\eta
+=
+\beta_0+\beta_1x_j+\beta_2x_j^2.
+$$
+
+A escolha deve combinar:
+
+- conhecimento substantivo;
+- comparação de modelos;
+- parcimônia;
+- diagnóstico.
+
+> **Diagnóstico não substitui a construção do modelo; ele retroalimenta a construção.**
+
+---
+
+# 5. Há observações com alta alavancagem?
+
+## O que é alavancagem?
+
+A alavancagem está relacionada à posição da observação no espaço das variáveis explicativas.
+
+No MLG, uma matriz de projeção ponderada pode ser escrita como
+
+$$
+\hat H
+=
+\hat W^{1/2}X
+(X^\top\hat W X)^{-1}
+X^\top\hat W^{1/2}.
+$$
+
+Seu elemento diagonal
+
+$$
+\hat h_{ii}
+$$
+
+mede a alavancagem da observação $i$.
+
+---
+
+## Intuição geométrica
+
+Uma observação possui maior alavancagem quando sua combinação de valores das preditoras é particularmente distante da região central ocupada pelas demais observações.
+
+Portanto:
+
+> **alavancagem é uma propriedade das preditoras, não do valor observado da resposta.**
+
+Isso é diferente de um resíduo grande.
+
+---
+
+## Gráfico de alavancagem
+
+Podemos representar
+
+$$
+\hat h_{ii}
+$$
+
+contra o índice da observação.
+
+Procuramos observações com valores de alavancagem particularmente altos em relação ao conjunto de dados.
+
+Não existe um ponto de corte universal que transforme automaticamente uma observação em “problemática”.
+
+Regras como $2p/n$ ou $3p/n$ podem ser usadas como referências exploratórias, mas não como decisões automáticas.
+
+---
+
+## R: leverage
+
+```{r}
+#| echo: true
+#| eval: false
+
+h <- hatvalues(modelo)
+
+plot(
+  h,
+  pch = 19,
+  xlab = "Índice da observação",
+  ylab = expression(hat(h)[ii]),
+  main = "Alavancagem"
+)
+
+abline(h = 2 * length(coef(modelo)) / nobs(modelo), lty = 2)
+```
+
+::: {.callout-note}
+A linha de referência é apenas exploratória. O valor esperado médio das alavancagens depende da estrutura do modelo; em particular, sua soma é relacionada à dimensão efetiva do modelo.
+:::
+
+---
+
+# 6. Há observações influentes?
+
+## Outlier, leverage e influência não são sinônimos
+
+Essa distinção é central.
+
+| Conceito | Pergunta |
+|---|---|
+| **Outlier em $Y$** | A resposta observada é discrepante em relação ao modelo? |
+| **Leverage** | A observação ocupa uma posição incomum nas preditoras? |
+| **Influência** | Quanto as estimativas mudam por causa dessa observação? |
+
+Uma observação pode ter uma dessas características sem necessariamente apresentar as outras.
+
+---
+
+## Quatro situações possíveis
+
+::: {.sublist-2col}
+- **Resíduo pequeno + leverage baixo**
+  - observação pouco discrepante e pouco particular nas preditoras;
+- **Resíduo grande + leverage baixo**
+  - possível outlier em $Y$;
+- **Resíduo pequeno + leverage alto**
+  - observação particular nas preditoras, mas bem ajustada;
+- **Resíduo grande + leverage alto**
+  - combinação com potencial elevado de influência.
+:::
+
+> A influência é uma propriedade do **efeito da observação sobre o ajuste**, não apenas de sua posição ou de seu resíduo.
+
+---
+
+## Distância de Cook
+
+A distância de Cook resume o quanto as estimativas do modelo podem mudar quando uma observação é retirada.
+
+No contexto do diagnóstico, ela responde à pergunta:
+
+> **O ajuste do modelo mudaria de maneira relevante se esta observação não estivesse presente?**
+
+Para o MLG, existem extensões da ideia de Cook baseadas na estrutura ponderada do modelo.
+
+A interpretação fundamental permanece:
+
+$$
+\text{grande distância de Cook}
+\quad\Rightarrow\quad
+\text{observação merece investigação}
+$$
+
+---
+
+## Importante: influência não é erro
+
+Uma observação altamente influente pode ser:
+
+- um erro de digitação;
+- um erro de medição;
+- uma observação legítima e rara;
+- uma observação representativa de um subgrupo importante;
+- evidência de que o modelo está incompleto.
+
+Portanto, a resposta estatisticamente adequada não é simplesmente:
+
+> “remover a observação”.
+
+A primeira pergunta é:
+
+> **Por que essa observação é influente?**
+
+---
+
+## R: distância de Cook
+
+Para objetos `glm`, o R fornece diretamente uma medida de influência:
+
+```{r}
+#| echo: true
+#| eval: false
+
+cook <- cooks.distance(modelo)
+
+plot(
+  cook,
+  type = "h",
+  xlab = "Índice da observação",
+  ylab = "Distância de Cook",
+  main = "Distância de Cook"
+)
+```
+
+Podemos ordenar as observações:
+
+```{r}
+#| echo: true
+#| eval: false
+
+ordem <- order(cook, decreasing = TRUE)
+
+head(
+  data.frame(
+    observacao = ordem,
+    cook = cook[ordem],
+    leverage = hatvalues(modelo)[ordem],
+    tDi = rstandard(modelo, type = "deviance")[ordem]
+  ),
+  10
+)
+```
+
+---
+
+# Diagnóstico integrado
+
+## Nenhum gráfico responde sozinho
+
+Uma análise de diagnóstico mais defensável combina evidências.
+
+Para uma observação suspeita, podemos perguntar:
+
+$$
+\boxed{
+\begin{array}{c}
+|t_{Di}|\text{ é grande?}\\
+\hat h_{ii}\text{ é grande?}\\
+D_i\text{ de Cook é grande?}
+\end{array}}
+$$
+
+E, simultaneamente:
+
+- há padrão nos resíduos?
+- a distribuição parece adequada?
+- a ligação parece adequada?
+- a forma das preditoras parece adequada?
+
+---
+
+## Uma matriz de perguntas
+
+| Pergunta | Ferramenta principal | Evidência procurada |
+|---|---|---|
+| Há observações mal ajustadas? | $t_{Di}$ × índice | valores extremos e padrões |
+| Distribuição adequada? | normal/envelope | afastamentos sistemáticos |
+| Ligação adequada? | resíduos × $\hat\eta$ | ausência de padrão |
+| Forma das preditoras adequada? | resíduos parciais | linearidade / curvatura |
+| Há alta alavancagem? | $h_{ii}$ × índice | posições extremas em $X$ |
+| Há influência? | Cook × índice | mudança potencial no ajuste |
+
+---
+
+## Um ponto pode aparecer em vários gráficos
+
+Isso é exatamente o que queremos investigar.
+
+Imagine uma observação com:
+
+- $|t_{Di}|$ elevado;
+- $\hat h_{ii}$ elevado;
+- distância de Cook elevada.
+
+Temos evidências convergentes de que essa observação merece atenção.
+
+Mas ainda não sabemos **por que** ela é problemática.
+
+Precisamos retornar aos dados originais e ao contexto do estudo.
+
+---
+
+## O que fazer diante de uma observação suspeita?
+
+Uma sequência defensável é:
+
+### 1. Verificar os dados
+
+Há erro de entrada, codificação ou medição?
+
+### 2. Verificar o contexto
+
+A observação é plausível cientificamente?
+
+### 3. Verificar a especificação
+
+Há variável omitida, interação ou forma funcional inadequada?
+
+### 4. Verificar a sensibilidade
+
+As conclusões mudam quando a observação é investigada ou excluída em uma análise de sensibilidade?
+
+### 5. Documentar
+
+A decisão deve ser justificada, não escondida.
+
+---
+
+# Diagnóstico e construção do modelo
+
+## Diagnóstico pode levar de volta à especificação
+
+O fluxo não é linear no sentido estrito.
+
+Podemos ter:
+
+$$
+\text{modelo}
+\rightarrow
+\text{diagnóstico}
+\rightarrow
+\text{problema}
+\rightarrow
+\text{re-especificação}
+\rightarrow
+\text{novo diagnóstico}.
+$$
+
+Por exemplo:
+
+> Um padrão curvilíneo nos resíduos pode sugerir a inclusão de $x^2$.
+
+Depois de incluir $x^2$, devemos diagnosticar novamente o modelo.
+
+---
+
+## Diagnóstico não é “melhorar o gráfico”
+
+O objetivo não é produzir gráficos visualmente bonitos.
+
+O objetivo é avaliar se há evidências de incompatibilidade entre:
+
+$$
+\text{dados}
+\quad\text{e}\quad
+\text{estrutura assumida pelo MLG}.
+$$
+
+Essa estrutura envolve:
+
+- distribuição da resposta;
+- função de ligação;
+- preditoras incluídas;
+- forma funcional;
+- interações;
+- estrutura de dependência, quando pertinente;
+- observações com comportamento incomum.
+
+---
+
+# R: uma rotina compacta de diagnóstico
+
+## Código para começar a investigação
+
+```{r}
+#| echo: true
+#| eval: false
+
+# Valores ajustados e preditor linear
+mu_hat <- fitted(modelo)
+eta_hat <- predict(modelo, type = "link")
+
+# Resíduos
+tPi <- rstandard(modelo, type = "pearson")
+tDi <- rstandard(modelo, type = "deviance")
+
+# Alavancagem
+h <- hatvalues(modelo)
+
+# Influência
+cook <- cooks.distance(modelo)
+
+# Tabela integrada
+diagnostico <- data.frame(
+  observado = modelo$y,
+  ajustado = mu_hat,
+  eta = eta_hat,
+  tPi = tPi,
+  tDi = tDi,
+  leverage = h,
+  cook = cook
+)
+
+head(diagnostico)
+```
+
+---
+
+## Ordenando observações para investigação
+
+Podemos começar pelas observações com maior discrepância ou maior influência:
+
+```{r}
+#| echo: true
+#| eval: false
+
+# Maiores resíduos de desvio padronizados
+ordem_res <- order(abs(diagnostico$tDi), decreasing = TRUE)
+
+diagnostico[ordem_res, ] |> head(10)
+```
+
+```{r}
+#| echo: true
+#| eval: false
+
+# Maiores distâncias de Cook
+ordem_cook <- order(diagnostico$cook, decreasing = TRUE)
+
+diagnostico[ordem_cook, ] |> head(10)
+```
+
+> A ordenação serve para **localizar observações para investigação**. Não é um procedimento automático de exclusão.
+
+---
+
+# Exemplo integrado
+
+## Um MLG Poisson
+
+Considere o conjunto `MASS::quine`, que contém dados sobre dias de ausência escolar.
+
+Vamos ajustar um modelo de Poisson com preditoras qualitativas:
+
+```{r}
+#| echo: true
+#| eval: false
+
+library(MASS)
+
+data(quine)
+
+modelo <- glm(
+  Days ~ Eth + Sex + Age + Lrn,
+  family = poisson(link = "log"),
+  data = quine
+)
+
+summary(modelo)
+```
+
+---
+
+## Primeira leitura: resíduos
+
+```{r}
+#| echo: true
+#| eval: false
+
+tDi <- rstandard(modelo, type = "deviance")
+
+plot(
+  tDi,
+  pch = 19,
+  xlab = "Índice da observação",
+  ylab = expression(t[Di]),
+  main = "Resíduos de desvio padronizados"
+)
+abline(h = 0, lty = 2)
+```
+
+Pergunta:
+
+> Há observações ou sequências de observações que merecem investigação?
+
+---
+
+## Segunda leitura: alavancagem e influência
+
+```{r}
+#| echo: true
+#| eval: false
+
+par(mfrow = c(1, 2))
+
+plot(
+  hatvalues(modelo),
+  pch = 19,
+  xlab = "Índice da observação",
+  ylab = expression(hat(h)[ii]),
+  main = "Alavancagem"
+)
+
+plot(
+  cooks.distance(modelo),
+  type = "h",
+  xlab = "Índice da observação",
+  ylab = "Distância de Cook",
+  main = "Influência"
+)
+
+par(mfrow = c(1, 1))
+```
+
+A pergunta agora é diferente:
+
+> **Alguma observação combina discrepância, posição incomum nas preditoras e mudança potencial no ajuste?**
+
+---
+
+# O que o diagnóstico pode revelar?
+
+## Cinco possibilidades importantes
+
+### 1. O modelo parece adequado
+
+Não encontramos padrões sistemáticos relevantes.
+
+### 2. Há observações discrepantes
+
+Algumas observações merecem investigação individual.
+
+### 3. Há estrutura não explicada
+
+Os resíduos apresentam padrões associados a uma variável, ordem ou escala.
+
+### 4. A distribuição ou a ligação podem estar inadequadas
+
+O padrão dos resíduos sugere revisar a especificação do MLG.
+
+### 5. Há observações influentes
+
+As estimativas podem depender de poucas observações.
+
+> Nenhuma dessas conclusões deve ser tomada por um único gráfico.
+
+---
+
+# Diagnóstico ≠ seleção de modelos
+
+## São etapas relacionadas, mas diferentes
+
+A seleção pergunta:
+
+> **Entre modelos candidatos, qual oferece uma combinação adequada de ajuste e complexidade segundo o critério adotado?**
+
+O diagnóstico pergunta:
+
+> **Há evidências de que o modelo escolhido apresenta problemas de especificação ou observações que exigem investigação?**
+
+Por isso, o diagnóstico pode levar a uma nova etapa de seleção ou reespecificação.
+
+---
+
+## AIC não substitui diagnóstico
+
+Um modelo pode ter:
+
+- menor AIC;
+- melhor log-verossimilhança;
+- menor desvio;
+
+mas ainda apresentar:
+
+- resíduos com padrões;
+- inadequação da função de ligação;
+- forma funcional inadequada;
+- observações influentes;
+- distribuição inadequada.
+
+> **Critério de seleção e diagnóstico respondem a perguntas diferentes.**
+
+---
+
+# Uma visão integrada das últimas aulas
+
+## O ciclo completo
+
+$$
+\boxed{
+\begin{array}{c}
+\text{Construir}\
+\downarrow\\
+\text{Representar}\
+\downarrow\\
+\text{Comparar}\
+\downarrow\\
+\text{Investigar}\
+\downarrow\\
+\text{Diagnosticar}\
+\downarrow\\
+\text{Re-especificar, se necessário}\
+\downarrow\\
+\text{Predizer}
+\end{array}}
+$$
+
+O diagnóstico não é o último passo antes da previsão.
+
+Ele pode exigir que retornemos às etapas anteriores.
+
+---
+
+## A ideia que deve permanecer
+
+> **Um modelo não é validado porque um único gráfico “parece bom”.**
+
+Uma análise de diagnóstico procura **evidências convergentes** sobre diferentes aspectos do ajuste.
+
+::: {.sublist-2col}
+- resíduos → discrepância individual;
+- envelope → compatibilidade da distribuição;
+- resíduos × $\hat\eta$ → função de ligação;
+- resíduos parciais → forma das preditoras;
+- $h_{ii}$ → posição nas preditoras;
+- Cook → influência sobre o ajuste.
+:::
+
+---
+
+## A distinção fundamental
+
+$$
+\boxed{
+\text{Outlier}
+\neq
+\text{Leverage}
+\neq
+\text{Influência}
+}
+$$
+
+- **Outlier:** discrepância na resposta;
+- **Leverage:** posição incomum nas preditoras;
+- **Influência:** impacto sobre o ajuste.
+
+Uma mesma observação pode apresentar mais de uma dessas características.
+
+Mas uma não implica automaticamente as outras.
+
+---
+
+## E agora?
+
+Depois de construir, comparar, investigar e diagnosticar o MLG, podemos finalmente voltar à pergunta aplicada:
+
+> **Dado um novo indivíduo com determinadas características, o que o modelo nos permite prever?**
+
+### Próxima aula
+
+# Predição em Modelos Lineares Generalizados
+
+Vamos distinguir:
+
+- previsão da **resposta média**;
+- intervalo de confiança para a média;
+- previsão de uma **nova observação**;
+- incerteza da predição;
+- extrapolação.
+
+---
+
+## Exercício de consolidação
+
+Considere um MLG ajustado no R.
+
+### Parte 1 — Observações mal ajustadas
+
+1. Calcule $t_{Di}$.
+2. Faça o gráfico de $t_{Di}$ contra o índice das observações.
+3. Identifique observações que mereçam investigação.
+
+### Parte 2 — Distribuição
+
+4. Construa um gráfico normal de probabilidades com envelope.
+5. Descreva se existem desvios sistemáticos.
+
+### Parte 3 — Especificação
+
+6. Faça o gráfico de resíduos contra o preditor linear.
+7. Investigue resíduos parciais para as principais preditoras numéricas.
+
+### Parte 4 — Influência
+
+8. Calcule $h_{ii}$ e a distância de Cook.
+9. Identifique observações com valores elevados.
+10. Compare essas observações com seus resíduos.
+
+### Parte 5 — Interpretação
+
+11. Escolha uma observação suspeita e responda:
+
+> **Ela é discrepante, tem alta alavancagem, é influente, ou apresenta uma combinação dessas características?**
+
+12. Discuta se há alguma razão estatística ou substantiva para reespecificar o modelo.
+
+::: {.callout-warning}
+Não remova uma observação apenas porque ela aparece como extrema em um gráfico. A decisão precisa ser sustentada pela verificação dos dados, pelo contexto e por uma análise de sensibilidade.
+:::
+
+---
+
+## Referências
+
+- Cordeiro, G. M.; Demétrio, C. G. B. *Modelos lineares generalizados e extensões*.
+- Paula, G. A. *Modelos lineares generalizados com apoio computacional*.
+- McCullagh, P.; Nelder, J. A. *Generalized Linear Models*. 2. ed. Chapman & Hall/CRC.
+- Dobson, A. J.; Barnett, A. G. *An Introduction to Generalized Linear Models*. 4. ed. CRC Press.
+- Olsson, U. *Generalized Linear Models: An Applied Approach*.
