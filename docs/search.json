@@ -21,11 +21,15 @@
     "text": "Nesta aula, vamos abordar o Teste de Wald, os intervalos de confiança para os coeficientes de regressão e a interpretação dos coeficientes de acordo com as funções de ligação identidade, logarítmica e logit.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF"
   },
   {
-    "objectID": "aulas/07-Variaveis_qualitativas_e_variaveis_dummies (a fazer)/conteudo.html",
-    "href": "aulas/07-Variaveis_qualitativas_e_variaveis_dummies (a fazer)/conteudo.html",
-    "title": "5. Avaliação dos coeficientes individuais da regressão",
+    "objectID": "aulas/07-Variaveis_qualitativas_e_variaveis_dummies/conteudo.html",
+    "href": "aulas/07-Variaveis_qualitativas_e_variaveis_dummies/conteudo.html",
+    "title": "7. Vraiǘeis qualitativas e variáveis dummies",
     "section": "",
-    "text": "Nesta aula, vamos abordar o Teste de Wald, os intervalos de confiança para os coeficientes de regressão e a interpretação dos coeficientes de acordo com as funções de ligação identidade, logarítmica e logit.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF"
+    "text": "Nesta aula, vamos abordar o uso de variáveis dummy em MLGs.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF",
+    "crumbs": [
+      "Aulas",
+      "7. Vraiǘeis qualitativas e variáveis *dummies*"
+    ]
   },
   {
     "objectID": "aulas/05-Avaliacao_dos_coeficientes_individuais_da_regressao/conteudo.html",

@@ -1,0 +1,433 @@
+---
+title: "Variáveis qualitativas e variáveis *dummy*"
+subtitle: |
+  *Como representar categorias no preditor linear dos MLGs*
+author:
+  name: | # indica que o campo name terá múltiplas linhas
+    ESTAT0092 -- Modelos Lineares Generalizados<br>
+    Prof. Dr. Sadraque E. F. Lucena<br>
+    <a href="http://sadraquelucena.github.io/mlg" style="font-size:.8em;">http://sadraquelucena.github.io/mlg</a><br>
+  
+format:
+  revealjs:
+    theme: meutema.scss
+    width: 1600
+    height: 900
+    margin: 0.1         # margem em torno do conteúdo
+    min-scale: 0.2       # escala mínima permitida
+    max-scale: 2.0       # escala máxima permitida
+    slide-number: true
+    code-line-numbers: false # sem numero das linhas nos code chunks
+    subtitle-style: "font-size: 2em; font-weight: bold;"  # Aqui é onde aumentamos o subtítulo
+    logo: imagens/ufs_principal_positiva.png
+    transition: fade
+    transition-speed: fast
+    scss: meutema.scss
+    include-in-header:
+      text: |
+        <style>
+        .sublist-2col ul ul {
+          column-count: 2;
+          column-gap: 2rem;
+        }
+        .sublist-2col ul ul li {
+          break-inside: avoid; /* Impede que um item quebre entre colunas */
+        }
+        </style>
+
+lang: pt-BR
+---
+
+## O problema da especificação
+
+Em um MLG, temos
+$$
+g(\mu_i)=\eta_i=\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}.
+$$
+
+- Cada componente que entra em $\eta_i$ precisa possuir uma representação numérica coerente com a estrutura do modelo.
+- Como se dá a representação de uma variável qualitativa$
+  - Se a variável *Possui imóvel próprio* ($x$) foi codificada como
+    - `x = 1` (sim)
+    - `x = 2` (não)
+  
+  não podemos interpretar os códigos `1` e `2` como uma escala quantitativa.
+
+
+
+
+## *Dummy*: a ideia
+
+- Uma variável *dummy* assume apenas os valores **0** ou **1**.
+- Ela representa a presença de uma categoria em relação a uma categoria de referência.
+$$
+x = \begin{cases}
+      0,&\text{referência}\\
+      1,&\text{categoria de interesse}
+    \end{cases}
+$$
+
+- Isso permite adicionar uma variável qualitativa no preditor linear de forma interpretável.
+- No modelo: $\eta = \beta_0 + \beta_1 \,(\texttt{possui imóvel próprio})$
+  - Se a referência é **não**, temos:
+    - Não possui imóvel próprio (`possui imóvel próprio = 0`): $~\eta = \beta_0$
+    - Possui imóvel próprio (`possui imóvel próprio = 1`): $\qquad\eta = \beta_0 + \beta_1$
+  - $\beta_1$ representa o impacto na resposta em relação à categoria de referência.
+
+
+
+
+## $k$ categorias → $k-1$ *dummies*
+
+- Se $x$ possui $k$ categorias, definimos uma como referência e criamos $k-1$ *dummies*.
+- Por quê?
+  - Se criarmos $k$ dummies, temos a seguinte restrição linear exata:
+  $$x_1 + x_2 + \dots + x_k = 1$$
+  - Essa soma gera multicolinearidade perfeita entre as colunas da matriz de dados ao considerar o intercepto ($\beta_0$), tornando impossível estimar os parâmetros de forma única.
+
+
+
+
+## Exemplo com 3 categorias
+
+- Considere a variável $X \in \{A, B, C\}$ com $A$ como categoria de referência:
+$$
+x_B = \begin{cases} 1, \text{se } X = B\\ 0, \text{caso contrário} \end{cases} \qquad \text{e} \qquad x_C = \begin{cases} 1, \text{se } X = C\\ 0, \text{caso contrário} \end{cases}
+$$
+- Modelo: $\eta = \beta_0 + \beta_B x_B + \beta_C x_C$
+
+| Categoria ($x$) | $x_B$ | $x_C$ | Preditor Linear ($\eta$) |
+|:--------------|:------|:------|:-------------------------|
+| $A$ (Referência) | 0 | 0 | $\eta_A ​= \beta_0$ |​
+| $B$ | 1 | 0 | $\eta_B ​= \beta_0​+\beta_B$ |​
+| $B$ | 0 | 1 | $\eta_C ​= \beta_0​+\beta_C$ |
+
+- $\beta_B$ e $\beta_C$ representam o impacto na resposta causado pela mudança da categoria $A$ para as categorias $B$ e $C$, respectivamente.
+
+
+
+
+
+## Impacto da Função de Ligação
+
+#### 1. Ligação Identidade ($\mu = \eta$)
+
+- Comparações diretas na escala original:
+$$
+\mu(x=1) - \mu(x=0) = \beta_1 \implies \boxed{\beta_i = \text{diferença entre as médias}}
+$$
+- **Exemplo:** $\widehat{\beta}_1 = 4{,}2$ → O grupo *sem imóvel próprio* apresenta média estimada $4{,}2$ unidades superior ao grupo *com imóvel próprio*, mantendo as demais covariáveis constantes.
+
+
+
+
+## Impacto da Função de Ligação
+
+#### 2. Ligação Log ($\log(\mu) = \eta$)
+
+- Comparações relativas (multiplicativas):
+$$\log(\mu_1) - \log(\mu_0) = \beta_1 \quad \implies \quad \log\left(\frac{\mu_1}{\mu_0}\right) = \beta_1$$
+
+$$\boxed{\frac{\mu_1}{\mu_0} = e^{\beta_1} = \text{Razão de Médias}}$$
+
+- **Exemplo:** $\widehat{\beta}_1 = 0{,}3 \Rightarrow e^{\widehat{\beta}_1}=e^{0{,}3} = 1{,}35$ → A média esperada do grupo *sem imóvel próprio* é $1{,}35$ vezes a média do grupo *com imóvel próprio* (ou seja, $35\%$ maior), mantendo constantes as demais covariáveis.
+
+
+
+
+## Impacto da Função de Ligação
+
+#### 3. Ligação Logit ($\text{logit}(\mu) = \log\left(\frac{\mu}{1-\mu}\right) = \eta$)
+
+- Comparações em termos de chance (*odds*):
+$$\operatorname{logit}(\mu_1) - \operatorname{logit}(\mu_0) = \beta_1 \quad \implies \quad \log\left(\frac{\operatorname{odds}_1}{\operatorname{odds}_0}\right) = \beta_1$$
+
+$$\boxed{\frac{\operatorname{odds}_1}{\operatorname{odds}_0} = e^{\beta_1} = \text{Razão de Chances (Odds Ratio)}}$$
+
+- **Exemplo:** $\widehat{\beta}_1 = 0{,}693 \Rightarrow e^{\widehat{\beta}_1}=e^{0{,}693} = 2{,}0$ → A chance (*odds*) de ocorrer o desfecho no grupo *sem imóvel próprio* é $2$ vezes a chance do grupo *com imóvel próprio* ($100\%$ maior), mantendo constantes as demais covariáveis.
+
+
+
+
+## Modelo com Interação (Duas Variáveis Binárias)
+
+- O termo de interação permite que o efeito de uma variável dependa do nível de outra:
+$$\eta = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_{12} (x_1 x_2)$$
+
+- O produto $(x_1 x_2)$ assume valor 1 apenas quando $x_1 = 1$ e $x_2 = 1$ *simultaneamente* (zero nos demais casos).
+- A combinação das duas variáveis binárias gera 4 cenários no preditor linear:
+
+| $x_1$ | $x_2$ | Termo de interação ($x_1x_2$) | Preditor Linear ($\eta$) |
+|:------|:------|:-------------------------|:-------------------------|
+| 0     | 0     | 0 | $\eta_{00} ​= \beta_0$ |​
+| 1     | 0     | 0 | $\eta_{10} ​= \beta_0​+\beta_1$ |​
+| 0     | 1     | 0 | $\eta_{01} ​= \beta_0+\beta_2$ |​
+| 1     | 1     | 1 | $\eta_{11} ​= \beta_0​+\beta_1+\beta_2+\beta_{12}$ |​
+
+
+
+
+## Interpretação do Coeficiente de Interação ($\beta_{12}$)
+
+- $\beta_{12} = 0$: Não há interação (efeitos são puramente aditivos).
+- $\beta_{12} > 0$: O efeito de $x_2$ é potencializado (mais forte) quando $x_1 = 1$.
+- $\beta_{12} < 0$: O efeito de $x_2$ é atenuado (mais fraco) quando $x_1 = 1$.
+
+
+
+
+## Exemplo
+
+Avaliar impacto do Ensino Superior ($x_1$) e do Gênero ($x_2$) no Salário ($\eta$ em mil R$).
+  - $x_1$: $0 =$ sem superior, $1 =$ com superior
+  - $x_2$: $0 =$ homem, $1 =$ mulher
+  $$
+    \text{Salário} = 3 + 2 \, x_1 + 1 \, x_2 + 1{,}5 \, (x_1 x_2)
+  $$
+
+  - Calculando o efeito do Ensino Superior ($x_1$) no Salário:
+    - Para Homens ($x_2 = 0$):
+      - Sem superior: $3$ $\qquad\circ\,$ Com superior: $3+2 = 5$
+      - Aumento: $+R\$ 2.000$ ($\beta_1$)
+    - Para Mulheres ($x_2 = 1$):
+      - Sem superior: $3 + 1 = 4$ $\qquad\circ\,$ Com Superior: $3 + 2 + 1 + 1{,}5 = 7{,}5$ 
+      - Aumento: $+\text{R\$ } 3.500$ ($\beta_1 + \beta_{12}$)
+  - *Interpretação de $\beta_{12} = 1{,}5$*: O retorno financeiro do diploma superior é $R\$ 1.500$ MAIOR para mulheres do que para homens.
+
+
+
+
+## Tratamento Automatizado de Fatores no R
+
+No R, não é necessário criar as variáveis *dummies* manualmente. A função `factor()` faz a gestão automaticamente.
+
+```{r}
+#| echo: true
+#| eval: false
+
+# 1. Converter para fator e definir rótulos
+dados$raca_f <- factor(
+  dados$raca,
+  levels = c(1, 2, 3),
+  labels = c("Branca", "Negra", "Outra")
+)
+
+# 2. Definir explicitamente a categoria de referência
+dados$raca_f <- relevel(dados$raca_f, ref = "Branca")
+
+# 3. Ajustar o modelo (o R cria k-1 dummies internamente)
+modelo <- glm(
+  low ~ lwt + smoke_f + raca_f,
+  family = binomial(link = "logit"),
+  data = dados
+)
+
+```
+
+
+## Exemplo 7.1
+
+Vamos modelar a precificação de apólices de automóveis com base na frequência esperada de sinistros por segurado no 3º trimestre de 1973. Vamos usar os dados da base `Insurance` do pacote `MASS` no R.
+
+As variáveis disponíveis na base de dados são:
+
+- `Claims` ($Y$): Número total de sinistros registrados no período (contagem).
+- `Holders` ($N$): Número de apólices ativas/segurados expostos ao risco.
+- `District`: Região de residência do segurado (1 a 4, sendo 4 grandes centros urbanos).
+- `Group`: Cilindrada do motor do veículo (<1 litre, 1–1.5 litre, 1.5–2 litre, >2 litre).
+- `Age`: Faixa etária do segurado (<25, 25–29, 30–35, >35).
+
+
+
+
+## Exemplo 7.1
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Carregar o pacote e os dados
+library(MASS)
+data("Insurance")
+
+# Visualizar a taxa bruta de sinistros por faixa etária e grupo do veículo
+Insurance$taxa_bruta <- Insurance$Claims / Insurance$Holders
+aggregate(taxa_bruta ~ Age + Group, data = Insurance, FUN = mean)
+```
+
+
+
+
+## Exemplo 7.1
+
+```{r}
+#| echo: true
+#| eval: false
+
+Insurance$Group <- factor(Insurance$Group, ordered = FALSE)
+Insurance$Age   <- factor(Insurance$Age, ordered = FALSE)
+
+# Ajustar o Modelo de Poisson COM Interação e Offset
+# offset(log(Holders)) controlando o modelo pelo tamanho desigual da base de clientes em cada grupo
+modelo_seguro <- glm(
+  Claims ~ District + Group * Age + offset(log(Holders)),
+  family = poisson(link = "log"),
+  data = Insurance
+)
+
+summary(modelo_seguro)
+```
+
+
+
+
+## Exemplo 7.1
+
+```{r}
+#| echo: false
+#| eval: true
+
+Insurance$Group <- factor(Insurance$Group, ordered = FALSE)
+Insurance$Age   <- factor(Insurance$Age, ordered = FALSE)
+
+# Ajustar o Modelo de Poisson COM Interação e Offset
+# offset(log(Holders)) controlando o modelo pelo tamanho desigual da base de clientes em cada grupo
+modelo_seguro <- glm(
+  Claims ~ District + Group * Age + offset(log(Holders)),
+  family = poisson(link = "log"),
+  data = Insurance
+)
+
+summary(modelo_seguro)
+```
+
+
+## Exemplo 7.1
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Comparando o modelo sem interação vs com interação (TRV)
+modelo_sem_int <- glm(
+  Claims ~ District + Group + Age + offset(log(Holders)),
+  family = poisson(link = "log"),
+  data = Insurance
+)
+
+lmtest::lrtest(modelo_seguro, modelo_sem_int)
+```
+
+<br>
+
+Como os modelos são estatisticamente equivalentes, vamos usar o modelo sem interação.
+
+
+
+
+## Exemplo 7.1
+
+```{r}
+#| echo: true
+#| eval: true
+
+summary(modelo_sem_int)
+```
+
+
+
+
+## Exemplo 7.1
+
+A referência é `District1` (região rural/cidades menores), `Group<1l` (carro popular) e `Age<25` (motoristas jovens).
+
+- `District4`: $e^\beta=e^{0{,}23421}=1{,}264 \rightarrow$ morar na metrópole (District4) aumenta a taxa de risco em 26,4%.
+- `Group1-1.5l`: $e^\beta=e^{0{,}16134}=1{,}175 \rightarrow$ taxa de risco $17{,}5\%$ maior que carros $<1\text{L}$.
+- `Group1.5-2l`: $e^\beta=e^{0{,}39281}=1{,}481 \rightarrow$ taxa de risco $48{,}1\%$ maior que carros $<1\text{L}$.
+- `Group>2l`: $e^\beta=e^{0{,}56341}=1{,}757 \rightarrow$ taxa de risco $75{,}7\%$ maior que carros $<1\text{L}$
+- `Age25-29`: $e^\beta=e^{-0{,}19101}=0{,}826 \rightarrow$ redução de $17{,}4\%$ no risco em relação a $<25$ anos.
+- `Age30-35`: $e^\beta=e^{-0{,}34495}=0{,}708 \rightarrow$ redução de $29{,}2\%$ no risco em relação a $<25$ anos.
+- `Age>35`: $e^\beta=e^{-0{,}53667}=0{,}585 \rightarrow$ redução de $41{,}5\%$ no risco em relação a $<25$ anos.
+
+
+
+## Exemplo 7.1
+
+Qual a taxa de risco para um motorista de 32 anos (`Age30-35`), dirigindo um carro de 1.8 Litros (`Group1.5-2l`), morando no Distrito 4?
+
+```{r}
+#| echo: true
+#| eval: true
+
+# 1. Criar o data frame com o perfil do cliente
+# Observação: Definimos Holders = 1 para obter a taxa por segurado (ou 1000 para a contagem)
+novo_cliente <- data.frame(
+  District = "4",
+  Group    = "1.5-2l",
+  Age      = "30-35",
+  Holders  = 1
+)
+
+# 2. Prever a taxa esperada de sinistros (type = "response")
+taxa_esperada <- predict(modelo_sem_int, newdata = novo_cliente, type = "response")
+taxa_esperada
+```
+
+- O risco é de 21,44%.
+
+
+
+
+## Exemplo 7.2
+
+Agora use os dados na base `DoctorVisits` do pacote `AER`.
+
+- `visits` ($Y$): Número de consultas médicas nas últimas 2 semanas (contagem).
+- `gender`: Sexo (female, male).
+- `age`: Idade do indivíduo (em anos / 100).
+- `income`: Renda anual (em dezenas de milhares de dólares).
+- `illness`: Número de doenças registradas nas últimas 2 semanas.
+- `reduced`: Número de dias com atividade reduzida por doença/lesão nas últimas 2 semanas.
+- `health`: Escore de saúde (escores maiores indicam pior estado de saúde).
+- `private`: Possui plano de saúde privado? (yes, no).
+
+
+
+
+## Exemplo 7.2
+
+- `freepoor`: Possui gratuidade governamental por baixa renda? (yes, no).
+- `freerepat`: Possui gratuidade governamental? (yes, no).
+- `nchronic`: Possui doença crônica que não limita atividades? (yes, no).
+- `lchronic`: Possui doença crônica que limita atividades? (yes, no).
+
+
+
+
+## Exemplo 7.2
+
+- Adicione `I(age^2)` no modelo além de `age`.
+- Faça seleção de varáveis.
+- Interprete os coeficientes.
+- Calcule o númeor de visitas esperados para uma pessoa com as seguintes características:
+
+```{r}
+#| echo: true
+#| eval: false
+
+novo_paciente <- data.frame(
+  gender    = "female",  # Sexo feminino
+  age       = 0.30,      # Idade: 30 anos (30 / 100)
+  income    = 0.20,      # Renda anual: $20.000 ($20.000 / 100.000)
+  illness   = 1,         # 1 doença recente nas últimas 2 semanas
+  reduced   = 0,         # 0 dias de atividade reduzida
+  health    = 0,         # Escore de saúde geral: 0 (boa saúde)
+  private   = "no",      # Sem plano de saúde privado
+  freepoor  = "no",      # Sem gratuidade governamental por baixa renda
+  freerepat = "no",      # Sem gratuidade governamental por idade/deficiência/veterano
+  nchronic  = "no",      # Sem doença crônica não limitante
+  lchronic  = "no"       # Sem doença crônica limitante
+)
+```
+
+# Fim

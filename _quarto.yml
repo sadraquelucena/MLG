@@ -36,6 +36,7 @@ website:                  # Configurações específicas do website
       - href: aulas/04-Teste_razao_verossimilhancas/conteudo.qmd
       - href: aulas/05-Avaliacao_dos_coeficientes_individuais_da_regressao/conteudo.qmd
       - href: aulas/06-selecao_de_variaveis/conteudo.qmd
+      - href: aulas/07-Variaveis_qualitativas_e_variaveis_dummies/conteudo.qmd
       
       
 
