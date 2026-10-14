@@ -1,0 +1,61 @@
+---
+title: "8. Análise de desvio"
+format:
+  html:
+    toc: false
+    anchor-sections: false
+---
+
+
+Nesta aula, vamos abordar o desvio como medida de discrepância entre o modelo ajustado e o modelo saturado, estabelecendo uma analogia com a soma de quadrados dos resíduos na regressão linear. Também estudaremos a análise de desvio (ANODEV), a comparação de modelos encaixados e os testes da razão de verossimilhanças e F para avaliar a contribuição das variáveis explicativas nos modelos lineares generalizados.
+
+
+
+Slides:
+
+
+```{r}
+#| echo: false
+#| eval: true
+
+# Pega o nome do arquivos html e pdf automaticamente
+html_slide <- list.files("slides", pattern = "\\.html$", full.names = FALSE)
+pdf_slide  <- list.files("slides", pattern = "\\.pdf$", full.names = FALSE)
+png_slide <- sub("\\.pdf$", ".png", pdf_slide)
+lista <- list.files("lista_de_exercicios", pattern = "\\.pdf$", full.names = FALSE)
+png_lista <- sub("\\.pdf$", ".png", lista)
+```
+
+:::: {.grid}
+
+::: {.g-col-12 .g-col-md-4}
+
+<a href="slides/`r html_slide`"
+   target="_blank"
+   class="thumb html-slide">
+<img
+  src="slides/`r png_slide`"
+  alt="Slides da aula em HTML"
+  class="img-fluid">
+</a>
+<p class="text-center">Slides da aula em HTML</p>
+
+:::
+
+::: {.g-col-12 .g-col-md-4}
+
+<a href="slides/`r pdf_slide`"
+   target="_blank"
+   class="thumb pdf-slide">
+<img
+  src="slides/`r png_slide`"
+  alt="Slides da aula em PDF"
+  class="img-fluid">
+</a>
+<p class="text-center">Slides da aula em PDF</p>
+
+:::
+
+
+::::
+

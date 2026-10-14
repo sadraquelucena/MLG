@@ -1,0 +1,495 @@
+---
+title: "Análise de desvio"
+subtitle: |
+  *Como medir a discrepância entre os dados e o modelo?*
+author:
+  name: | # indica que o campo name terá múltiplas linhas
+    ESTAT0092 -- Modelos Lineares Generalizados<br>
+    Prof. Dr. Sadraque E. F. Lucena<br>
+    <a href="http://sadraquelucena.github.io/mlg" style="font-size:.8em;">http://sadraquelucena.github.io/mlg</a><br>
+  
+format:
+  revealjs:
+    theme: meutema.scss
+    width: 1600
+    height: 900
+    margin: 0.1         # margem em torno do conteúdo
+    min-scale: 0.2       # escala mínima permitida
+    max-scale: 2.0       # escala máxima permitida
+    slide-number: true
+    code-line-numbers: false # sem numero das linhas nos code chunks
+    subtitle-style: "font-size: 2em; font-weight: bold;"  # Aqui é onde aumentamos o subtítulo
+    logo: imagens/ufs_principal_positiva.png
+    transition: fade
+    transition-speed: fast
+    scss: meutema.scss
+    include-in-header:
+      text: |
+        <style>
+        .sublist-2col ul ul {
+          column-count: 2;
+          column-gap: 2rem;
+        }
+        .sublist-2col ul ul li {
+          break-inside: avoid; /* Impede que um item quebre entre colunas */
+        }
+        </style>
+
+lang: pt-BR
+---
+
+
+## Introdução
+
+- Já vimos que é possível comparar modelos usando um teste global da razão de veorssimilhanças.
+- Hoje vamos nos debruçar um pouco mais sobre a significância global de um modelo usando o **desvio**.
+
+
+
+
+## Na regressão linear
+
+- Considere dois modelos de regressão linear normal encaixados:
+$$
+\begin{cases}
+  M_0:& Y_i=\beta_0+\varepsilon_i\\
+  M_1:& Y_i=\beta_0+\beta_1x_i+\varepsilon_i
+\end{cases}
+$$
+
+- O modelo $M_1$ acrescenta a covariável $x$.
+- Ao estimar seus parâmetros por mínimos quadrados, a soma de quadrados residual não aumenta:
+$$
+  SQE(M_1)\leq SQE(M_0).
+$$
+
+- A diferença $SQE(M_0)-SQE(M_1)$ mede quanto a inclusão de $x$ diminui a variação residual.
+- Mas essa redução, sozinha, não responde se o ganho é grande em relação à variabilidade residual e ao custo de adicionar um parâmetro.
+  - Para isso, usamos o teste F de comparação entre modelos encaixados.
+
+
+
+
+## O que muda nos MLG?
+
+- Em um MLG, a resposta pode ser binária, uma contagem ou uma variável contínua com outra distribuição.
+- A diferença $Y_i-\widehat{\mu}_i$ não fornece, por si só, uma medida universal e comparável da discrepância.
+- Por exemplo:
+  - Na regressão logística, $Y_i$ assume 0 ou 1, enquanto $\widehat{\mu}_i=\widehat{p}_i$ é uma probabilidade.
+  - Na regressão de Poisson, a variância condicional muda de acordo com o valor da média.
+- Precisamos, portanto, de uma medida de discrepância coerente com a distribuição probabilística especificada para o MLG: **o desvio (*deviance*)**.
+
+
+
+
+## Equivalência
+
+- A ANOVA na regressão linear é substituída pela Análise de Desvio em um MLG. A única diferença é que trocamos a Soma de Quadrados pela Deviance e o Teste F pelo Teste da Razão de Verossimilhanças.
+
+| Regressão linear normal | Modelos lineares generalizados |
+|---|---|
+| Soma de quadrados dos resíduos | Desvio residual |
+| Teste F para modelos encaixados | Teste da razão de verossimilhanças, em condições apropriadas |
+| Distribuição normal com variância constante, na forma clássica | Família probabilística e função de ligação especificadas pelo MLG |
+
+
+
+
+## Três modelos para entender o desvio
+
+- Para entendermos o desvio, precisamos entender a definição de 3 modelos:
+
+  - **Modelo nulo:** Contém apenas o intercepto. Não utiliza as covariáveis para explicar diferenças entre as médias condicionais.
+  - **Modelo ajustado:** É o modelo de interesse, com um conjunto definido de preditores. Ele busca representar os dados com uma estrutura mais simples que a do modelo saturado.
+  - **Modelo saturado:** Possui número de parâmetros igual ao número de observações coletadas nos dados. Serve como referência de ajuste máximo, mas normalmente não é útil para explicar ou resumir os dados.
+
+- **Obs.:** O modelo saturado é uma referência matemática, não necessariamente um modelo que deveríamos usar para previsão ou interpretação.
+
+
+
+
+## O que é o desvio?
+
+- O desvio mede a discrepância entre o modelo ajustado e o modelo saturado, comparando suas log-verossimilhanças máximas:
+$$
+  D=2\{\ell(\text{modelo saturado})-\ell(\text{modelo ajustado})\}
+$$
+
+- Aqui, $\ell$ representa a log-verossimilhança maximizada.
+- Mantidas a família probabilística e as condições de comparação, o modelo saturado alcança uma log-verossimilhança pelo menos tão alta quanto a do modelo ajustado; por isso, o desvio é não negativo.
+
+- **Interpretação:** quanto menor o desvio, mais próximo o modelo ajustado está do modelo saturado em termos de log-verossimilhança.
+  - Cabe lembrar que isso não garante, por si só, adequação absoluta nem bom desempenho fora da amostra.
+
+
+
+
+## Desvio escalonado
+
+- O Desvio ($D$) mede a "distância" total entre o modelo saturado e o modelo ajustado.
+- Porém, um erro de $100$ é grande ou pequeno? Depende da dispersão dos dados ($\phi$).
+  - Se a dispersão ($\phi$) for $1.000$, um erro de $100$ é pequeno.
+  - Se a dispersão ($\phi$) for $0{,}1$, um erro de $100$ é gigantesco.
+- Nesse caso, podemos utilizar o Desvio Escalonado ($D^*$):
+$$
+D^*=\frac{D}{\phi}
+$$
+
+- Para famílias como binomial e Poisson, a dispersão é frequentemente fixada em $\phi=1$, e o desvio e desvio escalonado coincidem.
+
+- R ou Python geralmente imprimem no `summary` o Desvio Não Escalonado ($D$).
+
+
+
+
+## Desvio escalonado
+
+- O devio escalonado pode ser usado com duas finalidades:
+  1. Avaliando UM modelo isolado: O Teste de Qualidade do Ajuste (*Goodness-of-Fit*).
+  2. Avaliando VARIÁVEIS sequencialmente: A Tabela ANODEV (A ANOVA dos MLGs).
+
+
+
+
+## 1. Testando a Qualidade do Ajuste de um Modelo
+
+- Uma vez que o Desvio Escalonado ($D^*$) mede a distância entre o Modelo Ajustado e o Modelo Saturado (ajuste perfeito), ele ode ser usado como uma meidade de qualidade do ajuste (*goodness-of-fit*).
+- Sob condições regulares, $D^* \sim \chi^2_{n-p}$ ($n$ observações, $p$ parâmetros).
+- Se  $D^* < \chi^2_{n-p, 1-\alpha} \implies$ Não há evidência de falta de ajuste (O modelo é adequado).
+- Como o valor esperado de uma $\chi^2_{n-p}$ é $n-p$, um valor de $D^*$ próximo
+de $n-p$ pode ser um indicativo de que o modelo ajustado aos dados é adequado.
+- **Regra de bolso:** $\frac{D^*}{n-p}\approx 1 \implies$ o modelo está bem ajustado aos dados.
+
+
+
+
+## 1. Testando a Qualidade do Ajuste de um Modelo
+
+No R:
+
+```{r}
+#| echo: true
+#| eval: false
+
+# Ajuste do modelo
+modelo <- glm(y ~ x1 + x2, family = gamma(link = "log"))
+
+# Desvio não escalonado (D)
+D <- deviance(modelo)
+
+# Estimativa da dispersão (phi)
+phi <- summary(modelo)$dispersion
+
+# Desvio Escalonado (D*)
+D_star <- D / phi
+
+```
+<br>
+
+- Em famílias como Poisson e Binomial, $\phi = 1 \implies D^* = D$.
+- Em famílias como Gama, Normal e Gaussiana Inversa, $\phi$ precisa ser estimado $\implies D^* = D / \hat{\phi}$.
+
+
+
+
+## 2. Análise de Desvio (ANODEV)
+
+- ANODEV é a ANOVA para os MLGs.
+- Na análise de desvio é um procedimento para avaliar a relevância de variáveis explicativas em MLGs.
+- Ele é estatisticamente mais preciso e robusto que o teste de Wald em amostras pequenas e moderadas, além de evitar distorções graves (como o efeito Hauck-Donner).
+
+- Aqui, as variáveis explicativas são adicionadas uama a uma (de forma sequencial) e mede quanto o desvio cai a cada passo:
+$$\text{Modelo Nulo } (M_0) \xrightarrow{+A} M_1 \xrightarrow{+B} M_2 \xrightarrow{+A:B} M_3$$
+- Se a redução no desvio for significativa, a variavel deve permanecer no modelo.
+
+
+
+
+## 2. Análise de Desvio (ANODEV)
+
+- Para comparar dois modelos encaixados ($M_p$ com $p$ parâmetros e $M_q$ com $q$ parâmetros, $p < q$), a estatística do LRT é dada pela diferença de desvios.
+
+  - Para Binomial e Poisson ($\phi=1$), usa-se diretamente o Teste LRT ($\chi^2$).:
+$$
+  T_{\text{LRT}} = \frac{D_p - D_q}{\phi} \sim \chi^2_{q-p} \quad (\text{quando } \phi \text{ é conhecido})
+$$
+  
+  - Para famílias como Gaussiana, Gama e Normal Inversa ($\phi\neq 1$), utiliza-se a estatística do Teste F:
+$$
+  F = \frac{(D_p - D_q) / (q - p)}{\hat{\phi}_m} \sim F_{q-p, \, n-m}
+$$
+
+
+
+
+## 2. Análise de Desvio (ANODEV)
+
+Considere uma sequência de entrada $M_0 \to A \to A+B \to A+B+AB$:  
+
+::: {style="font-size: 0.85em;"}
+
+| Modelo | G.L. | Desvio Residual | Redução do Desvio ($\Delta D$) | Teste LRT ($\phi = 1$) | Teste F ($\phi$ estimado) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Nulo** | $n - 1$ | $D_0$ | — | — | — |
+| **A** | $n_A - 1$ | $D_A$ | $D_0 - D_A$ | $(D_0 - D_A) \sim \chi^2_{n_A - 1}$ | $\frac{(D_0 - D_A)/(n_A-1)}{\hat{\phi}_m} \sim F$ |
+| **A + B** | $n_B - 1$ | $D_{A+B}$ | $D_A - D_{A+B}$ | $(D_A - D_{A+B}) \sim \chi^2_{n_B - 1}$ | $\frac{(D_A - D_{A+B})/(n_B-1)}{\hat{\phi}_m} \sim F$ |
+| **A + B + AB** | $(n_A-1)(n_B-1)$ | $D_{A+B+AB}$ | $D_{A+B} - D_{A+B+AB}$ | $\Delta D_{AB} \sim \chi^2_{(n_A-1)(n_B-1)}$ | $\frac{\Delta D_{AB}/\text{GL}_{AB}}{\hat{\phi}_m} \sim F$ |
+
+:::
+
+
+
+
+## 2. Análise de Desvio (ANODEV)
+
+No R:
+
+```{r}
+#| echo: true
+#| eval: false
+
+# 1. Ajuste do modelo completo com interações
+modelo_gama <- glm(yield ~ lineage + epoca + lineage:epoca, 
+                   family = Gamma(link = "log"), data = cotton)
+
+# 2. Gerando a Tabela ANODEV via Teste F (pois phi é estimado na Gama)
+anova(modelo_gama, test = "F")
+
+# 3. Caso fosse um modelo Poisson ou Regressão Logística (phi = 1)
+modelo_poisson <- glm(counts ~ A + B, family = poisson)
+anova(modelo_poisson, test = "LRT")
+```
+
+
+
+
+## Exemplo 8.1
+
+```{r}
+#| echo: false
+#| eval: true
+
+# 1. Preparação de um banco de dados hospitalar didático
+data("infert")
+set.seed(123)
+
+dados_hosp <- data.frame(
+  infec = infert$case,                           # 1 = Infeção, 0 = Não
+  idade = infert$age,                            # Idade do paciente
+  uti = factor(ifelse(infert$spontaneous > 0, "Sim", "Não")), # Simulando UTI
+  tempo_internacao = round(infert$parity * 3.5 + rnorm(248, 5, 2), 1),
+  vacinado = factor(sample(c("Sim", "Não"), 248, replace = TRUE, prob = c(0.6, 0.4)))
+)
+
+# 2. Ajuste do modelo e exibição do summary
+modelo_hosp <- glm(infec ~ idade + uti + tempo_internacao + vacinado, 
+                    family = binomial(link = "logit"), data = dados_hosp)
+
+summary(modelo_hosp)
+```
+
+
+
+
+## Exemplo 8.1
+
+1. A qualidade do ajuste é boa?
+$$
+\frac{\texttt{Residual deviance}}{\texttt{degrees of freedom}} = \frac{287{,}19}{243} = 1{,}18
+$$
+
+  - A razão está acima de $1$, o que acende um primeiro alerta de que o modelo pode ter ruído ou falta de ajuste.
+
+2. Teste Qui-Quadrado de qualidade de ajuste:
+
+```{r}
+#| echo: true
+#| eval: true
+options(scipen = 999)
+1 - pchisq(287.19, df = 243)
+```
+
+  - Como $p \approx 0{,}028 < 0{,}05$, rejeitamos a hipótese nula de bom ajuste! Há evidências estatísticas de que o modelo atual apresenta falta de ajuste em relação ao modelo saturado.
+
+
+
+
+## Exemplo 8.1
+
+3. Mas será que o conjunto de variáveis é importante para o modelo?
+  - Vamos calcular a redução no desvio (Modelo Nulo vs. Modelo Residual)
+  - $\Delta D = \texttt{Null deviance} - \texttt{Residual deviance} = 316{,}17 - 287{,}19 = 28{,}98$
+  - Graus de liberdade: $247 - 243 = 4$
+  - Teste global: `1 - pchisq(28.98, df = 4) =` `r 1 - pchisq(28.98, df = 4)`
+    - O conjunto de 4 variáveis reduz a deviança em relação ao modelo nulo de forma significativa.
+
+
+
+
+## Exemplo 8.1
+
+```{r}
+#| echo: true
+#| eval: true
+
+anova(modelo_hosp, test = "LRT")
+```
+
+
+
+
+## Exemplo 8.1
+
+```{r}
+#| echo: true
+#| eval: true
+
+modelo_final <- glm(infec ~ uti, family = binomial(link = "logit"), data = dados_hosp)
+summary(modelo_final)
+```
+
+
+
+
+## Exemplo 8.1
+
+Para o modelo final:
+
+- Qualidade do ajuste:
+  $$
+    \frac{\texttt{Residual deviance}}{\texttt{degrees of freedom}} = \frac{288{,}81}{246} = 1{,}17
+  $$
+  - Teste Qui-Quadrado de qualidade de ajuste:
+```{r}
+#| echo: true
+#| eval: true
+options(scipen = 999)
+1 - pchisq(288.81, df = 246)
+```
+  - O modelo melhorou mas continua mal ajustado.
+  - Deve haver outras variáveis importantes no modelo que não foram medidas.
+
+
+
+
+## Exemplo 8.2
+
+Considere o conjunto de dados `ToothGrowth`, de um ensaio clínico sobre o impacto da Vitamina C no crescimento dentário em 60 cobaias (porquinhos-da-índia). As variáveis são:
+
+- `len` (resposta): Comprimento dos dentes em mícrones
+- `supp`: Tipo de suplemento de Vitamina C (factor com 2 níveis)
+  - `OJ`: Sumo de laranja (Orange Juice)
+  - `VC`: Ácido ascórbico / Vitamina C pura (Ascorbic Acid).
+- `dose`: Dose diária administrada (numeric, com os níveis 0.5, 1.0 e 2.0 mg/dia).
+
+
+
+
+## Exemplo 8.2
+
+```{r}
+#| echo: true
+#| eval: false
+data("ToothGrowth")
+dados <- ToothGrowth
+
+dados$dose_f <- factor(dados$dose, levels = c(0.5, 1.0, 2.0))
+
+fit_gama <- glm(len ~ supp * dose_f, family = Gamma(link = "log"), data = dados)
+
+summary(fit_gama)
+```
+
+
+
+
+## Exemplo 8.2
+
+```{r}
+#| echo: false
+#| eval: true
+data("ToothGrowth")
+dados <- ToothGrowth
+
+dados$dose_f <- factor(dados$dose, levels = c(0.5, 1.0, 2.0))
+
+fit_gama <- glm(len ~ supp * dose_f, family = Gamma(link = "log"), data = dados)
+
+summary(fit_gama)
+```
+
+
+
+
+## Exemplo 8.2
+
+Vamos verificar se alguma variável deve sair do modelo usando ANODEV.
+
+```{r}
+#| echo: true
+#| eval: true
+
+anova(fit_gama, test = "F") # No modelo Gama usamos teste F pois phi != 1
+```
+
+- O teste F indica que todas as variávis devem permanecer no modelo.
+
+
+
+
+## Exemplo 8.2
+
+Vamos avaliar a qualidade do ajuste.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Avaliação da Qualidade do Ajuste (Goodness-of-Fit)
+( D_res   <- deviance(fit_gama) )            # desvio residual
+( phi_hat <- summary(fit_gama)$dispersion )  # phi
+( gl_res  <- df.residual(fit_gama) )         # graus de liberdade
+( D_star  <- D_res / phi_hat )               # Desvio Escalonado D* = D / phi_hat
+1 - pchisq(D_star, df = gl_res)
+```
+
+- O desvio escalonado é próximo dos graus de liberdade.
+- O p-valor do teste qui-quadrado indica que o modelo está bem ajustado.
+
+
+
+
+
+
+
+## Exercício 8.1
+
+Considere o conjunto de dados `birthwt` do pacote `MASS`. Ajuste um modelo de regressão. Faça selecção de variáveis usado o desvio. Avalie a qualidade do ajuste do modelo final.
+
+```{r}
+#| echo: true
+#| eval: false
+
+library(MASS)
+
+dados <- birthwt |>
+  # remover bwt (peso de cada bebê)
+  dplyr::select(-bwt) |>
+  # codificar como fator as preditoras categóricas e renomear as demais
+  dplyr::mutate(
+    baixo_peso = low,
+    idade = age,
+    peso_mae = lwt,
+    raca = factor(race, levels = c(1, 2, 3), labels = c("Branca", "Negra", "Outra")),
+    fumante = factor(smoke, levels = c(0, 1), labels = c("Não", "Sim")),
+    partos_prematuros = ptl,
+    hipertensao = factor(ht, levels = c(0, 1), labels = c("Não", "Sim")),
+    irritabilidade_uterina = factor(ui, levels = c(0, 1), labels = c("Não", "Sim")),
+    consultas_pre_natal = ftv
+  )
+```
+
+
+
+
+# Fim

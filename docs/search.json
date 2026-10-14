@@ -23,12 +23,12 @@
   {
     "objectID": "aulas/07-Variaveis_qualitativas_e_variaveis_dummies/conteudo.html",
     "href": "aulas/07-Variaveis_qualitativas_e_variaveis_dummies/conteudo.html",
-    "title": "7. Vraiǘeis qualitativas e variáveis dummies",
+    "title": "7. Variáveis qualitativas e variáveis dummies",
     "section": "",
     "text": "Nesta aula, vamos abordar o uso de variáveis dummy em MLGs.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF",
     "crumbs": [
       "Aulas",
-      "7. Vraiǘeis qualitativas e variáveis *dummies*"
+      "7. Variáveis qualitativas e variáveis *dummies*"
     ]
   },
   {
@@ -139,11 +139,15 @@
     ]
   },
   {
-    "objectID": "aulas/08-Desvio_e_comparacao_de_modelos (a fazer)/conteudo.html",
-    "href": "aulas/08-Desvio_e_comparacao_de_modelos (a fazer)/conteudo.html",
-    "title": "5. Avaliação dos coeficientes individuais da regressão",
+    "objectID": "aulas/08-Analise_de_desvio/conteudo.html",
+    "href": "aulas/08-Analise_de_desvio/conteudo.html",
+    "title": "8. Análise de desvio",
     "section": "",
-    "text": "Nesta aula, vamos abordar o Teste de Wald, os intervalos de confiança para os coeficientes de regressão e a interpretação dos coeficientes de acordo com as funções de ligação identidade, logarítmica e logit.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF"
+    "text": "Nesta aula, vamos abordar o desvio como medida de discrepância entre o modelo ajustado e o modelo saturado, estabelecendo uma analogia com a soma de quadrados dos resíduos na regressão linear. Também estudaremos a análise de desvio (ANODEV), a comparação de modelos encaixados e os testes da razão de verossimilhanças e F para avaliar a contribuição das variáveis explicativas nos modelos lineares generalizados.\nSlides:\n\n\n  \n\nSlides da aula em HTML\n\n\n\n  \n\nSlides da aula em PDF",
+    "crumbs": [
+      "Aulas",
+      "8. Análise de desvio"
+    ]
   },
   {
     "objectID": "aulas/10-Diagnostico (a fazer)/conteudo.html",
