@@ -1,0 +1,437 @@
+---
+title: "Diagnóstico de Modelos Lineares Generalizados"
+subtitle: |
+  *Como investigar e avaliar a adequação do modelo?*
+author:
+  name: |
+    ESTAT0092 -- Modelos Lineares Generalizados<br>
+    Prof. Dr. Sadraque E. F. Lucena<br>
+    <a href="http://sadraquelucena.github.io/mlg" style="font-size:.8em;">http://sadraquelucena.github.io/mlg</a><br>
+format:
+  revealjs:
+    theme: meutema.scss
+    width: 1600
+    height: 900
+    margin: 0.1
+    min-scale: 0.2
+    max-scale: 2.0
+    slide-number: true
+    code-line-numbers: false
+    subtitle-style: "font-size: 2em; font-weight: bold;"
+    logo: imagens/ufs_principal_positiva.png
+    transition: fade
+    transition-speed: fast
+    scss: meutema.scss
+lang: pt-BR
+---
+
+**## Onde estamos?**
+
+Na aula anterior, aprendemos a calcular e interpretar resíduos e a procurar padrões nos gráficos. Agora vamos responder a uma pergunta mais ampla: **o modelo está representando adequadamente a estrutura dos dados para o objetivo da análise?**
+
+Diagnosticar não é procurar um modelo perfeito nem eliminar automaticamente pontos extremos. É reunir evidências, formular explicações plausíveis, comparar alternativas justificadas e verificar se as conclusões são robustas.
+
+**## Exemplo inicial: contagens de falhas em fios**
+
+Vamos continuar com `warpbreaks`, que registra falhas em amostras de fios por tipo de lã e tensão. Começamos com um modelo Poisson aditivo e vamos construir um roteiro de diagnóstico.
+
+```{r}
+#| eval: false
+
+dados <- warpbreaks
+m0 <- glm(breaks ~ wool + tension,
+          family = poisson(link = "log"), data = dados)
+summary(m0)
+```
+
+Antes de mudar o modelo, pergunte: qual é o objetivo científico? A resposta é uma contagem? Há exposição desigual? As observações são independentes? As preditoras foram medidas e codificadas corretamente?
+
+**## Diagnóstico não é uma lista automática de testes**
+
+Uma avaliação defensável combina:
+
+- conhecimento do processo que gerou os dados;
+- resíduos e gráficos;
+- avaliação da variância e da dispersão;
+- forma funcional e função de ligação;
+- alavancagem e influência;
+- comparação entre modelos plausíveis;
+- análise de sensibilidade e validação, quando apropriadas.
+
+Nenhum indicador isolado decide se um modelo é adequado.
+
+**## Primeiro: confira dados e especificação**
+
+Antes de interpretar medidas de diagnóstico, confirme a qualidade do conjunto de dados e a coerência do modelo.
+
+- Resposta compatível com a família? Contagem, binária, contínua positiva etc.
+- Codificação e categorias corretas? Valores ausentes e registros duplicados foram tratados de forma justificada?
+- Observações independentes ou há agrupamento, repetição, tempo ou espaço?
+- Há exposição ou denominador que deveria entrar no modelo como *offset*?
+- As preditoras, interações e unidades fazem sentido para a pergunta científica?
+
+Erros de dados e erros de especificação podem produzir padrões semelhantes. O contexto é indispensável.
+
+**## Reajustando e comparando modelos plausíveis**
+
+```{r}
+#| eval: false
+
+# Modelo aditivo
+m0 <- glm(breaks ~ wool + tension,
+          family = poisson(link = "log"), data = dados)
+
+# Modelo com interação, se houver justificativa científica
+m1 <- glm(breaks ~ wool * tension,
+          family = poisson(link = "log"), data = dados)
+
+AIC(m0, m1)
+anova(m0, m1, test = "Chisq")
+```
+
+A interação permite que o efeito associado à tensão varie entre tipos de lã. A comparação por razão de verossimilhanças exige modelos aninhados ajustados aos mesmos dados e condições adequadas à aproximação assintótica. O AIC compara compromisso entre ajuste e complexidade; não prova que um modelo seja verdadeiro.
+
+**## Famílias de diagnóstico**
+
+| Pergunta | Evidência inicial |
+|---|---|
+| Há observações mal representadas? | Resíduos e envelopes simulados |
+| A variância é compatível? | Dispersão, resíduos e conhecimento da família |
+| A forma funcional está adequada? | Resíduos versus ajustados e preditoras |
+| Há observações com posição extrema? | Alavancagem |
+| Alguma observação altera as estimativas? | Influência e análise de exclusão justificada |
+| As conclusões dependem de escolhas específicas? | Comparação e análise de sensibilidade |
+
+**## Resíduos: o ponto de partida**
+
+```{r}
+#| eval: false
+
+par(mfrow = c(1, 2))
+plot(fitted(m0), rstandard(m0, type = "deviance"),
+     xlab = "Valores ajustados", ylab = "Resíduos de desvio padronizados",
+     pch = 19)
+abline(h = 0, lty = 2)
+abline(h = c(-2, 2), lty = 3)
+boxplot(rstandard(m0, type = "deviance") ~ dados$tension,
+        xlab = "Tensão", ylab = "Resíduos de desvio padronizados")
+abline(h = 0, lty = 2)
+par(mfrow = c(1, 1))
+```
+
+Procure curvatura, tendências, mudança de dispersão, diferenças sistemáticas entre categorias e pontos extremos. A ausência de um padrão visual forte é evidência limitada: depende do tamanho da amostra, da escala e da capacidade do gráfico de revelar a inadequação.
+
+**## Distribuição dos resíduos: envelope simulado**
+
+Em MLGs, não se deve exigir que os resíduos sejam exatamente normais. Um gráfico meio-normal com envelope simulado permite comparar resíduos observados com o comportamento esperado sob o modelo ajustado.
+
+```{r}
+#| eval: false
+
+# Instale uma única vez, se necessário:
+# install.packages("hnp")
+library(hnp)
+hnp(m0, resid.type = "deviance", sim = 99, halfnormal = TRUE)
+```
+
+Desvios sistemáticos do envelope sugerem incompatibilidade que merece investigação; não identificam sozinhos a causa. A sintaxe disponível pode variar conforme a versão do pacote.
+
+**## Investigação explícita da função de ligação**
+
+A função de ligação define como a média condicional se relaciona ao preditor linear. Duas ligações podem produzir ajustes e interpretações diferentes, mesmo quando a família probabilística é a mesma. Para contagens Poisson, a ligação log garante médias positivas e interpreta os coeficientes como diferenças na escala logarítmica da média.
+
+No exemplo, vamos comparar a ligação log com a ligação raiz quadrada, mantendo resposta, preditoras e família constantes. Esta é uma comparação didática de especificações; a escolha final deve considerar o processo científico, a plausibilidade das médias ajustadas e os diagnósticos, não apenas o AIC.
+
+```{r}
+#| eval: false
+
+m_log <- glm(breaks ~ wool * tension,
+             family = poisson(link = "log"), data = dados)
+m_sqrt <- glm(breaks ~ wool * tension,
+              family = poisson(link = "sqrt"), data = dados)
+
+comparacao_ligacoes <- data.frame(
+  modelo = c("Poisson: ligação log", "Poisson: ligação raiz"),
+  AIC = c(AIC(m_log), AIC(m_sqrt)),
+  desvio_residual = c(deviance(m_log), deviance(m_sqrt)),
+  minimo_ajustado = c(min(fitted(m_log)), min(fitted(m_sqrt)))
+)
+comparacao_ligacoes
+```
+
+Interprete os números em conjunto. Um AIC menor favorece um modelo dentro do conjunto comparado, mas não prova adequação absoluta. Verifique também resíduos e se as médias ajustadas são plausíveis.
+
+```{r}
+#| eval: false
+
+par(mfrow = c(1, 2))
+plot(fitted(m_log), rstandard(m_log, type = "deviance"),
+     main = "Ligação log", xlab = "Ajustados", ylab = "Resíduo padronizado",
+     pch = 19)
+abline(h = 0, lty = 2)
+plot(fitted(m_sqrt), rstandard(m_sqrt, type = "deviance"),
+     main = "Ligação raiz", xlab = "Ajustados", ylab = "Resíduo padronizado",
+     pch = 19)
+abline(h = 0, lty = 2)
+par(mfrow = c(1, 1))
+```
+
+**Pergunta para discussão:** os gráficos sugerem diferenças sistemáticas? Qual ligação tem justificativa substantiva mais clara? Se a evidência for inconclusiva, registre a incerteza em vez de declarar uma vencedora automática.
+
+**## Dispersão: o que significa?**
+
+A família de distribuição especifica uma relação entre a média e a variância. Para Poisson, \(\operatorname{Var}(Y_i\mid x_i)=\mu_i\). Se a variabilidade observada for maior do que a esperada, pode haver **sobredispersão**; se for menor, **subdispersão**.
+
+Uma medida exploratória é a razão entre o qui-quadrado de Pearson e os graus de liberdade residuais:
+
+\[
+\hat\phi_P=\frac{X_P^2}{\mathrm{gl}_{res}},\qquad
+X_P^2=\sum_i r_{Pi}^2.
+\]
+
+```{r}
+#| eval: false
+
+X2_P <- sum(residuals(m0, type = "pearson")^2)
+gl_res <- df.residual(m0)
+phi_P <- X2_P / gl_res
+c(qui_quadrado_Pearson = X2_P, gl_residuais = gl_res,
+  razao_Pearson_gl = phi_P)
+```
+
+Essa razão é uma indicação, não um teste universal com ponto de corte rígido. Em amostras pequenas e modelos mal especificados, sua interpretação é especialmente cautelosa.
+
+**## Sobredispersão não é uma causa única**
+
+A sobredispersão pode decorrer de heterogeneidade não observada, dependência entre observações, variáveis omitidas, excesso de zeros, estrutura de agrupamento ou escolha inadequada da distribuição. Não se deve mudar automaticamente de Poisson para binomial negativa sem investigar o processo gerador dos dados.
+
+Possíveis respostas, conforme a causa e o desenho: incluir preditoras relevantes, modelar dependência/agrupamento, usar uma distribuição mais adequada ou corrigir a especificação. Erros-padrão robustos podem ajudar em certas situações inferenciais, mas não corrigem todos os problemas do modelo.
+
+**## Alavancagem: posição extrema no desenho**
+
+A alavancagem descreve quanto uma observação se destaca na configuração das preditoras e pode ter potencial para afetar o ajuste. Ela não mede, por si só, discrepância na resposta.
+
+- **Resíduo grande + baixa alavancagem:** resposta discrepante em uma região comum das preditoras;
+- **Resíduo pequeno + alta alavancagem:** observação em posição extrema, mas bem ajustada pelo modelo;
+- **Resíduo grande + alta alavancagem:** combinação que merece atenção especial.
+
+Em MLGs, a alavancagem é definida a partir da matriz de trabalho do ajuste iterativo; não é, em geral, idêntica à alavancagem da regressão linear não ponderada.
+
+**## Obtendo alavancagem no R**
+
+```{r}
+#| eval: false
+
+h <- hatvalues(m0)
+tD <- rstandard(m0, type = "deviance")
+verificacao <- data.frame(
+  observacao = seq_len(nrow(dados)),
+  ajustado = fitted(m0),
+  residuo_desvio_padronizado = tD,
+  alavancagem = h
+)
+head(verificacao[order(verificacao$alavancagem, decreasing = TRUE), ], 8)
+```
+
+Valores altos devem ser interpretados relativamente ao número de parâmetros, ao desenho e à distribuição das alavancagens. Regras como \(2p/n\) ou \(3p/n\) são apenas referências heurísticas, não leis universais para todos os MLGs.
+
+**## Resíduos e alavancagem juntos**
+
+```{r}
+#| eval: false
+
+plot(h, tD, pch = 19,
+     xlab = "Alavancagem", ylab = "Resíduo de desvio padronizado")
+abline(h = 0, lty = 2)
+abline(h = c(-2, 2), lty = 3)
+```
+
+O gráfico ajuda a localizar observações que combinam posição extrema no desenho e discrepância residual. Não é uma regra automática de exclusão: verifique registro, contexto, qualidade da medição e efeito sobre as conclusões.
+
+**## Influência: a observação altera o ajuste?**
+
+Uma observação influente é aquela cuja presença pode alterar materialmente os coeficientes, erros-padrão, previsões ou conclusões. Influência combina discrepância residual e posição no desenho, entre outros aspectos.
+
+A distância de Cook resume mudanças no ajuste associadas à retirada de uma observação. Em MLGs, sua implementação e interpretação dependem da classe de modelo e da aproximação usada; use-a como ferramenta de triagem, não como veredito.
+
+**## Distância de Cook no R**
+
+```{r}
+#| eval: false
+
+cook <- cooks.distance(m0)
+resultado_influencia <- data.frame(
+  observacao = seq_len(nrow(dados)),
+  residuo_desvio_padronizado = rstandard(m0, type = "deviance"),
+  alavancagem = hatvalues(m0),
+  cook = cook
+)
+resultado_influencia[order(resultado_influencia$cook, decreasing = TRUE), ][1:8, ]
+plot(cook, type = "h", xlab = "Observação", ylab = "Distância de Cook")
+```
+
+Valores relativamente grandes identificam casos para exame. Limites como \(4/n\) são regras heurísticas herdadas de contextos específicos e não devem ser aplicados como critérios universais de exclusão em MLGs.
+
+**## Investigar a influência por análise de sensibilidade**
+
+Quando uma observação parece influente:
+
+1. confira a fonte, a codificação e a plausibilidade do registro;
+2. verifique se pertence à população e ao desenho de estudo;
+3. compare o ajuste com e sem a observação como análise de sensibilidade, quando cientificamente justificável;
+4. compare coeficientes, erros-padrão, intervalos de confiança, previsões e conclusões;
+5. documente os resultados com e sem o caso, sem omitir seletivamente a versão inconveniente.
+
+A análise sem a observação não substitui o modelo principal nem justifica exclusão automática.
+
+**## Exemplo executável de análise de sensibilidade**
+
+A observação com maior distância de Cook será usada apenas como caso para investigar. Isso não significa que deva ser excluída do modelo final. Primeiro, confira o registro e a explicação científica; depois, avalie quanto as conclusões dependem dela.
+
+```{r}
+#| eval: false
+
+cook <- cooks.distance(m1)
+id_suspeita <- which.max(cook)
+id_suspeita
+
+dados_sens <- dados[-id_suspeita, ]
+m1_sem_caso <- glm(breaks ~ wool * tension,
+                   family = poisson(link = "log"), data = dados_sens)
+
+coeficientes_comparados <- data.frame(
+  termo = names(coef(m1)),
+  completo = unname(coef(m1)),
+  sem_caso = unname(coef(m1_sem_caso))
+)
+coeficientes_comparados
+```
+
+Como os modelos foram ajustados a conjuntos de dados diferentes, não compare seus AICs. Use a análise de sensibilidade para verificar se coeficientes, erros-padrão, intervalos de confiança, previsões e conclusões mudam materialmente. A tabela de coeficientes é apenas o primeiro passo; em uma análise aplicada, examine também a incerteza e as previsões relevantes.
+
+**## Forma funcional e função de ligação**
+
+A função de ligação relaciona a média ao preditor linear: \(g(\mu_i)=x_i^T\beta\). Um padrão residual pode indicar que a estrutura sistemática está incompleta, mas nem sempre permite distinguir entre função de ligação inadequada, variável omitida, interação ausente ou forma funcional errada.
+
+Para preditoras numéricas, considere se a relação precisa de transformação, termo não linear ou spline. Para categorias, avalie a codificação e as categorias de referência. Interações devem ter justificativa substantiva, não ser incluídas apenas para melhorar uma estatística.
+
+**## Ciclo completo: hipótese, reespecificação e novo diagnóstico**
+
+Vamos tornar explícito o raciocínio que deve ser usado em uma análise real:
+
+1. **Sinal:** um gráfico ou uma medida sugere possível inadequação;
+2. **Hipótese:** propomos uma explicação verificável, por exemplo, que o efeito da tensão varia conforme o tipo de lã;
+3. **Alternativa:** ajustamos um modelo com interação, se houver justificativa substantiva;
+4. **Comparação:** avaliamos ajuste, complexidade e interpretação;
+5. **Novo diagnóstico:** refazemos gráficos, dispersão e avaliação de influência no modelo alternativo;
+6. **Decisão:** mantemos a alternativa apenas se ela for defensável no contexto dos dados e da pergunta.
+
+No conjunto `warpbreaks`, a interação é uma hipótese plausível porque a resposta pode variar com a combinação de tipo de lã e tensão. Ela não deve ser adicionada apenas para melhorar um número.
+
+```{r}
+#| eval: false
+
+m0 <- glm(breaks ~ wool + tension,
+          family = poisson(link = "log"), data = dados)
+m1 <- glm(breaks ~ wool * tension,
+          family = poisson(link = "log"), data = dados)
+
+AIC(m0, m1)
+anova(m0, m1, test = "Chisq")
+```
+
+O teste da razão de verossimilhanças compara modelos aninhados e depende de condições apropriadas. Examine o tamanho e o sentido dos efeitos, além da evidência estatística.
+
+**## Novo diagnóstico depois da reespecificação**
+
+Não basta comparar AIC ou um valor-p: depois de ajustar a alternativa, repita as verificações essenciais.
+
+```{r}
+#| eval: false
+
+par(mfrow = c(1, 2))
+plot(fitted(m1), rstandard(m1, type = "deviance"),
+     xlab = "Ajustados", ylab = "Resíduo de desvio padronizado",
+     main = "Modelo com interação", pch = 19)
+abline(h = 0, lty = 2)
+abline(h = c(-2, 2), lty = 3)
+boxplot(rstandard(m1, type = "deviance") ~ dados$tension,
+        xlab = "Tensão", ylab = "Resíduo padronizado")
+abline(h = 0, lty = 2)
+par(mfrow = c(1, 1))
+
+phi_m1 <- sum(residuals(m1, type = "pearson")^2) / df.residual(m1)
+c(desvio = deviance(m1), AIC = AIC(m1), razao_Pearson_gl = phi_m1)
+```
+
+Pergunte: os padrões diminuíram, permaneceram ou mudaram? A razão de Pearson ficou mais compatível com a estrutura esperada? Algum problema continua sem explicação? Um modelo alternativo precisa ser diagnosticado de novo, mesmo quando melhora um critério de comparação.
+
+**## Comparar modelos: ajuste e complexidade**
+
+```{r}
+#| eval: false
+
+AIC(m0, m1)
+# Para modelos aninhados e condições apropriadas:
+anova(m0, m1, test = "Chisq")
+```
+
+- **AIC:** compara modelos ajustados aos mesmos dados, equilibrando ajuste e complexidade; menor valor é preferível dentro do conjunto comparado, sem garantir adequação absoluta.
+- **Teste da razão de verossimilhanças:** compara modelos aninhados; requer condições de regularidade e cuidado com amostras pequenas, parâmetros na fronteira e modelos não aninhados.
+- **Desvio residual:** ajuda a avaliar discrepância global, mas sua referência inferencial depende das condições e da família.
+
+Não escolha um modelo apenas porque tem o menor AIC ou um valor-p abaixo de 0,05. A interpretação, a parcimônia e a adequação ao desenho importam.
+
+**## E se houver excesso de zeros ou dependência?**
+
+Se os dados exibirem muitos zeros em relação ao esperado, examine primeiro se isso decorre da média ajustada, de heterogeneidade, de exposição, de dependência ou de uma estrutura de dois processos. Modelos hurdle ou zero-inflated são opções apenas quando há justificativa para um processo gerador distinto e dados suficientes para estimá-lo.
+
+Se houver medidas repetidas, indivíduos agrupados, locais ou tempo, a independência pode ser inadequada. Considere modelos mistos, equações de estimação generalizadas ou estrutura explícita de dependência, conforme o desenho e o objetivo. Gráficos residuais não substituem a modelagem do desenho amostral.
+
+**## Previsão e validação**
+
+Quando o objetivo for previsão, avalie desempenho fora da amostra com separação adequada entre treino e teste ou validação cruzada. Evite vazamento de informação entre partições e respeite a estrutura temporal ou de agrupamento.
+
+Quando o objetivo for inferência, concentre-se também em viés, incerteza, especificação e robustez das conclusões. Bom desempenho preditivo não prova que todos os coeficientes tenham interpretação causal.
+
+**## Um fluxo de diagnóstico defensável**
+
+1. Defina o objetivo e o mecanismo de geração dos dados.
+2. Confira resposta, preditoras, exposição, dependência e codificação.
+3. Ajuste um modelo inicial cientificamente plausível.
+4. Examine resíduos, gráficos e envelope simulado.
+5. Avalie dispersão e estrutura de variância.
+6. Examine alavancagem e influência.
+7. Formule hipóteses de inadequação e compare alternativas justificadas.
+8. Faça análise de sensibilidade e valide previsões, quando aplicável.
+9. Registre decisões e limitações com transparência.
+
+**## Exercício aplicado**
+
+Use `warpbreaks` para comparar o modelo aditivo `m0` e o modelo com interação `m1`.
+
+1. Compare os coeficientes, o desvio residual e o AIC.
+2. Examine resíduos versus ajustados e versus preditoras.
+3. Calcule a razão de Pearson por graus de liberdade residuais.
+4. Identifique observações com maior alavancagem e distância de Cook.
+5. Para os casos mais destacados, compare o ajuste com e sem cada observação como análise de sensibilidade.
+6. Compare a ligação log e a ligação raiz quadrada mantendo a mesma família e a mesma fórmula;
+7. escolha um sinal de possível inadequação, formule uma hipótese e justifique uma reespecificação;
+8. refaça os diagnósticos depois da reespecificação;
+9. faça uma análise de sensibilidade para a observação com maior distância de Cook e explique o que muda;
+10. escreva uma conclusão distinguindo evidência, hipótese, decisão e limitações.
+
+**## O que não fazer**
+
+- Não excluir uma observação apenas porque seu resíduo é grande;
+- não escolher a família apenas por uma estatística isolada;
+- não interpretar ausência de padrão visual como prova de adequação;
+- não aplicar pontos de corte heurísticos como leis universais;
+- não confundir associação estatística, previsão e causalidade;
+- não esconder análises de sensibilidade que mudem a conclusão.
+
+**## Síntese: evidências, explicações e decisões**
+
+Um diagnóstico sólido não é a soma mecânica de testes. É um argumento técnico que liga padrões observados a hipóteses de inadequação, verifica alternativas plausíveis e mostra se as conclusões são estáveis.
+
+O objetivo não é obter um modelo que passe em todos os testes, mas construir um modelo defensável para a pergunta científica, explicitar suas limitações e comunicar a incerteza.
