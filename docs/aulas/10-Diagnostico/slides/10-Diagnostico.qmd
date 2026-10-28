@@ -1,0 +1,648 @@
+---
+title: "Diagnóstico de Modelos Lineares Generalizados"
+subtitle: |
+  *Alguma observação afeta excessivamente o ajuste?*
+  
+author:
+  name: | # indica que o campo name terá múltiplas linhas
+    ESTAT0092 -- Modelos Lineares Generalizados<br>
+    Prof. Dr. Sadraque E. F. Lucena<br>
+    <a href="http://sadraquelucena.github.io/mlg" style="font-size:.8em;">http://sadraquelucena.github.io/mlg</a><br>
+  
+format:
+  revealjs:
+    theme: meutema.scss
+    width: 1600
+    height: 900
+    margin: 0.1         # margem em torno do conteúdo
+    min-scale: 0.2       # escala mínima permitida
+    max-scale: 2.0       # escala máxima permitida
+    slide-number: true
+    code-line-numbers: false # sem numero das linhas nos code chunks
+    subtitle-style: "font-size: 2em; font-weight: bold;"  # Aqui é onde aumentamos o subtítulo
+    logo: imagens/ufs_principal_positiva.png
+    transition: fade
+    transition-speed: fast
+    scss: meutema.scss
+    include-in-header:
+      text: |
+        <style>
+        .sublist-2col ul ul {
+          column-count: 2;
+          column-gap: 2rem;
+        }
+        .sublist-2col ul ul li {
+          break-inside: avoid; /* Impede que um item quebre entre colunas */
+        }
+        </style>
+
+lang: pt-BR
+---
+
+## Na aula passada
+
+- Utilizamos o conjunto de dados `warpbreaks`, que registra o número de falhas (`breaks`) em amostras de fios, sob diferentes tipos de lã (`wool`) e níveis de tensão (`tension`).
+- Após ajustar e analisar os resíduos, verificamos que o modelo binomial negativo com função de ligação logarítmica era o mais adequado.
+- Agora vamos realizar uma análise de diagnóstico para identificarmos
+  - observações cuja combinação de preditoras é muito distinta das demais e
+  - observações que alteram desproporcionalmente as estimativas do modelo.
+
+
+
+
+## Análise de Diagnóstico
+
+O objetivo da **Análise de Diagnóstico** é investigar observações individuais que podem distorcer as estimativas. Para isso, usamos as seguintes medidas:
+
+- **Alavancagem ($h_i$):**
+  - Elemento da diagonal da matriz chapéu ponderada $H = W^{1/2} X (X^T W X)^{-1} X^T W^{1/2}$.
+  - Mede o quão extrema é a observação $i$ no espaço das variáveis explicativas ($X$).
+
+- **Distância de Cook ($D_i$):**
+  - Mede o impacto **global** da remoção da observação $i$ sobre todo o vetor de coeficientes $\hat{\beta}$.
+
+- **DFBETAs ($DFBETA_{j(i)}$):**
+  - Avalia o impacto **específico** da remoção da observação $i$ sobre a estimativa do coeficiente $\hat{\beta}_j$.
+
+
+
+
+## Alavancagem ($h_{ii}$)
+
+- A alavancagem quantifica o afastamento da $i$-ésima observação em relação ao centroide das variáveis explicativas no espaço $p$-dimensional.
+- É obtida pelos elementos diagonais $h_{ii}$ da matriz de projeção ponderada:
+$$
+  H = W^{1/2} X (X^T W X)^{-1} X^T W^{1/2}
+$$
+  - $X$ é a matriz de delineamento e $W = \operatorname{diag}(w_i)$ é a matriz de pesos iterativos do algoritmo de estimação dos parâmetros, IWLS, que depende do valor ajustado $\hat{\mu}_i$ e da função de variância $V(\mu)$.
+- A alavancagem mede o potencial (e não o impacto efetivo) de uma observação alterar o ajuste.
+- Emprega-se a regra empírica $h_{ii} > \frac{2p}{n}$ para sinalizar observações com alta alavancagem.
+  - Em amostras pequenas ($n < 30$) ou com muitos parâmetros, adota-se $h_{ii} > \frac{3p}{n}$.
+
+
+
+
+## Distância de Cook ($D_i$): Influência Global
+
+- A Distância de Cook quantifica o impacto conjunto da remoção da $i$-ésima observação sobre todo o vetor de parâmetros estimados $\hat{\boldsymbol{\beta}}$ (ou, equivalentemente, sobre a estrutura de médias $\hat{\boldsymbol{\mu}}$):
+$$
+  D_i = \frac{(\hat{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}}_{(i)})^T (X^T W X) (\hat{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}}_{(i)})}{p \phi} \approx \frac{r_{P,i}^2}{p \phi} \left( \frac{h_{ii}}{1 - h_{ii}} \right)
+$$
+  - $r_{P,i}$ é o resíduo de Pearson padronizado, $h_{ii}$ é a alavancagem, $p$ é o número de coeficientes e $\phi$ é o parâmetro de dispersão.
+
+- **Interpretação:** Mede o impacto no ajuste do modelo quando a observação $i$ é excluída. 
+- O gráfico da distância de Cook contra o índice da observação permite localizar os pontos mais influentes.
+- $D_i > \frac{4}{n}$ indica que a observação é influente no ajuste do modelo.
+
+
+
+
+## DFBETAs: Influência em Coeficientes Específicos
+
+- Enquanto a Distância de Cook resume a influência global, o DFBETAS quantifica o impacto individual da $i$-ésima observação sobre a estimativa do $j$-ésimo coeficiente $\hat{\beta}_j$:
+$$\text{DFBETAS}_{ij} = \frac{\hat{\beta}_j - \hat{\beta}_{j(i)}}{\operatorname{EP}(\hat{\beta}_{j(i)})}$$
+em que $\hat{\beta}_{j(i)}$ e $\operatorname{EP}(\hat{\beta}_{j(i)})$ são a estimativa e o erro-padrão obtidos sem a observação $i$.
+- Ela permite avaliar se a significância ($p$-valor) de uma variável específica ($\hat{\beta}_j$$) depende criticamente de uma única observação.
+- Em geral, observações com $|\text{DFBETAS}_{ij}| > \frac{2}{\sqrt{n}}$ são sinalizadas para inspeção em amostras moderadas ou grandes.
+
+
+
+
+## Voltando ao ajuste do conjunto `warpbreaks`
+
+
+
+
+
+## Roteiro Geral: Ajuste e Avaliação de um MLG
+
+A modelagem via MLGs segue um fluxo sistemático e iterativo em quatro etapas principais:
+
+1. **Especificação e Seleção de Preditoras:**
+   - Definição da componente aleatória (família), da função de ligação e seleção das variáveis explicativas (ANODEV / Stepwise).
+
+2. **Avaliação do Ajuste Global e Comparação:**
+   - Verificação da qualidade geral do ajuste (Deviance, Pseudo-$R^2$) e comparação entre modelos candidatos (AIC).
+
+3. **Análise de Resíduos e Inspeção Gráfica:**
+   - Validação de premissas teóricas, forma funcional, estabilidade da variância e calibração local via envelopes simulados.
+
+4. **Diagnóstico de Alavancagem e Influência (Aula de hoje):**
+   - Identificação de pontos extremos no espaço dos preditores ($h_i$) e de observações que alteram desproporcionalmente as estimativas do modelo ($D_i$, DFBETAs).
+
+
+
+
+## 4. Análise de Diagnóstico
+
+Agora, avançaremos para a **Análise de Diagnóstico**, investigando observações individuais que podem distorcer as estimativas:
+
+- **Alavancagem ($h_i$):**
+  - Elemento da diagonal da matriz chapéu ponderada $H = W^{1/2} X (X^T W X)^{-1} X^T W^{1/2}$.
+  - Mede o quão extrema é a observação $i$ no espaço das variáveis explicativas ($X$).
+
+- **Distância de Cook ($D_i$):**
+  - Mede o impacto **global** da remoção da observação $i$ sobre todo o vetor de coeficientes $\hat{\beta}$.
+
+- **DFBETAs ($DFBETA_{j(i)}$):**
+  - Avalia o impacto **específico** da remoção da observação $i$ sobre a estimativa do coeficiente $\hat{\beta}_j$.
+
+
+
+
+## Alavancagem
+
+- A alavancagem mede o potencial de uma observação exercer influência devido à sua posição no espaço das covariáveis.
+- Ela é obtida pelos elementos diagonais ($h_{ii}$) da matriz de projeção ponderada:
+  $$H = W^{1/2} X (X^T W X)^{-1} X^T W^{1/2}$$
+- Um valor elevado de $h_{ii}$ indica alta alavancagem (afastamento da observação em relação ao centro dos preditores).
+- Uma regra comum é sinalizar valores superiores a $2p/n$, em que $p$ é o número de coeficientes estimados e $n$ é o tamanho amostral. Esse limite não é universal.
+
+
+
+
+## Medidas de Influência (Distância de Cook)
+
+Uma observação é **influente** se sua remoção altera significativamente o vetor de parâmetros $\hat{\beta}$.
+
+
+
+### Distância de Cook para MLGs
+
+- Combina o resíduo padronizado (discrepância na resposta) e a alavancagem (posição em $X$):
+$$
+  D_i = \frac{(\hat{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}}_{(i)})^T (X^T W X) (\hat{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}}_{(i)})}{p \phi} \approx \frac{r_{P,i}^2}{p \phi} \left( \frac{h_{ii}}{1 - h_{ii}} \right)
+$$
+  * $r_{Pi}$: Resíduo de Pearson.
+
+  * $h_i$: Alavancagem da observação $i$.
+
+- **Interpretação:** Mede a mudança no ajuste do modelo quando a observação $i$ é excluída. 
+- O gráfico da distância de Cook contra o índice da observação permite localizar os pontos mais influentes.
+
+
+
+
+## DFBETAs: influência sobre cada coeficiente
+
+- DFBETAS quantifica o impacto individual da $i$-ésima observação sobre a estimativa do $j$-ésimo coeficiente $\hat{\beta}_j$:
+$$\text{DFBETAS}_{ij} = \frac{\hat{\beta}_j - \hat{\beta}_{j(i)}}{\operatorname{EP}(\hat{\beta}_{j(i)})}$$
+em que $\hat{\beta}_{j(i)}$ e $\operatorname{EP}(\hat{\beta}_{j(i)})$ são a estimativa e o erro-padrão obtidos sem a observação $i$.
+- Ela permite avaliar se a significância ($p$-valor) de uma variável específica ($\hat{\beta}_j$$) depende criticamente de uma única observação.
+- Em geral, observações com $\vert{}\text{DFBETAS}_{ij}\vert{} > \frac{2}{\sqrt{n}}$ são sinalizadas para inspeção em amostras moderadas ou grandes.
+
+
+
+
+## Voltando aos dados `warpbreaks`
+
+```{r}
+#| echo: true
+#| evaL: true
+
+modelo <- MASS::glm.nb(breaks ~ wool + tension,  link = "log",  data = warpbreaks)
+
+# Medidas de diagnóstico
+h <- hatvalues(modelo)          # Alavancagem
+cook <- cooks.distance(modelo)  # Cook
+dfb <- dfbetas(modelo)          # DFBETAs
+
+
+# Observações que merecem investigação
+diagnostico <- data.frame(
+  observacao = seq_len(nrow(warpbreaks)),
+  residuo_dev = rstandard(modelo, type = "deviance"),
+  alavancagem = h,
+  cook = cook
+)
+
+head( diagnostico[order(diagnostico$cook, decreasing = TRUE),] )
+```
+
+
+
+
+## Alavancagem
+
+```{r}
+#| echo: true
+#| evaL: true
+
+# Gráfico da alavancagem
+plot(h, type = "h", xlab = "Observação", ylab = "Alavancagem")
+abline(h = 2*(length(modelo$coefficients) - 1)/length(modelo$fitted.values),
+              col = "red", lty = 2) # 2p/n
+```
+
+- Nenhuma observação ultrapassa o limite de referência para alavancagem.
+- As observações não apresentam alavancagem elevada segundo esse critério.
+
+
+
+
+## Distância ce Cook
+
+```{r}
+#| echo: true
+#| evaL: true
+
+# Gráfico da distância de Cook
+plot(cook, type = "h", xlab = "Observação", ylab = "Distância de Cook")
+abline(h = 4/length(modelo$fitted.values), col = "red", lty = 2) # Linha de alerta: 4/n
+```
+
+- As observações 5, 9, 24 e 37 apresentam distância de Cook acima do limite de referência.
+
+
+
+
+## DFBETAs
+
+```{r}
+#| echo: true
+#| evaL: true
+
+# DFBETAs
+matplot(dfb, type = "h", xlab = "Observação", ylab = "DFBETA")
+corte_dfb <- 2/sqrt(length(modelo$fitted.values)) # 2/sqrt(n)
+abline(h = c(-corte_dfb, corte_dfb), col = "red", lty = 2) # Linhas limites
+```
+
+- Algumas observações ultrapassam os limites de referência dos DFBETAs, indicando possível influência sobre as estimativas de determinados coeficientes.
+
+
+
+
+
+## Novo Exemplo: `faraway::gala`
+
+Estudo sobre a riqueza de espécies de plantas em $n = 30$ ilhas do Arquipélago de Galápagos (Johnson & Raven, 1973).
+
+- **Objetivo:** Modelar a relação entre a contagem de espécies de plantas e características geográficas da ilha.
+
+- **Variáveis:**
+  - **`Species`** *(Resposta $Y$)*: número de espécies de plantas encontradas na ilha.
+  - **`Area`**: área total da ilha ($\text{km}^2$).
+  - **`Elevation`**: altitude máxima da ilha ($\text{m}$).
+  - **`Nearest`**: distância até a ilha mais próxima ($\text{km}$).
+  - **`Scruz`**: distância até a ilha Santa Cruz ($\text{km}$).
+  - **`Adjacent`**: área da ilha adjacente ($\text{km}^2$).
+
+
+
+
+## Novo Exemplo: `faraway::gala`
+```{r}
+#| echo: true
+#| eval: true
+
+# Carregamento e visualização inicial
+library(faraway)
+data(gala)
+head(gala)
+```
+
+<br>
+
+- A variável `Endemics` representa o número de espécies endêmicas (que só existem naquela ilha) e é um subconjunto do total de espécies (Species). Usar `Endemics` como variável explicativa ($X$) para prever `Species` ($Y$) significa usar a resposta para explicar a si mesma.
+
+
+
+
+## 1. Especificação e Seleção de Preditoras
+
+- Como os dados são de contagem, vamos ajustar os modelos de *Poisson* com função de ligação *log* e *raiz quadrada* e  o modelo *Binomial Negativo* com função de ligação *log*.
+  - R não conseguiu estimar os parâmetros com as outras funções de ligação.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Modelo Poisson com ligação log
+mod_poisson_log <- glm(Species ~ Area + Elevation + Nearest + Scruz + Adjacent,
+                       family = poisson(link = "log"), data = gala)
+
+# Modelo Poisson com ligação raiz quadrada
+mod_poisson_raiz <- glm(Species ~ Area + Elevation + Nearest + Scruz + Adjacent,
+                       family = poisson(link = "sqrt"), data = gala)
+
+# Modelo Binomial Negativo com ligação log
+mod_binNeg_log <- MASS::glm.nb(Species ~ Area + Elevation + Nearest + Scruz + Adjacent,
+                       link = log, data = gala)
+```
+
+
+
+
+## 1. Especificação e Seleção de Preditoras
+
+- Vamos encolher um modelo pelo menor AIC.
+
+```{r}
+#| echo: true
+#| eval: true
+AIC(mod_poisson_log, mod_poisson_raiz, mod_binNeg_log)
+```
+
+- Vamos olhar também a razão de dispersão.
+
+```{r}
+#| echo: true
+#| eval: true
+# Razão de dispersão phi_D = D / gl (ideal é próximo a 1)
+razao_dispersao <- function(modelo) return(modelo$deviance / modelo$df.residual)
+razao_dispersao(mod_poisson_log)
+razao_dispersao(mod_poisson_raiz)
+razao_dispersao(mod_binNeg_log)
+```
+
+
+
+
+## 1. Especificação e Seleção de Preditoras
+
+- Como o modelo Binomial Negativo teve menor AIC (e a razão de dispersão é próxima a 1), vamos avaliar a significância das preditoras.
+
+```{r}
+#| echo: true
+#| eval: true
+# ANODEV marginal - avalia o efeito de remover cada variável
+drop1(mod_binNeg_log, test = "Chisq") 
+```
+
+
+
+
+## 1. Especificação e Seleção de Preditoras
+
+- Modelo sem `Nearest`.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Modelo Binomial Negativo com ligação log sem Nearest
+mod_binNeg_log2 <- MASS::glm.nb(Species ~ Area + Elevation + Scruz + Adjacent,
+                       link = log, data = gala)
+
+drop1(mod_binNeg_log2, test = "Chisq")
+```
+
+
+
+
+## 1. Especificação e Seleção de Preditoras
+
+- Modelo sem `Nearest` e `Scruz`.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Modelo Binomial Negativo com ligação log sem Nearest e Scruz
+mod_binNeg_log3 <- MASS::glm.nb(Species ~ Area + Elevation + Adjacent,
+                       link = log, data = gala)
+
+drop1(mod_binNeg_log3, test = "Chisq")
+```
+
+
+
+
+## 1. Especificação e Seleção de Preditoras
+
+- Modelo sem `Nearest`, `Scruz` e `Area`.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Modelo Binomial Negativo com ligação log sem Nearest, Scruz e Area
+mod_binNeg_log4 <- MASS::glm.nb(Species ~ Elevation + Adjacent,
+                       link = log, data = gala)
+
+drop1(mod_binNeg_log4, test = "Chisq")
+```
+
+
+
+
+## 2. Avaliação global do modelo
+
+- Avaliação e teste global do modelo reduzido e comparação com AIC.
+
+```{r}
+#| echo: true
+#| eval: true
+
+razao_dispersao(mod_binNeg_log) # modelo completo
+razao_dispersao(mod_binNeg_log4) # modelo apenas com variáveis significativas
+lmtest::lrtest(mod_binNeg_log, mod_binNeg_log4) # tesando se a diferença é significativa
+AIC(mod_binNeg_log,mod_binNeg_log4) # comparando AICs
+```
+
+
+
+## 3. Análise de resíduos
+
+- Há inadequações na estrutura de média e variância do modelo? *(Gráfico dos Resíduos padronizados vs. Ajustados)*
+
+```{r}
+#| echo: true
+#| eval: true
+
+tD <- rstandard(mod_binNeg_log4, type = "deviance")
+plot(fitted(mod_binNeg_log4), tD,
+     xlab = "Valores ajustados", ylab = "Resíduos de desvio padronizados",
+     pch = 19, col = "darkblue")
+abline(h = 0, lty = 2, col = "red")
+abline(h = c(-2, 2), lty = 3, col = "gray40")
+```
+
+
+
+
+## 3. Análise de resíduos
+ 
+- As variáveis preditoras estão bem especificadas? *(Gráfico dos Resíduos vs. Variáveis Preditoras)*
+
+```{r}
+#| echo: true
+#| eval: true
+
+par(mfrow = c(1, 2))
+plot(gala$Elevation, tD, ylab = "Resíduo de desvio padronizado")
+abline(h = 0, lty = 2)
+plot(gala$Adjacent, tD, ylab = "Resíduo de desvio padronizado")
+abline(h = 0, lty = 2)
+```
+
+
+
+
+## 3. Análise de resíduos
+
+- As observações são independentes? *(Gráfico dos Resíduos vs. Ordem)*
+
+```{r}
+#| echo: true
+#| eval: true
+
+plot(tD, pch = 19, xlab = "Índice da observação",
+     ylab = "Resíduo de desvio padronizado")
+abline(h = 0, lty = 2)
+```
+
+
+
+
+## 3. Análise de resíduos
+
+- O modelo está adequado? *(Gráfico Meio-Normal com Envelope Simulado)*
+
+```{r}
+#| echo: true
+#| eval: true
+
+hnp::hnp(mod_binNeg_log4, resid.type = "deviance", sim = 999, halfnormal = TRUE)
+```
+
+
+
+
+## 4. Análise de Diganóstico
+
+- Vamos agora verificar se alguma variável tem alta alavancagem.
+
+```{r}
+#| echo: true
+#| eval: true
+
+h <- hatvalues(mod_binNeg_log4) # Alavancagem
+cook <- cooks.distance(mod_binNeg_log4)  # Cook
+dfb <- dfbetas(mod_binNeg_log4)          # DFBETAs
+
+# Observações que merecem investigação
+diagnostico <- data.frame(
+  observacao = seq_len(nrow(gala)),
+  residuo_dev = rstandard(mod_binNeg_log4, type = "deviance"),
+  alavancagem = h,
+  cook = cook
+)
+
+diagnostico[
+  order(diagnostico$cook, decreasing = TRUE),
+][1:5, ]
+```
+
+
+
+
+## 4. Análise de Diganóstico: Pontos de alavanca
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Gráfico da alavancagem
+plot(h, type = "h", xlab = "Observação", ylab = "Alavancagem")
+abline(h = 2*(length(mod_binNeg_log4$coefficients) - 1)/length(mod_binNeg_log4$fitted.values),
+              col = "red", lty = 2) # 2p/n
+```
+
+
+
+
+## 4. Análise de Diganóstico: Distância de Cook
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Gráfico da distância de Cook
+plot(cook, type = "h", xlab = "Observação", ylab = "Distância de Cook")
+abline(h = 4/length(mod_binNeg_log4$fitted.values), col = "red", lty = 2) # Linha de alerta: 4/n
+```
+
+
+
+
+## 4. Análise de Diganóstico: DFBETAs
+
+```{r}
+#| echo: true
+#| eval: true
+
+# DFBETAs
+matplot(dfb, type = "h", xlab = "Observação", ylab = "DFBETA")
+corte_dfb <- 2/sqrt(length(mod_binNeg_log4$fitted.values)) # 2/sqrt(n)
+abline(h = c(-corte_dfb, corte_dfb), col = "red", lty = 2) # Linhas limites
+```
+
+
+
+## A Influência da Obs. 16: Ilha Isabela
+
+```{r}
+#| echo: true
+#| eval: true
+
+gala[16, c("Species", "Elevation", "Adjacent")]
+colMeans(gala[,c("Species", "Elevation", "Adjacent")])
+
+# Predição para a observação 16 segundo o modelo
+predict(mod_binNeg_log4, type = "response")[16]
+```
+
+- **Características:** 
+  - A observação 16 (Isabela) possui altitude de $1.707\text{ m}$, sendo um ponto extremo no espaço do preditor `Elevation`.
+  - O modelo superestima a contagem de espécies nessa ilha ($\approx 2.285$ espécies estimadas contra $347$ contabilizadas).
+
+
+
+
+## Exercício
+
+- Base de dados: `dataCar`, pacote `insuranceData` do R.
+
+A base contém 67.856 apólices de seguro de automóveis contratadas em 2004 ou 2005, com informações sobre os veículos, os segurados, a exposição ao risco e a ocorrência de sinistros.
+
+- Ajuste um modelo de regressão com a variável `numero_sinistros` como resposta e `valor_veiculo`, `idade_veiculo`, `sexo`, `regiao`, `faixa_etaria` e `offset(log(exposicao)` como variáveis regressoras.
+- Escolha a distribuição e função de ligação mais adequada. Faça seleção de variáveis, Avalie a adequação do modelo. Faça a análise de resíduos e diagnóstico.
+
+
+
+
+## Exercício
+
+```{r}
+#| echo: true
+#| eval: false
+
+library(insuranceData, dplyr, forcats)
+data(dataCar)
+dados <- dataCar |>
+  rename(valor_veiculo = veh_value, exposicao = exposure, sinistro = clm,
+    numero_sinistros = numclaims, custo_sinistros = claimcst0, carroceria = veh_body,
+    idade_veiculo = veh_age, sexo = gender, regiao = area, faixa_etaria = agecat
+  ) |>
+  mutate(
+    sinistro = factor(sinistro, levels = c(0, 1), labels = c("Não", "Sim")),
+    idade_veiculo = factor(idade_veiculo, levels = c(1, 2, 3, 4),
+      labels = c("Mais novo", "Categoria 2", "Categoria 3", "Mais antigo")),
+    sexo = factor(sexo, levels = c("F", "M"), labels = c("Feminino", "Masculino")),
+    regiao = factor(regiao, levels = c("A", "B", "C", "D", "E", "F"),
+      labels = c("Região A", "Região B", "Região C", "Região D", "Região E", "Região F")),
+    faixa_etaria = factor(faixa_etaria, levels = 1:6,
+      labels = c("Mais jovem", "Faixa 2", "Faixa 3", "Faixa 4", "Faixa 5", "Mais velha")),
+    carroceria = fct_recode(factor(carroceria), "Ônibus" = "BUS", "Conversível" = "CONVT",
+      "Cupê" = "COUPE", "Hatchback" = "HBACK", "Teto rígido" = "HDTOP", "Minicarro" = "MCARA",
+      "Micro-ônibus" = "MIBUS", "Furgão" = "PANVN", "Roadster" = "RDSTR", "Sedã" = "SEDAN",
+      "Perua" = "STNWG", "Caminhão" = "TRUCK", "Utilitário" = "UTE"))
+```
+
+
+
+
+
+# Fim
