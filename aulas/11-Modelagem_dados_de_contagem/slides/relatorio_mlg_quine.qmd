@@ -1,0 +1,516 @@
+---
+title: "Modelos Lineares Generalizados para Dados de Contagem"
+subtitle: "Análise dos dias de ausência escolar"
+author: "Prof. Dr. Sadraque E. F. Lucena"
+lang: pt-BR
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    code-tools: true
+    theme: cosmo
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# Introdução
+
+Este é um modelo simples de relatório técnico de modelagem de dados de contagem usando como exemplo o número de faltas escolares em uma zona rural de Nova Gales do Sul, Austrália. Aqui foi investigado o número de dias de ausência escolar (`Days`) e sua associação com características dos estudantes. O objetivo é comparar modelos lineares generalizados (MLGs) com distribuição de Poisson e binomial negativa, utilizando diferentes funções de ligação, e avaliar a adequação dos ajustes por critérios de informação e diagnóstico dos resíduos.
+
+A análise é observacional. Portanto, as associações estimadas não devem ser interpretadas automaticamente como relações causais.
+
+# Dados e variáveis
+
+Os dados são provenientes do conjunto `quine`, disponibilizado no pacote `MASS` do R. A base contém 146 observações e cinco variáveis:
+
+- `Days`: número de dias de ausência;
+- `Eth`: grupo étnico conforme codificado na base;
+- `Sex`: sexo;
+- `Age`: faixa etária codificada; e
+- `Lrn`: categoria de aprendizagem codificada.
+
+As categorias são mantidas conforme os códigos originais do conjunto de dados.
+
+```{r}
+#| label: setup
+#| include: false
+
+pacotes <- c("MASS", "dplyr", "ggplot2", "knitr", "hnp", "lmtest")
+
+faltantes <- pacotes[
+  !pacotes %in% rownames(installed.packages())
+]
+
+if (length(faltantes) > 0) {
+  install.packages(faltantes)
+}
+
+library(MASS)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(hnp)
+library(lmtest)
+
+data("quine", package = "MASS")
+dados <- quine
+```
+
+## Inspeção inicial
+
+```{r}
+str(dados)
+head(dados)
+summary(dados)
+```
+
+A variável resposta é `Days` e as demais são as variáveis explicativas, todas categóricas. Como o interesse é explicar diferenças na média dos dias de ausência, ajustamos os modelos com a mesma fórmula e as mesmas observações.
+
+# Análise exploratória
+
+## Estatísticas descritivas
+
+```{r}
+resumo_days <- dados |>
+  summarise(
+    n = n(),
+    media = mean(Days),
+    desvio_padrao = sd(Days),
+    variancia = var(Days),
+    mediana = median(Days),
+    minimo = min(Days),
+    maximo = max(Days),
+    Q1 = quantile(Days, 0.25),
+    Q3 = quantile(Days, 0.75)
+  )
+
+knitr::kable(
+  resumo_days,
+  digits = 2,
+  caption = "Estatísticas descritivas dos dias de ausência escolar."
+)
+```
+
+A média observada é de aproximadamente 16,46 faltas, enquanto a variância é de aproximadamente 264,17. Como a varãncia é muito maior que a média, um modelo Poisson provavelmente terá ajuste inferior a um modelo binomial negativo para esses dados, embora a comparação final também dependa dos diagnósticos e do ajuste global.
+
+## Distribuição da resposta
+
+```{r}
+ggplot(dados, aes(x = Days)) +
+  geom_histogram(
+    binwidth = 5,
+    boundary = 0,
+    color = "white"
+  ) +
+  labs(
+    title = "Distribuição dos dias de ausência escolar",
+    x = "Dias de ausência",
+    y = "Número de estudantes"
+  ) +
+  theme_minimal()
+```
+
+O histograma do número de faltas apresenta uma distribuição assimétrica à direita, com maior concentração de estudantes com númoer de faltas relativamente baixo e uma cauda que se estende até 81 dias.
+
+## Distribuição por covariável
+
+Os boxplots abaixo sugerem diferenças nas distribuições de dias de ausência entre as categorias das variáveis explicativas. Merece destaque a diferença visual entre o númeor de faltas entre os grupos étnicos A e N, enquanto as diferenças entre as categorias de aprendizagem parecem menos pronunciadas. Essas comparações são exploratórias e não consideram simultaneamente as demais variáveis.
+
+```{r}
+ggplot(dados, aes(x = Age, y = Days)) +
+  geom_boxplot() +
+  labs(
+    title = "Dias de ausência segundo faixa etária",
+    x = "Faixa etária (código original)",
+    y = "Dias de ausência"
+  ) +
+  theme_minimal()
+
+ggplot(dados, aes(x = Eth, y = Days)) +
+  geom_boxplot() +
+  labs(
+    title = "Dias de ausência segundo grupo étnico",
+    x = "Grupo étnico (código original)",
+    y = "Dias de ausência"
+  ) +
+  theme_minimal()
+
+ggplot(dados, aes(x = Sex, y = Days)) +
+  geom_boxplot() +
+  labs(
+    title = "Dias de ausência segundo sexo",
+    x = "Sexo (código original)",
+    y = "Dias de ausência"
+  ) +
+  theme_minimal()
+
+ggplot(dados, aes(x = Lrn, y = Days)) +
+  geom_boxplot() +
+  labs(
+    title = "Dias de ausência segundo categoria de aprendizagem",
+    x = "Categoria de aprendizagem (código original)",
+    y = "Dias de ausência"
+  ) +
+  theme_minimal()
+```
+
+Os boxplots permitem comparar as distribuições observadas entre as categorias. Essas comparações são exploratórias: diferenças visuais não controlam simultaneamente as demais covariáveis e não substituem a análise multivariada.
+
+# Metodologia estatística
+
+Seja $Y_i$ o número de dias de ausência do estudante $i$, e seja $\boldsymbol{x}_i$ o vetor de variáveis explicativas. Nos MLGs, a média condicional $\mu_i = E(Y_i \mid \boldsymbol{x}_i)$ é relacionada ao preditor linear por uma função de ligação:
+
+$$
+g(\mu_i) = \beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip}.
+$$
+
+## Modelo de Poisson
+
+No modelo de Poisson,
+
+$$
+Y_i \mid \boldsymbol{x}_i \sim \operatorname{Poisson}(\mu_i),
+\qquad
+E(Y_i \mid \boldsymbol{x}_i)
+=
+\operatorname{Var}(Y_i \mid \boldsymbol{x}_i)
+=
+\mu_i.
+$$
+
+Foram consideradas as funções de ligação logarítmica e raiz quadrada. A ligação logarítmica garante médias positivas. A ligação raiz quadrada impõe uma relação diferente entre a média e o preditor linear e requer atenção à validade das médias ajustadas.
+
+## Modelo binomial negativo
+
+O modelo binomial negativo permite que a variância exceda a média. Na parametrização usual utilizada por `MASS::glm.nb`,
+
+$$
+E(Y_i \mid \boldsymbol{x}_i) = \mu_i,
+\qquad
+\operatorname{Var}(Y_i \mid \boldsymbol{x}_i)
+= \mu_i + \frac{\mu_i^2}{\theta},
+$$
+
+em que $\theta > 0$ é o parâmetro de dispersão. Valores menores de $\theta$ correspondem a maior dispersão adicional em relação ao Poisson. Também foram comparadas as ligações logarítmica e raiz quadrada.
+
+## Especificação dos modelos completos
+
+Inicialmente, todos os modelos foram ajustados com a fórmula `Days ~ Eth + Sex + Age + Lrn`. Essa especificação permite comparar as distribuições e funções de ligação mantendo constantes a resposta, as covariáveis e a amostra utilizada.
+
+```{r}
+modelo_pois_log <- glm(
+  Days ~ Eth + Sex + Age + Lrn,
+  family = poisson(link = "log"),
+  data = dados
+)
+
+modelo_pois_sqrt <- glm(
+  Days ~ Eth + Sex + Age + Lrn,
+  family = poisson(link = "sqrt"),
+  data = dados
+)
+
+modelo_bn_log <- MASS::glm.nb(
+  Days ~ Eth + Sex + Age + Lrn,
+  data = dados,
+  link = "log"
+)
+
+modelo_bn_sqrt <- MASS::glm.nb(
+  Days ~ Eth + Sex + Age + Lrn,
+  data = dados,
+  link = "sqrt"
+)
+```
+
+# Resultados
+
+## Comparação inicial das distribuições e ligações
+
+Com base no procedimento de seleção de variáveis por testes de razão de verossimilhanças, o modelo final adotado foi o Binomial Negativo reduzido com função de ligação logarítmica. O modelo desconsiderou as variáveis Sex e Lrn devido à ausência de ganho estatisticamente significativo de ajuste.
+
+```{r}
+modelos_completos <- list(
+  "Poisson — log" = modelo_pois_log,
+  "Poisson — raiz quadrada" = modelo_pois_sqrt,
+  "Binomial negativa — log" = modelo_bn_log,
+  "Binomial negativa — raiz quadrada" = modelo_bn_sqrt
+)
+
+tabela_comparacao_inicial <- tibble(
+  Modelo = names(modelos_completos),
+  AIC = vapply(modelos_completos, AIC, numeric(1)),
+  BIC = vapply(modelos_completos, BIC, numeric(1)),
+  Deviance_residual = vapply(modelos_completos, deviance, numeric(1)),
+  GL_residuais = vapply(modelos_completos, df.residual, numeric(1)),
+  Razao_deviance_GL = vapply(
+    modelos_completos,
+    function(m) deviance(m) / df.residual(m),
+    numeric(1)
+  ),
+  Minimo_ajustado = vapply(
+    modelos_completos,
+    function(m) min(fitted(m)),
+    numeric(1)
+  )
+) |>
+  mutate(
+    Delta_AIC = AIC - min(AIC),
+    Delta_BIC = BIC - min(BIC)
+  ) |>
+  arrange(AIC)
+
+knitr::kable(
+  tabela_comparacao_inicial,
+  digits = 3,
+  caption = "Comparação inicial dos modelos completos."
+)
+```
+
+Os modelos ajustados pela distribuição de Poisson apresentaram elevado AIC ($2.299,18$ na ligação log e $2.312,44$ na raiz quadrada) e deviance residual de $1.696,71$ para $139$ graus de liberdade. A razão $\text{Deviance}/\text{GL} \approx 12,21$ confirma a presença de severa sobredispersão, invalidando a suposição de equidispersão da Poisson ($\text{Var}(Y) = \mu$). 
+
+A introdução do parâmetro de dispersão $\theta$ nos modelos Binomiais Negativos reduziu drasticamente o AIC para $1.109,15$ (ligação log) e $1.109,43$ (raiz quadrada), além de estabilizar a razão $\text{Deviance}/\text{GL}$ em $1,208$.   
+
+Diante da equivalência prática em termos de AIC ($\Delta\text{AIC} = 0,282$), a ligação logarítmica foi selecionada por garantir que médias ajustadas fossem sempre positivas e por permitir a interpretação direta dos coeficientes exponenciados como Razões de Médias Condicionais (IRR). 
+
+## Seleção de variáveis no modelo binomial negativo completo
+
+A seleção de covariáveis foi conduzida sobre o modelo Binomial Negativo completo com ligação log por meio de testes de exclusão individual (função drop1()) baseados no Teste da Razão de Verossimilhanças (LRT). 
+
+ 
+
+```{r}
+selecao_drop1 <- drop1(modelo_bn_log, test = "Chisq")
+selecao_drop1
+```
+
+As variáveis `Sex` ($\text{LRT} = 0,25$; $p = 0,6170$) e `Lrn` ($\text{LRT} = 2,53$; $p = 0,1121$) não apresentaram contribuição estatisticamente significativa para a explicação da variabilidade das fasltas dos alunos. Por esse motivo, foram removidas do modelo.
+
+```{r}
+modelo_bn_log2 <- MASS::glm.nb(
+  Days ~ Eth + Age,
+  data = dados,
+  link = "log"
+)
+
+drop1(modelo_bn_log2)
+```
+
+## Comparação entre o modelo completo e o reduzido
+
+Para testar formalmente a exclusão conjunta de `Sex` e `Lrn`, aplicou-se o Teste da Razão de Verossimilhanças entre os modelos aninhados. Como o $p$-valor $> 0{,}05$, não há evidência estatística de que a exclusão de `Sex` e `Lrn` afeta significativamente a qualidade do ajuste. Portanto, o modelo reduzido foi escolhido.
+
+```{r}
+teste_modelos <- lmtest::lrtest(modelo_bn_log2, modelo_bn_log)
+teste_modelos
+```
+
+
+
+## Comparação dos modelos binomiais negativos
+
+```{r}
+modelos_bn <- list(
+  "Binomial negativa — log completo" = modelo_bn_log,
+  "Binomial negativa — raiz quadrada completa" = modelo_bn_sqrt,
+  "Binomial negativa — log reduzido" = modelo_bn_log2
+)
+
+tabela_bn <- tibble(
+  Modelo = names(modelos_bn),
+  AIC = vapply(modelos_bn, AIC, numeric(1)),
+  BIC = vapply(modelos_bn, BIC, numeric(1)),
+  Deviance_residual = vapply(modelos_bn, deviance, numeric(1)),
+  GL_residuais = vapply(modelos_bn, df.residual, numeric(1)),
+  Razao_deviance_GL = vapply(
+    modelos_bn,
+    function(m) deviance(m) / df.residual(m),
+    numeric(1)
+  ),
+  Minimo_ajustado = vapply(
+    modelos_bn,
+    function(m) min(fitted(m)),
+    numeric(1)
+  )
+) |>
+  mutate(
+    Delta_AIC = AIC - min(AIC),
+    Delta_BIC = BIC - min(BIC)
+  ) |>
+  arrange(AIC)
+
+knitr::kable(
+  tabela_bn,
+  digits = 3,
+  caption = "Comparação dos modelos binomiais negativos."
+)
+```
+
+A comparação global entre os modelos confirma que o Binomial Negativo Reduzido com Ligação Log obteve a melhor performance estatística.
+
+## Interpretação dos coeficientes do modelo final
+
+O modelo final estimado é dado por:
+   $$\ln(\hat{\mu}_i) = 3,038 - 0,561 \cdot \text{EthN}_i - 0,386 \cdot \text{AgeF1}_i + 0,185 \cdot \text{AgeF2}_i + 0,255 \cdot \text{AgeF3}_i$$
+com parâmetro de dispersão $\hat{\theta} = 1,249$ ($\text{EP} = 0,157$). A tabela abaixo apresetna melhor detalhamento das estimativas obtidas.
+
+```{r}
+resumo_final <- summary(modelo_bn_log2)$coefficients
+
+ic_final <- confint(modelo_bn_log2)
+
+tabela_coef_final <- data.frame(
+  Termo = rownames(resumo_final),
+  Estimativa = resumo_final[, "Estimate"],
+  Erro_padrao = resumo_final[, "Std. Error"],
+  Estatistica_z = resumo_final[, "z value"],
+  Valor_p = resumo_final[, "Pr(>|z|)"],
+  Razao_de_medias = exp(coef(modelo_bn_log2)),
+  IC95_inferior = exp(ic_final[, 1]),
+  IC95_superior = exp(ic_final[, 2]),
+  row.names = NULL
+)
+
+knitr::kable(
+  tabela_coef_final,
+  digits = 3,
+  caption = "Coeficientes, razões de médias e intervalos de confiança do modelo final."
+)
+```
+
+O intercepto representa a média condicional estimada para o conjunto de categorias de referência de `Eth` e `Age`.  Sua estimativa ($\hat{\beta}_0 = 3,038$; $p < 0,001$) indica que a média esperada de faltas para a categoria de referência (estudantes aborígenes na faixa etária F0) é de $\exp(3,038) = 20,87$ dias.   
+
+Para `Eth`, a razão de médias compara a categoria N com a categoria A. Aqui, mantida a faixa etária constante, a razão de médias é $0,571$ ($\text{IC}_{95\%}: [0,418; 0,779]$; $p < 0,001$). Isso indica que estudantes não aborígenes (N) apresentam uma redução esperada de $42,9\%$ no número de faltas em relação aos estudantes aborígenes (A).
+
+Considerando a faixa etária,  F1 apresenta redução de $32,0\%$ nas faltas esperadas em relação ao F0 ($\text{Razão de Médias} = 0,680$; $\text{IC}_{95\%}: [0,430; 1,060]$; $p = 0,090$). Por outro lado, a faixa etária F2 apresenta aumento de $20,3\%$ nas faltas esperadas ($\text{Razão de Médias} = 1,203$; $\text{IC}_{95\%}: [0,752; 1,903]$; $p = 0,425$). Para a faixa etária F3, há um aumento de $29,0\%$ nas faltas esperadas ($\text{Razão de Médias} = 1,290$; $\text{IC}_{95\%}: [0,800; 2,068]$; $p = 0,289$).
+
+(Nota: Embora as comparações individuais de F1, F2 e F3 em relação ao F0 não sejam estatisticamente significativas a $5\%$, a variável Age como um todo é altamente significativa para o modelo, conforme o teste LRT global, $p = 0,0075$).   
+
+```{r}
+modelo_bn_log2$theta
+```
+
+
+## Médias ajustadas
+
+
+A análise visual do gráfico Dias Observados vs. Previstos mostra que os valores ajustados pelo modelo acompanham a tendência central dos dados. A dispersão observada ao redor da linha de concordância é consistente com a estrutura de variabilidade prevista pela distribuição Binomial Negativa ($\text{Var}(Y) = \mu + \mu^2 / 1,249$). 
+
+```{r}
+dados$media_ajustada_bn <- predict(
+  modelo_bn_log2,
+  type = "response"
+)
+
+head(
+  dados[, c("Days", "media_ajustada_bn")]
+)
+```
+
+```{r}
+ggplot(dados, aes(x = media_ajustada_bn, y = Days)) +
+  geom_point(alpha = 0.7) +
+  geom_abline(
+    intercept = 0,
+    slope = 1,
+    linetype = "dashed"
+  ) +
+  labs(
+    title = "Dias observados versus previstos",
+    x = "Média prevista pelo modelo binomial negativo",
+    y = "Dias de ausência observados"
+  ) +
+  theme_minimal()
+```
+
+
+
+# Diagnóstico dos resíduos do modelo final
+
+
+## Envelope simulado meio-normal
+
+```{r}
+set.seed(123)
+
+hnp::hnp(
+  modelo_bn_log2,
+  sim = 999,
+  resid.type = "deviance",
+  paint.out = TRUE,
+  print.on = TRUE
+)
+```
+
+O gráfico de envelope simulado confirma que $94,52\%$ dos resíduos estão contidos dentro das bandas de confiança de $95\%$ (com apenas $8$ observações fora do envelope, equivalente a $5,48\%$). Essa pequena taxa de extravasamento é plenamente aceitável sob simulação aleatória, indicando que a distribuição Binomial Negativa especificou adequadamente a estrutura de probabilidade dos dados. 
+
+## Resíduos de Pearson versus valores ajustados
+
+```{r}
+plot(
+  fitted(modelo_bn_log2),
+  residuals(modelo_bn_log2, type = "pearson"),
+  xlab = "Valores ajustados",
+  ylab = "Resíduos de Pearson",
+  main = "Resíduos de Pearson versus valores ajustados"
+)
+abline(h = 0, lty = 2)
+```
+
+Os gráficos de dispersão dos resíduos de Pearson contra as médias ajustadas não exibem padrões heterocedásticos ou tendências não lineares. Os resíduos encontram-se simetricamente distribuídos em torno de zero em todas as faixas de valores previstos ($8$ a $27$ dias). A amplitude da maioria dos resíduos situa-se dentro do intervalo $[-2, +2]$, sem presença de viés sistemático de sub-ajuste ou super-ajuste.
+
+## Resíduos de deviance versus valores ajustados
+
+```{r}
+plot(
+  fitted(modelo_bn_log2),
+  residuals(modelo_bn_log2, type = "deviance"),
+  xlab = "Valores ajustados",
+  ylab = "Resíduos de deviance",
+  main = "Resíduos de deviance versus valores ajustados"
+)
+abline(h = 0, lty = 2)
+```
+
+A interpretação aqui é similar a dos resíduos de Pearson.
+
+## Análise de Pontos Influentes (Distância de Cook)
+
+```{r}
+cook <- cooks.distance(modelo_bn_log2)
+
+plot(
+  cook,
+  type = "h",
+  xlab = "Observação",
+  ylab = "Distância de Cook",
+  main = "Distância de Cook — modelo final"
+)
+
+abline(h = 4 / nobs(modelo_bn_log2), lty = 2)
+
+which(cook > 4 / nobs(modelo_bn_log2))
+```
+
+A avaliação de pontos influentes identificou que a vasta maioria das observações apresenta Distância de Cook próxima de zero.
+
+Apenas a observação nº 72 destaca-se isoladamente com valor $\approx 0,22$, seguida moderadamente pelas observações 45, 46, 59, 104, 109 e 126 que ultrapassam marginalmente o limite exploratório de $4/n = 0,0274$.
+
+
+```{r}
+dados[c(72,45, 46, 59, 104, 109, 126),]
+```
+
+A inspeção detalhada dos registros que ultrapassaram o limite da Distância de Cook ($4/n = 0,0274$) revela que o elevado impacto dessas observações decorre da presença de contagens atípicas de ausência escolar. O caso mais proeminente é o da observação 59 (com $81$ faltas observadas frente a $26,44$ previstas), que corresponde ao máximo de todo o conjunto de dados. Da mesma forma, os alunos 45, 46, 72 e 104 apresentaram faltas acentuadamente acima da tendência central do grupo (com $53$, $54$, $67$ e $69$ dias, respectivamente). Apesar do impacto visual na Distância de Cook, esses pontos refletem observações reais e válidas da cauda longa da distribuição das faltas.
+
+Por estarem significativamente abaixo do limiar crítico de influência severa ($\text{Distância de Cook} < 0,5$), conclui-se que nenhum ponto individual distorce isoladamente a estimativa dos parâmetros. O modelo final é robusto e está estatisticamente validado.
+
+
+# Conclusão
+
+Após a comparação das distribuições e funções de ligação e a avaliação da contribuição das variáveis explicativas, foi considerado o modelo binomial negativo com ligação logarítmica e preditores `Eth` e `Age`.
+

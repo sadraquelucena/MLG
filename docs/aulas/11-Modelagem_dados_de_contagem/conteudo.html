@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>11. Modelagem de Dados de Contagem – Modelos Lineares Generalizados</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../aulas/10-Diagnostico/conteudo.html" rel="prev">
+<link href="../../img/mlg_logo.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-00d389e62b6df4345c42dbb6af57f6a4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title">11. Modelagem de Dados de Contagem</h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+      <a href="../../index.html" class="sidebar-logo-link">
+      <img src="../../img/mlg_logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../../img/mlg_logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../info.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Informações da Disciplina</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Aulas</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/00-Regressao_linear/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">0. O Modelo Normal Linear</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/01-MLG_e_familia_exponencial/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">1. MLG e Família Exponencial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/02-Propriedades_da_familia_exponencial/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">2. Propriedades da Família Exponencial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/03-Estimacao_por_maxima_verossimilhanca/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">3. Estimação dos Parâmetros de um MLG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/04-Teste_razao_verossimilhancas/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">4. Teste da razão de verossimilhanças</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/05-Avaliacao_dos_coeficientes_individuais_da_regressao/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">5. Avaliação dos coeficientes individuais da regressão</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/06-selecao_de_variaveis/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">6. Seleção de variáveis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/07-Variaveis_qualitativas_e_variaveis_dummies/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">7. Variáveis qualitativas e variáveis <em>dummies</em></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/08-Analise_de_desvio/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">8. Análise de desvio</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/09-Analise_de_residuos/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">9. Análise de resíduos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/10-Diagnostico/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Diagnóstico de Modelos Lineares Generalizados</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Modelagem</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/11-Modelagem_dados_de_contagem/conteudo.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">11. Modelagem de Dados de Contagem</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">11. Modelagem de Dados de Contagem</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Nesta aula, vamos modelar o número faltas de alunos em uma escola da Austrália. Vamos usar o conjunto de dados <code>quine</code> do pacote <code>MASS</code> do R.</p>
+<ul>
+<li>Código R: <a href="../../aulas/11-Modelagem_dados_de_contagem/slides/codigo_modelagem_dados_contagem.R" target="_blank">Aqui</a></li>
+</ul>
+<hr>
+<section id="introdução" class="level1">
+<h1>Introdução</h1>
+<p>Este é um modelo simples de relatório técnico de modelagem de dados de contagem usando como exemplo o número de faltas escolares em uma zona rural de Nova Gales do Sul, Austrália. Aqui foi investigado o número de dias de ausência escolar (<code>Days</code>) e sua associação com características dos estudantes. O objetivo é comparar modelos lineares generalizados (MLGs) com distribuição de Poisson e binomial negativa, utilizando diferentes funções de ligação, e avaliar a adequação dos ajustes por critérios de informação e diagnóstico dos resíduos.</p>
+<p>A análise é observacional. Portanto, as associações estimadas não devem ser interpretadas automaticamente como relações causais.</p>
+</section>
+<section id="dados-e-variáveis" class="level1">
+<h1>Dados e variáveis</h1>
+<p>Os dados são provenientes do conjunto <code>quine</code>, disponibilizado no pacote <code>MASS</code> do R. A base contém 146 observações e cinco variáveis:</p>
+<ul>
+<li><code>Days</code>: número de dias de ausência;</li>
+<li><code>Eth</code>: grupo étnico conforme codificado na base;</li>
+<li><code>Sex</code>: sexo;</li>
+<li><code>Age</code>: faixa etária codificada; e</li>
+<li><code>Lrn</code>: categoria de aprendizagem codificada.</li>
+</ul>
+<p>As categorias são mantidas conforme os códigos originais do conjunto de dados.</p>
+<section id="inspeção-inicial" class="level2">
+<h2 data-anchor-id="inspeção-inicial">Inspeção inicial</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(dados)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   146 obs. of  5 variables:
+ $ Eth : Factor w/ 2 levels "A","N": 1 1 1 1 1 1 1 1 1 1 ...
+ $ Sex : Factor w/ 2 levels "F","M": 2 2 2 2 2 2 2 2 2 2 ...
+ $ Age : Factor w/ 4 levels "F0","F1","F2",..: 1 1 1 1 1 1 1 1 2 2 ...
+ $ Lrn : Factor w/ 2 levels "AL","SL": 2 2 2 1 1 1 1 1 2 2 ...
+ $ Days: int  2 11 14 5 5 13 20 22 6 6 ...</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dados)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Eth Sex Age Lrn Days
+1   A   M  F0  SL    2
+2   A   M  F0  SL   11
+3   A   M  F0  SL   14
+4   A   M  F0  AL    5
+5   A   M  F0  AL    5
+6   A   M  F0  AL   13</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dados)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Eth    Sex    Age     Lrn          Days      
+ A:69   F:80   F0:27   AL:83   Min.   : 0.00  
+ N:77   M:66   F1:46   SL:63   1st Qu.: 5.00  
+               F2:40           Median :11.00  
+               F3:33           Mean   :16.46  
+                               3rd Qu.:22.75  
+                               Max.   :81.00  </code></pre>
+</div>
+</div>
+<p>A variável resposta é <code>Days</code> e as demais são as variáveis explicativas, todas categóricas. Como o interesse é explicar diferenças na média dos dias de ausência, ajustamos os modelos com a mesma fórmula e as mesmas observações.</p>
+</section>
+</section>
+<section id="análise-exploratória" class="level1">
+<h1>Análise exploratória</h1>
+<section id="estatísticas-descritivas" class="level2">
+<h2 data-anchor-id="estatísticas-descritivas">Estatísticas descritivas</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>resumo_days <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">media =</span> <span class="fu">mean</span>(Days),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">desvio_padrao =</span> <span class="fu">sd</span>(Days),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">variancia =</span> <span class="fu">var</span>(Days),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">mediana =</span> <span class="fu">median</span>(Days),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">minimo =</span> <span class="fu">min</span>(Days),</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">maximo =</span> <span class="fu">max</span>(Days),</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">Q1 =</span> <span class="fu">quantile</span>(Days, <span class="fl">0.25</span>),</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Q3 =</span> <span class="fu">quantile</span>(Days, <span class="fl">0.75</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  resumo_days,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">2</span>,</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"Estatísticas descritivas dos dias de ausência escolar."</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Estatísticas descritivas dos dias de ausência escolar.</caption>
+<colgroup>
+<col style="width: 6%">
+<col style="width: 9%">
+<col style="width: 21%">
+<col style="width: 15%">
+<col style="width: 12%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 4%">
+<col style="width: 9%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">media</th>
+<th style="text-align: right;">desvio_padrao</th>
+<th style="text-align: right;">variancia</th>
+<th style="text-align: right;">mediana</th>
+<th style="text-align: right;">minimo</th>
+<th style="text-align: right;">maximo</th>
+<th style="text-align: right;">Q1</th>
+<th style="text-align: right;">Q3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">146</td>
+<td style="text-align: right;">16.46</td>
+<td style="text-align: right;">16.25</td>
+<td style="text-align: right;">264.17</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">81</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">22.75</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>A média observada é de aproximadamente 16,46 faltas, enquanto a variância é de aproximadamente 264,17. Como a varãncia é muito maior que a média, um modelo Poisson provavelmente terá ajuste inferior a um modelo binomial negativo para esses dados, embora a comparação final também dependa dos diagnósticos e do ajuste global.</p>
+</section>
+<section id="distribuição-da-resposta" class="level2">
+<h2 data-anchor-id="distribuição-da-resposta">Distribuição da resposta</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dados, <span class="fu">aes</span>(<span class="at">x =</span> Days)) <span class="sc">+</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">binwidth =</span> <span class="dv">5</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">boundary =</span> <span class="dv">0</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"white"</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Distribuição dos dias de ausência escolar"</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Dias de ausência"</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Número de estudantes"</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>O histograma do número de faltas apresenta uma distribuição assimétrica à direita, com maior concentração de estudantes com númoer de faltas relativamente baixo e uma cauda que se estende até 81 dias.</p>
+</section>
+<section id="distribuição-por-covariável" class="level2">
+<h2 data-anchor-id="distribuição-por-covariável">Distribuição por covariável</h2>
+<p>Os boxplots abaixo sugerem diferenças nas distribuições de dias de ausência entre as categorias das variáveis explicativas. Merece destaque a diferença visual entre o númeor de faltas entre os grupos étnicos A e N, enquanto as diferenças entre as categorias de aprendizagem parecem menos pronunciadas. Essas comparações são exploratórias e não consideram simultaneamente as demais variáveis.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dados, <span class="fu">aes</span>(<span class="at">x =</span> Age, <span class="at">y =</span> Days)) <span class="sc">+</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Dias de ausência segundo faixa etária"</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Faixa etária (código original)"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Dias de ausência"</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dados, <span class="fu">aes</span>(<span class="at">x =</span> Eth, <span class="at">y =</span> Days)) <span class="sc">+</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Dias de ausência segundo grupo étnico"</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Grupo étnico (código original)"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Dias de ausência"</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dados, <span class="fu">aes</span>(<span class="at">x =</span> Sex, <span class="at">y =</span> Days)) <span class="sc">+</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Dias de ausência segundo sexo"</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Sexo (código original)"</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Dias de ausência"</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-4-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dados, <span class="fu">aes</span>(<span class="at">x =</span> Lrn, <span class="at">y =</span> Days)) <span class="sc">+</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Dias de ausência segundo categoria de aprendizagem"</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Categoria de aprendizagem (código original)"</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Dias de ausência"</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-4-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Os boxplots permitem comparar as distribuições observadas entre as categorias. Essas comparações são exploratórias: diferenças visuais não controlam simultaneamente as demais covariáveis e não substituem a análise multivariada.</p>
+</section>
+</section>
+<section id="metodologia-estatística" class="level1">
+<h1>Metodologia estatística</h1>
+<p>Seja <span class="math inline">\(Y_i\)</span> o número de dias de ausência do estudante <span class="math inline">\(i\)</span>, e seja <span class="math inline">\(\boldsymbol{x}_i\)</span> o vetor de variáveis explicativas. Nos MLGs, a média condicional <span class="math inline">\(\mu_i = E(Y_i \mid \boldsymbol{x}_i)\)</span> é relacionada ao preditor linear por uma função de ligação:</p>
+<p><span class="math display">\[
+g(\mu_i) = \beta_0 + \beta_1 x_{i1} + \cdots + \beta_p x_{ip}.
+\]</span></p>
+<section id="modelo-de-poisson" class="level2">
+<h2 data-anchor-id="modelo-de-poisson">Modelo de Poisson</h2>
+<p>No modelo de Poisson,</p>
+<p><span class="math display">\[
+Y_i \mid \boldsymbol{x}_i \sim \operatorname{Poisson}(\mu_i),
+\qquad
+E(Y_i \mid \boldsymbol{x}_i)
+=
+\operatorname{Var}(Y_i \mid \boldsymbol{x}_i)
+=
+\mu_i.
+\]</span></p>
+<p>Foram consideradas as funções de ligação logarítmica e raiz quadrada. A ligação logarítmica garante médias positivas. A ligação raiz quadrada impõe uma relação diferente entre a média e o preditor linear e requer atenção à validade das médias ajustadas.</p>
+</section>
+<section id="modelo-binomial-negativo" class="level2">
+<h2 data-anchor-id="modelo-binomial-negativo">Modelo binomial negativo</h2>
+<p>O modelo binomial negativo permite que a variância exceda a média. Na parametrização usual utilizada por <code>MASS::glm.nb</code>,</p>
+<p><span class="math display">\[
+E(Y_i \mid \boldsymbol{x}_i) = \mu_i,
+\qquad
+\operatorname{Var}(Y_i \mid \boldsymbol{x}_i)
+= \mu_i + \frac{\mu_i^2}{\theta},
+\]</span></p>
+<p>em que <span class="math inline">\(\theta &gt; 0\)</span> é o parâmetro de dispersão. Valores menores de <span class="math inline">\(\theta\)</span> correspondem a maior dispersão adicional em relação ao Poisson. Também foram comparadas as ligações logarítmica e raiz quadrada.</p>
+</section>
+<section id="especificação-dos-modelos-completos" class="level2">
+<h2 data-anchor-id="especificação-dos-modelos-completos">Especificação dos modelos completos</h2>
+<p>Inicialmente, todos os modelos foram ajustados com a fórmula <code>Days ~ Eth + Sex + Age + Lrn</code>. Essa especificação permite comparar as distribuições e funções de ligação mantendo constantes a resposta, as covariáveis e a amostra utilizada.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>modelo_pois_log <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  Days <span class="sc">~</span> Eth <span class="sc">+</span> Sex <span class="sc">+</span> Age <span class="sc">+</span> Lrn,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">poisson</span>(<span class="at">link =</span> <span class="st">"log"</span>),</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dados</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>modelo_pois_sqrt <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  Days <span class="sc">~</span> Eth <span class="sc">+</span> Sex <span class="sc">+</span> Age <span class="sc">+</span> Lrn,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">poisson</span>(<span class="at">link =</span> <span class="st">"sqrt"</span>),</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dados</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>modelo_bn_log <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">glm.nb</span>(</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  Days <span class="sc">~</span> Eth <span class="sc">+</span> Sex <span class="sc">+</span> Age <span class="sc">+</span> Lrn,</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dados,</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">link =</span> <span class="st">"log"</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>modelo_bn_sqrt <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">glm.nb</span>(</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  Days <span class="sc">~</span> Eth <span class="sc">+</span> Sex <span class="sc">+</span> Age <span class="sc">+</span> Lrn,</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dados,</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">link =</span> <span class="st">"sqrt"</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="resultados" class="level1">
+<h1>Resultados</h1>
+<section id="comparação-inicial-das-distribuições-e-ligações" class="level2">
+<h2 data-anchor-id="comparação-inicial-das-distribuições-e-ligações">Comparação inicial das distribuições e ligações</h2>
+<p>Com base no procedimento de seleção de variáveis por testes de razão de verossimilhanças, o modelo final adotado foi o Binomial Negativo reduzido com função de ligação logarítmica. O modelo desconsiderou as variáveis Sex e Lrn devido à ausência de ganho estatisticamente significativo de ajuste.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>modelos_completos <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Poisson — log"</span> <span class="ot">=</span> modelo_pois_log,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Poisson — raiz quadrada"</span> <span class="ot">=</span> modelo_pois_sqrt,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Binomial negativa — log"</span> <span class="ot">=</span> modelo_bn_log,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Binomial negativa — raiz quadrada"</span> <span class="ot">=</span> modelo_bn_sqrt</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>tabela_comparacao_inicial <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">Modelo =</span> <span class="fu">names</span>(modelos_completos),</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">AIC =</span> <span class="fu">vapply</span>(modelos_completos, AIC, <span class="fu">numeric</span>(<span class="dv">1</span>)),</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">BIC =</span> <span class="fu">vapply</span>(modelos_completos, BIC, <span class="fu">numeric</span>(<span class="dv">1</span>)),</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">Deviance_residual =</span> <span class="fu">vapply</span>(modelos_completos, deviance, <span class="fu">numeric</span>(<span class="dv">1</span>)),</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">GL_residuais =</span> <span class="fu">vapply</span>(modelos_completos, df.residual, <span class="fu">numeric</span>(<span class="dv">1</span>)),</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">Razao_deviance_GL =</span> <span class="fu">vapply</span>(</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    modelos_completos,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(m) <span class="fu">deviance</span>(m) <span class="sc">/</span> <span class="fu">df.residual</span>(m),</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">numeric</span>(<span class="dv">1</span>)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">Minimo_ajustado =</span> <span class="fu">vapply</span>(</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    modelos_completos,</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(m) <span class="fu">min</span>(<span class="fu">fitted</span>(m)),</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">numeric</span>(<span class="dv">1</span>)</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">Delta_AIC =</span> AIC <span class="sc">-</span> <span class="fu">min</span>(AIC),</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">Delta_BIC =</span> BIC <span class="sc">-</span> <span class="fu">min</span>(BIC)</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(AIC)</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>  tabela_comparacao_inicial,</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"Comparação inicial dos modelos completos."</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Comparação inicial dos modelos completos.</caption>
+<colgroup>
+<col style="width: 24%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 13%">
+<col style="width: 9%">
+<col style="width: 13%">
+<col style="width: 11%">
+<col style="width: 7%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Modelo</th>
+<th style="text-align: right;">AIC</th>
+<th style="text-align: right;">BIC</th>
+<th style="text-align: right;">Deviance_residual</th>
+<th style="text-align: right;">GL_residuais</th>
+<th style="text-align: right;">Razao_deviance_GL</th>
+<th style="text-align: right;">Minimo_ajustado</th>
+<th style="text-align: right;">Delta_AIC</th>
+<th style="text-align: right;">Delta_BIC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Binomial negativa — log</td>
+<td style="text-align: right;">1109.151</td>
+<td style="text-align: right;">1133.020</td>
+<td style="text-align: right;">167.952</td>
+<td style="text-align: right;">139</td>
+<td style="text-align: right;">1.208</td>
+<td style="text-align: right;">6.532</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Binomial negativa — raiz quadrada</td>
+<td style="text-align: right;">1109.433</td>
+<td style="text-align: right;">1133.302</td>
+<td style="text-align: right;">167.900</td>
+<td style="text-align: right;">139</td>
+<td style="text-align: right;">1.208</td>
+<td style="text-align: right;">6.244</td>
+<td style="text-align: right;">0.282</td>
+<td style="text-align: right;">0.282</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Poisson — log</td>
+<td style="text-align: right;">2299.184</td>
+<td style="text-align: right;">2320.069</td>
+<td style="text-align: right;">1696.707</td>
+<td style="text-align: right;">139</td>
+<td style="text-align: right;">12.207</td>
+<td style="text-align: right;">6.346</td>
+<td style="text-align: right;">1190.033</td>
+<td style="text-align: right;">1187.049</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Poisson — raiz quadrada</td>
+<td style="text-align: right;">2312.439</td>
+<td style="text-align: right;">2333.324</td>
+<td style="text-align: right;">1709.962</td>
+<td style="text-align: right;">139</td>
+<td style="text-align: right;">12.302</td>
+<td style="text-align: right;">5.550</td>
+<td style="text-align: right;">1203.288</td>
+<td style="text-align: right;">1200.304</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Os modelos ajustados pela distribuição de Poisson apresentaram elevado AIC (<span class="math inline">\(2.299,18\)</span> na ligação log e <span class="math inline">\(2.312,44\)</span> na raiz quadrada) e deviance residual de <span class="math inline">\(1.696,71\)</span> para <span class="math inline">\(139\)</span> graus de liberdade. A razão <span class="math inline">\(\text{Deviance}/\text{GL} \approx 12,21\)</span> confirma a presença de severa sobredispersão, invalidando a suposição de equidispersão da Poisson (<span class="math inline">\(\text{Var}(Y) = \mu\)</span>).</p>
+<p>A introdução do parâmetro de dispersão <span class="math inline">\(\theta\)</span> nos modelos Binomiais Negativos reduziu drasticamente o AIC para <span class="math inline">\(1.109,15\)</span> (ligação log) e <span class="math inline">\(1.109,43\)</span> (raiz quadrada), além de estabilizar a razão <span class="math inline">\(\text{Deviance}/\text{GL}\)</span> em <span class="math inline">\(1,208\)</span>.</p>
+<p>Diante da equivalência prática em termos de AIC (<span class="math inline">\(\Delta\text{AIC} = 0,282\)</span>), a ligação logarítmica foi selecionada por garantir que médias ajustadas fossem sempre positivas e por permitir a interpretação direta dos coeficientes exponenciados como Razões de Médias Condicionais (IRR).</p>
+</section>
+<section id="seleção-de-variáveis-no-modelo-binomial-negativo-completo" class="level2">
+<h2 data-anchor-id="seleção-de-variáveis-no-modelo-binomial-negativo-completo">Seleção de variáveis no modelo binomial negativo completo</h2>
+<p>A seleção de covariáveis foi conduzida sobre o modelo Binomial Negativo completo com ligação log por meio de testes de exclusão individual (função drop1()) baseados no Teste da Razão de Verossimilhanças (LRT).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>selecao_drop1 <span class="ot">&lt;-</span> <span class="fu">drop1</span>(modelo_bn_log, <span class="at">test =</span> <span class="st">"Chisq"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>selecao_drop1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Single term deletions
+
+Model:
+Days ~ Eth + Sex + Age + Lrn
+       Df Deviance    AIC    LRT  Pr(&gt;Chi)    
+&lt;none&gt;      167.95 1107.2                     
+Eth     1   181.01 1118.2 13.059 0.0003019 ***
+Sex     1   168.20 1105.4  0.250 0.6170467    
+Age     3   179.93 1113.1 11.979 0.0074547 ** 
+Lrn     1   170.48 1107.7  2.525 0.1120563    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>As variáveis <code>Sex</code> (<span class="math inline">\(\text{LRT} = 0,25\)</span>; <span class="math inline">\(p = 0,6170\)</span>) e <code>Lrn</code> (<span class="math inline">\(\text{LRT} = 2,53\)</span>; <span class="math inline">\(p = 0,1121\)</span>) não apresentaram contribuição estatisticamente significativa para a explicação da variabilidade das fasltas dos alunos. Por esse motivo, foram removidas do modelo.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>modelo_bn_log2 <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">glm.nb</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  Days <span class="sc">~</span> Eth <span class="sc">+</span> Age,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dados,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">link =</span> <span class="st">"log"</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="fu">drop1</span>(modelo_bn_log2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Single term deletions
+
+Model:
+Days ~ Eth + Age
+       Df Deviance    AIC
+&lt;none&gt;      167.84 1105.8
+Eth     1   180.34 1116.3
+Age     3   179.06 1111.0</code></pre>
+</div>
+</div>
+</section>
+<section id="comparação-entre-o-modelo-completo-e-o-reduzido" class="level2">
+<h2 data-anchor-id="comparação-entre-o-modelo-completo-e-o-reduzido">Comparação entre o modelo completo e o reduzido</h2>
+<p>Para testar formalmente a exclusão conjunta de <code>Sex</code> e <code>Lrn</code>, aplicou-se o Teste da Razão de Verossimilhanças entre os modelos aninhados. Como o <span class="math inline">\(p\)</span>-valor <span class="math inline">\(&gt; 0{,}05\)</span>, não há evidência estatística de que a exclusão de <code>Sex</code> e <code>Lrn</code> afeta significativamente a qualidade do ajuste. Portanto, o modelo reduzido foi escolhido.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>teste_modelos <span class="ot">&lt;-</span> lmtest<span class="sc">::</span><span class="fu">lrtest</span>(modelo_bn_log2, modelo_bn_log)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>teste_modelos</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Likelihood ratio test
+
+Model 1: Days ~ Eth + Age
+Model 2: Days ~ Eth + Sex + Age + Lrn
+  #Df  LogLik Df  Chisq Pr(&gt;Chisq)
+1   6 -547.90                     
+2   8 -546.58  2 2.6502     0.2658</code></pre>
+</div>
+</div>
+</section>
+<section id="comparação-dos-modelos-binomiais-negativos" class="level2">
+<h2 data-anchor-id="comparação-dos-modelos-binomiais-negativos">Comparação dos modelos binomiais negativos</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>modelos_bn <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Binomial negativa — log completo"</span> <span class="ot">=</span> modelo_bn_log,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Binomial negativa — raiz quadrada completa"</span> <span class="ot">=</span> modelo_bn_sqrt,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Binomial negativa — log reduzido"</span> <span class="ot">=</span> modelo_bn_log2</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>tabela_bn <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">Modelo =</span> <span class="fu">names</span>(modelos_bn),</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">AIC =</span> <span class="fu">vapply</span>(modelos_bn, AIC, <span class="fu">numeric</span>(<span class="dv">1</span>)),</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">BIC =</span> <span class="fu">vapply</span>(modelos_bn, BIC, <span class="fu">numeric</span>(<span class="dv">1</span>)),</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">Deviance_residual =</span> <span class="fu">vapply</span>(modelos_bn, deviance, <span class="fu">numeric</span>(<span class="dv">1</span>)),</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">GL_residuais =</span> <span class="fu">vapply</span>(modelos_bn, df.residual, <span class="fu">numeric</span>(<span class="dv">1</span>)),</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">Razao_deviance_GL =</span> <span class="fu">vapply</span>(</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    modelos_bn,</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(m) <span class="fu">deviance</span>(m) <span class="sc">/</span> <span class="fu">df.residual</span>(m),</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">numeric</span>(<span class="dv">1</span>)</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">Minimo_ajustado =</span> <span class="fu">vapply</span>(</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    modelos_bn,</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(m) <span class="fu">min</span>(<span class="fu">fitted</span>(m)),</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">numeric</span>(<span class="dv">1</span>)</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">Delta_AIC =</span> AIC <span class="sc">-</span> <span class="fu">min</span>(AIC),</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">Delta_BIC =</span> BIC <span class="sc">-</span> <span class="fu">min</span>(BIC)</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(AIC)</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>  tabela_bn,</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"Comparação dos modelos binomiais negativos."</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Comparação dos modelos binomiais negativos.</caption>
+<colgroup>
+<col style="width: 29%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 12%">
+<col style="width: 8%">
+<col style="width: 12%">
+<col style="width: 10%">
+<col style="width: 6%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Modelo</th>
+<th style="text-align: right;">AIC</th>
+<th style="text-align: right;">BIC</th>
+<th style="text-align: right;">Deviance_residual</th>
+<th style="text-align: right;">GL_residuais</th>
+<th style="text-align: right;">Razao_deviance_GL</th>
+<th style="text-align: right;">Minimo_ajustado</th>
+<th style="text-align: right;">Delta_AIC</th>
+<th style="text-align: right;">Delta_BIC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Binomial negativa — log reduzido</td>
+<td style="text-align: right;">1107.801</td>
+<td style="text-align: right;">1125.703</td>
+<td style="text-align: right;">167.842</td>
+<td style="text-align: right;">141</td>
+<td style="text-align: right;">1.190</td>
+<td style="text-align: right;">8.098</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Binomial negativa — log completo</td>
+<td style="text-align: right;">1109.151</td>
+<td style="text-align: right;">1133.020</td>
+<td style="text-align: right;">167.952</td>
+<td style="text-align: right;">139</td>
+<td style="text-align: right;">1.208</td>
+<td style="text-align: right;">6.532</td>
+<td style="text-align: right;">1.350</td>
+<td style="text-align: right;">7.317</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Binomial negativa — raiz quadrada completa</td>
+<td style="text-align: right;">1109.433</td>
+<td style="text-align: right;">1133.302</td>
+<td style="text-align: right;">167.900</td>
+<td style="text-align: right;">139</td>
+<td style="text-align: right;">1.208</td>
+<td style="text-align: right;">6.244</td>
+<td style="text-align: right;">1.631</td>
+<td style="text-align: right;">7.599</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>A comparação global entre os modelos confirma que o Binomial Negativo Reduzido com Ligação Log obteve a melhor performance estatística.</p>
+</section>
+<section id="interpretação-dos-coeficientes-do-modelo-final" class="level2">
+<h2 data-anchor-id="interpretação-dos-coeficientes-do-modelo-final">Interpretação dos coeficientes do modelo final</h2>
+<p>O modelo final estimado é dado por: <span class="math display">\[\ln(\hat{\mu}_i) = 3,038 - 0,561 \cdot \text{EthN}_i - 0,386 \cdot \text{AgeF1}_i + 0,185 \cdot \text{AgeF2}_i + 0,255 \cdot \text{AgeF3}_i\]</span> com parâmetro de dispersão <span class="math inline">\(\hat{\theta} = 1,249\)</span> (<span class="math inline">\(\text{EP} = 0,157\)</span>). A tabela abaixo apresetna melhor detalhamento das estimativas obtidas.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>resumo_final <span class="ot">&lt;-</span> <span class="fu">summary</span>(modelo_bn_log2)<span class="sc">$</span>coefficients</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>ic_final <span class="ot">&lt;-</span> <span class="fu">confint</span>(modelo_bn_log2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Waiting for profiling to be done...</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>tabela_coef_final <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Termo =</span> <span class="fu">rownames</span>(resumo_final),</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Estimativa =</span> resumo_final[, <span class="st">"Estimate"</span>],</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Erro_padrao =</span> resumo_final[, <span class="st">"Std. Error"</span>],</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">Estatistica_z =</span> resumo_final[, <span class="st">"z value"</span>],</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">Valor_p =</span> resumo_final[, <span class="st">"Pr(&gt;|z|)"</span>],</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">Razao_de_medias =</span> <span class="fu">exp</span>(<span class="fu">coef</span>(modelo_bn_log2)),</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">IC95_inferior =</span> <span class="fu">exp</span>(ic_final[, <span class="dv">1</span>]),</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">IC95_superior =</span> <span class="fu">exp</span>(ic_final[, <span class="dv">2</span>]),</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">row.names =</span> <span class="cn">NULL</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>  tabela_coef_final,</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">digits =</span> <span class="dv">3</span>,</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">caption =</span> <span class="st">"Coeficientes, razões de médias e intervalos de confiança do modelo final."</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Coeficientes, razões de médias e intervalos de confiança do modelo final.</caption>
+<colgroup>
+<col style="width: 11%">
+<col style="width: 10%">
+<col style="width: 11%">
+<col style="width: 13%">
+<col style="width: 7%">
+<col style="width: 15%">
+<col style="width: 13%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Termo</th>
+<th style="text-align: right;">Estimativa</th>
+<th style="text-align: right;">Erro_padrao</th>
+<th style="text-align: right;">Estatistica_z</th>
+<th style="text-align: right;">Valor_p</th>
+<th style="text-align: right;">Razao_de_medias</th>
+<th style="text-align: right;">IC95_inferior</th>
+<th style="text-align: right;">IC95_superior</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">3.038</td>
+<td style="text-align: right;">0.196</td>
+<td style="text-align: right;">15.529</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">20.868</td>
+<td style="text-align: right;">14.086</td>
+<td style="text-align: right;">31.912</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EthN</td>
+<td style="text-align: right;">-0.561</td>
+<td style="text-align: right;">0.155</td>
+<td style="text-align: right;">-3.628</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.571</td>
+<td style="text-align: right;">0.418</td>
+<td style="text-align: right;">0.779</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AgeF1</td>
+<td style="text-align: right;">-0.386</td>
+<td style="text-align: right;">0.227</td>
+<td style="text-align: right;">-1.695</td>
+<td style="text-align: right;">0.090</td>
+<td style="text-align: right;">0.680</td>
+<td style="text-align: right;">0.430</td>
+<td style="text-align: right;">1.060</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">AgeF2</td>
+<td style="text-align: right;">0.185</td>
+<td style="text-align: right;">0.231</td>
+<td style="text-align: right;">0.798</td>
+<td style="text-align: right;">0.425</td>
+<td style="text-align: right;">1.203</td>
+<td style="text-align: right;">0.752</td>
+<td style="text-align: right;">1.903</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AgeF3</td>
+<td style="text-align: right;">0.255</td>
+<td style="text-align: right;">0.241</td>
+<td style="text-align: right;">1.060</td>
+<td style="text-align: right;">0.289</td>
+<td style="text-align: right;">1.290</td>
+<td style="text-align: right;">0.800</td>
+<td style="text-align: right;">2.068</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>O intercepto representa a média condicional estimada para o conjunto de categorias de referência de <code>Eth</code> e <code>Age</code>. Sua estimativa (<span class="math inline">\(\hat{\beta}_0 = 3,038\)</span>; <span class="math inline">\(p &lt; 0,001\)</span>) indica que a média esperada de faltas para a categoria de referência (estudantes aborígenes na faixa etária F0) é de <span class="math inline">\(\exp(3,038) = 20,87\)</span> dias.</p>
+<p>Para <code>Eth</code>, a razão de médias compara a categoria N com a categoria A. Aqui, mantida a faixa etária constante, a razão de médias é <span class="math inline">\(0,571\)</span> (<span class="math inline">\(\text{IC}_{95\%}: [0,418; 0,779]\)</span>; <span class="math inline">\(p &lt; 0,001\)</span>). Isso indica que estudantes não aborígenes (N) apresentam uma redução esperada de <span class="math inline">\(42,9\%\)</span> no número de faltas em relação aos estudantes aborígenes (A).</p>
+<p>Considerando a faixa etária, F1 apresenta redução de <span class="math inline">\(32,0\%\)</span> nas faltas esperadas em relação ao F0 (<span class="math inline">\(\text{Razão de Médias} = 0,680\)</span>; <span class="math inline">\(\text{IC}_{95\%}: [0,430; 1,060]\)</span>; <span class="math inline">\(p = 0,090\)</span>). Por outro lado, a faixa etária F2 apresenta aumento de <span class="math inline">\(20,3\%\)</span> nas faltas esperadas (<span class="math inline">\(\text{Razão de Médias} = 1,203\)</span>; <span class="math inline">\(\text{IC}_{95\%}: [0,752; 1,903]\)</span>; <span class="math inline">\(p = 0,425\)</span>). Para a faixa etária F3, há um aumento de <span class="math inline">\(29,0\%\)</span> nas faltas esperadas (<span class="math inline">\(\text{Razão de Médias} = 1,290\)</span>; <span class="math inline">\(\text{IC}_{95\%}: [0,800; 2,068]\)</span>; <span class="math inline">\(p = 0,289\)</span>).</p>
+<p>(Nota: Embora as comparações individuais de F1, F2 e F3 em relação ao F0 não sejam estatisticamente significativas a <span class="math inline">\(5\%\)</span>, a variável Age como um todo é altamente significativa para o modelo, conforme o teste LRT global, <span class="math inline">\(p = 0,0075\)</span>).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>modelo_bn_log2<span class="sc">$</span>theta</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.249143</code></pre>
+</div>
+</div>
+</section>
+<section id="médias-ajustadas" class="level2">
+<h2 data-anchor-id="médias-ajustadas">Médias ajustadas</h2>
+<p>A análise visual do gráfico Dias Observados vs.&nbsp;Previstos mostra que os valores ajustados pelo modelo acompanham a tendência central dos dados. A dispersão observada ao redor da linha de concordância é consistente com a estrutura de variabilidade prevista pela distribuição Binomial Negativa (<span class="math inline">\(\text{Var}(Y) = \mu + \mu^2 / 1,249\)</span>).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>dados<span class="sc">$</span>media_ajustada_bn <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  modelo_bn_log2,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"response"</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  dados[, <span class="fu">c</span>(<span class="st">"Days"</span>, <span class="st">"media_ajustada_bn"</span>)]</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Days media_ajustada_bn
+1    2          20.86813
+2   11          20.86813
+3   14          20.86813
+4    5          20.86813
+5    5          20.86813
+6   13          20.86813</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dados, <span class="fu">aes</span>(<span class="at">x =</span> media_ajustada_bn, <span class="at">y =</span> Days)) <span class="sc">+</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">intercept =</span> <span class="dv">0</span>,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">slope =</span> <span class="dv">1</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Dias observados versus previstos"</span>,</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Média prevista pelo modelo binomial negativo"</span>,</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Dias de ausência observados"</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="diagnóstico-dos-resíduos-do-modelo-final" class="level1">
+<h1>Diagnóstico dos resíduos do modelo final</h1>
+<section id="envelope-simulado-meio-normal" class="level2">
+<h2 data-anchor-id="envelope-simulado-meio-normal">Envelope simulado meio-normal</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>hnp<span class="sc">::</span><span class="fu">hnp</span>(</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  modelo_bn_log2,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">sim =</span> <span class="dv">999</span>,</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">resid.type =</span> <span class="st">"deviance"</span>,</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">paint.out =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">print.on =</span> <span class="cn">TRUE</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Negative binomial model (using MASS package) </code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>O gráfico de envelope simulado confirma que <span class="math inline">\(94,52\%\)</span> dos resíduos estão contidos dentro das bandas de confiança de <span class="math inline">\(95\%\)</span> (com apenas <span class="math inline">\(8\)</span> observações fora do envelope, equivalente a <span class="math inline">\(5,48\%\)</span>). Essa pequena taxa de extravasamento é plenamente aceitável sob simulação aleatória, indicando que a distribuição Binomial Negativa especificou adequadamente a estrutura de probabilidade dos dados.</p>
+</section>
+<section id="resíduos-de-pearson-versus-valores-ajustados" class="level2">
+<h2 data-anchor-id="resíduos-de-pearson-versus-valores-ajustados">Resíduos de Pearson versus valores ajustados</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fitted</span>(modelo_bn_log2),</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">residuals</span>(modelo_bn_log2, <span class="at">type =</span> <span class="st">"pearson"</span>),</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Valores ajustados"</span>,</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Resíduos de Pearson"</span>,</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Resíduos de Pearson versus valores ajustados"</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Os gráficos de dispersão dos resíduos de Pearson contra as médias ajustadas não exibem padrões heterocedásticos ou tendências não lineares. Os resíduos encontram-se simetricamente distribuídos em torno de zero em todas as faixas de valores previstos (<span class="math inline">\(8\)</span> a <span class="math inline">\(27\)</span> dias). A amplitude da maioria dos resíduos situa-se dentro do intervalo <span class="math inline">\([-2, +2]\)</span>, sem presença de viés sistemático de sub-ajuste ou super-ajuste.</p>
+</section>
+<section id="resíduos-de-deviance-versus-valores-ajustados" class="level2">
+<h2 data-anchor-id="resíduos-de-deviance-versus-valores-ajustados">Resíduos de deviance versus valores ajustados</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fitted</span>(modelo_bn_log2),</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">residuals</span>(modelo_bn_log2, <span class="at">type =</span> <span class="st">"deviance"</span>),</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Valores ajustados"</span>,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Resíduos de deviance"</span>,</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Resíduos de deviance versus valores ajustados"</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A interpretação aqui é similar a dos resíduos de Pearson.</p>
+</section>
+<section id="análise-de-pontos-influentes-distância-de-cook" class="level2">
+<h2 data-anchor-id="análise-de-pontos-influentes-distância-de-cook">Análise de Pontos Influentes (Distância de Cook)</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>cook <span class="ot">&lt;-</span> <span class="fu">cooks.distance</span>(modelo_bn_log2)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  cook,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"h"</span>,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Observação"</span>,</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Distância de Cook"</span>,</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Distância de Cook — modelo final"</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">4</span> <span class="sc">/</span> <span class="fu">nobs</span>(modelo_bn_log2), <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">which</span>(cook <span class="sc">&gt;</span> <span class="dv">4</span> <span class="sc">/</span> <span class="fu">nobs</span>(modelo_bn_log2))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> 45  46  59  72 104 109 126 
+ 45  46  59  72 104 109 126 </code></pre>
+</div>
+</div>
+<p>A avaliação de pontos influentes identificou que a vasta maioria das observações apresenta Distância de Cook próxima de zero.</p>
+<p>Apenas a observação nº 72 destaca-se isoladamente com valor <span class="math inline">\(\approx 0,22\)</span>, seguida moderadamente pelas observações 45, 46, 59, 104, 109 e 126 que ultrapassam marginalmente o limite exploratório de <span class="math inline">\(4/n = 0,0274\)</span>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>dados[<span class="fu">c</span>(<span class="dv">72</span>,<span class="dv">45</span>, <span class="dv">46</span>, <span class="dv">59</span>, <span class="dv">104</span>, <span class="dv">109</span>, <span class="dv">126</span>),]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    Eth Sex Age Lrn Days media_ajustada_bn
+72    N   M  F0  SL   67         11.907111
+45    A   F  F1  SL   53         14.192174
+46    A   F  F1  SL   54         14.192174
+59    A   F  F2  SL   81         25.099082
+104   N   M  F3  AL   69         15.365677
+109   N   F  F0  AL   33         11.907111
+126   N   F  F1  AL   28          8.097887</code></pre>
+</div>
+</div>
+<p>A inspeção detalhada dos registros que ultrapassaram o limite da Distância de Cook (<span class="math inline">\(4/n = 0,0274\)</span>) revela que o elevado impacto dessas observações decorre da presença de contagens atípicas de ausência escolar. O caso mais proeminente é o da observação 59 (com <span class="math inline">\(81\)</span> faltas observadas frente a <span class="math inline">\(26,44\)</span> previstas), que corresponde ao máximo de todo o conjunto de dados. Da mesma forma, os alunos 45, 46, 72 e 104 apresentaram faltas acentuadamente acima da tendência central do grupo (com <span class="math inline">\(53\)</span>, <span class="math inline">\(54\)</span>, <span class="math inline">\(67\)</span> e <span class="math inline">\(69\)</span> dias, respectivamente). Apesar do impacto visual na Distância de Cook, esses pontos refletem observações reais e válidas da cauda longa da distribuição das faltas.</p>
+<p>Por estarem significativamente abaixo do limiar crítico de influência severa (<span class="math inline">\(\text{Distância de Cook} &lt; 0,5\)</span>), conclui-se que nenhum ponto individual distorce isoladamente a estimativa dos parâmetros. O modelo final é robusto e está estatisticamente validado.</p>
+</section>
+</section>
+<section id="conclusão" class="level1">
+<h1>Conclusão</h1>
+<p>Após a comparação das distribuições e funções de ligação e a avaliação da contribuição das variáveis explicativas, foi considerado o modelo binomial negativo com ligação logarítmica e preditores <code>Eth</code> e <code>Age</code>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../aulas/10-Diagnostico/conteudo.html" class="pagination-link" aria-label="10. Diagnóstico de Modelos Lineares Generalizados">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">10. Diagnóstico de Modelos Lineares Generalizados</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

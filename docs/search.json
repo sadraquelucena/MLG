@@ -163,5 +163,203 @@
       "Aulas",
       "10. Diagnóstico de Modelos Lineares Generalizados"
     ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "",
+    "text": "Nesta aula, vamos modelar o número faltas de alunos em uma escola da Austrália. Vamos usar o conjunto de dados quine do pacote MASS do R.",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#inspeção-inicial",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#inspeção-inicial",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Inspeção inicial",
+    "text": "Inspeção inicial\n\nstr(dados)\n\n'data.frame':   146 obs. of  5 variables:\n $ Eth : Factor w/ 2 levels \"A\",\"N\": 1 1 1 1 1 1 1 1 1 1 ...\n $ Sex : Factor w/ 2 levels \"F\",\"M\": 2 2 2 2 2 2 2 2 2 2 ...\n $ Age : Factor w/ 4 levels \"F0\",\"F1\",\"F2\",..: 1 1 1 1 1 1 1 1 2 2 ...\n $ Lrn : Factor w/ 2 levels \"AL\",\"SL\": 2 2 2 1 1 1 1 1 2 2 ...\n $ Days: int  2 11 14 5 5 13 20 22 6 6 ...\n\nhead(dados)\n\n  Eth Sex Age Lrn Days\n1   A   M  F0  SL    2\n2   A   M  F0  SL   11\n3   A   M  F0  SL   14\n4   A   M  F0  AL    5\n5   A   M  F0  AL    5\n6   A   M  F0  AL   13\n\nsummary(dados)\n\n Eth    Sex    Age     Lrn          Days      \n A:69   F:80   F0:27   AL:83   Min.   : 0.00  \n N:77   M:66   F1:46   SL:63   1st Qu.: 5.00  \n               F2:40           Median :11.00  \n               F3:33           Mean   :16.46  \n                               3rd Qu.:22.75  \n                               Max.   :81.00  \n\n\nA variável resposta é Days e as demais são as variáveis explicativas, todas categóricas. Como o interesse é explicar diferenças na média dos dias de ausência, ajustamos os modelos com a mesma fórmula e as mesmas observações.",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#estatísticas-descritivas",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#estatísticas-descritivas",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Estatísticas descritivas",
+    "text": "Estatísticas descritivas\n\nresumo_days &lt;- dados |&gt;\n  summarise(\n    n = n(),\n    media = mean(Days),\n    desvio_padrao = sd(Days),\n    variancia = var(Days),\n    mediana = median(Days),\n    minimo = min(Days),\n    maximo = max(Days),\n    Q1 = quantile(Days, 0.25),\n    Q3 = quantile(Days, 0.75)\n  )\n\nknitr::kable(\n  resumo_days,\n  digits = 2,\n  caption = \"Estatísticas descritivas dos dias de ausência escolar.\"\n)\n\n\nEstatísticas descritivas dos dias de ausência escolar.\n\n\n\n\n\n\n\n\n\n\n\n\n\nn\nmedia\ndesvio_padrao\nvariancia\nmediana\nminimo\nmaximo\nQ1\nQ3\n\n\n\n\n146\n16.46\n16.25\n264.17\n11\n0\n81\n5\n22.75\n\n\n\n\n\nA média observada é de aproximadamente 16,46 faltas, enquanto a variância é de aproximadamente 264,17. Como a varãncia é muito maior que a média, um modelo Poisson provavelmente terá ajuste inferior a um modelo binomial negativo para esses dados, embora a comparação final também dependa dos diagnósticos e do ajuste global.",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#distribuição-da-resposta",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#distribuição-da-resposta",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Distribuição da resposta",
+    "text": "Distribuição da resposta\n\nggplot(dados, aes(x = Days)) +\n  geom_histogram(\n    binwidth = 5,\n    boundary = 0,\n    color = \"white\"\n  ) +\n  labs(\n    title = \"Distribuição dos dias de ausência escolar\",\n    x = \"Dias de ausência\",\n    y = \"Número de estudantes\"\n  ) +\n  theme_minimal()\n\n\n\n\n\n\n\n\nO histograma do número de faltas apresenta uma distribuição assimétrica à direita, com maior concentração de estudantes com númoer de faltas relativamente baixo e uma cauda que se estende até 81 dias.",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#distribuição-por-covariável",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#distribuição-por-covariável",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Distribuição por covariável",
+    "text": "Distribuição por covariável\nOs boxplots abaixo sugerem diferenças nas distribuições de dias de ausência entre as categorias das variáveis explicativas. Merece destaque a diferença visual entre o númeor de faltas entre os grupos étnicos A e N, enquanto as diferenças entre as categorias de aprendizagem parecem menos pronunciadas. Essas comparações são exploratórias e não consideram simultaneamente as demais variáveis.\n\nggplot(dados, aes(x = Age, y = Days)) +\n  geom_boxplot() +\n  labs(\n    title = \"Dias de ausência segundo faixa etária\",\n    x = \"Faixa etária (código original)\",\n    y = \"Dias de ausência\"\n  ) +\n  theme_minimal()\n\n\n\n\n\n\n\nggplot(dados, aes(x = Eth, y = Days)) +\n  geom_boxplot() +\n  labs(\n    title = \"Dias de ausência segundo grupo étnico\",\n    x = \"Grupo étnico (código original)\",\n    y = \"Dias de ausência\"\n  ) +\n  theme_minimal()\n\n\n\n\n\n\n\nggplot(dados, aes(x = Sex, y = Days)) +\n  geom_boxplot() +\n  labs(\n    title = \"Dias de ausência segundo sexo\",\n    x = \"Sexo (código original)\",\n    y = \"Dias de ausência\"\n  ) +\n  theme_minimal()\n\n\n\n\n\n\n\nggplot(dados, aes(x = Lrn, y = Days)) +\n  geom_boxplot() +\n  labs(\n    title = \"Dias de ausência segundo categoria de aprendizagem\",\n    x = \"Categoria de aprendizagem (código original)\",\n    y = \"Dias de ausência\"\n  ) +\n  theme_minimal()\n\n\n\n\n\n\n\n\nOs boxplots permitem comparar as distribuições observadas entre as categorias. Essas comparações são exploratórias: diferenças visuais não controlam simultaneamente as demais covariáveis e não substituem a análise multivariada.",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#modelo-de-poisson",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#modelo-de-poisson",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Modelo de Poisson",
+    "text": "Modelo de Poisson\nNo modelo de Poisson,\n\\[\nY_i \\mid \\boldsymbol{x}_i \\sim \\operatorname{Poisson}(\\mu_i),\n\\qquad\nE(Y_i \\mid \\boldsymbol{x}_i)\n=\n\\operatorname{Var}(Y_i \\mid \\boldsymbol{x}_i)\n=\n\\mu_i.\n\\]\nForam consideradas as funções de ligação logarítmica e raiz quadrada. A ligação logarítmica garante médias positivas. A ligação raiz quadrada impõe uma relação diferente entre a média e o preditor linear e requer atenção à validade das médias ajustadas.",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#modelo-binomial-negativo",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#modelo-binomial-negativo",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Modelo binomial negativo",
+    "text": "Modelo binomial negativo\nO modelo binomial negativo permite que a variância exceda a média. Na parametrização usual utilizada por MASS::glm.nb,\n\\[\nE(Y_i \\mid \\boldsymbol{x}_i) = \\mu_i,\n\\qquad\n\\operatorname{Var}(Y_i \\mid \\boldsymbol{x}_i)\n= \\mu_i + \\frac{\\mu_i^2}{\\theta},\n\\]\nem que \\(\\theta &gt; 0\\) é o parâmetro de dispersão. Valores menores de \\(\\theta\\) correspondem a maior dispersão adicional em relação ao Poisson. Também foram comparadas as ligações logarítmica e raiz quadrada.",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#especificação-dos-modelos-completos",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#especificação-dos-modelos-completos",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Especificação dos modelos completos",
+    "text": "Especificação dos modelos completos\nInicialmente, todos os modelos foram ajustados com a fórmula Days ~ Eth + Sex + Age + Lrn. Essa especificação permite comparar as distribuições e funções de ligação mantendo constantes a resposta, as covariáveis e a amostra utilizada.\n\nmodelo_pois_log &lt;- glm(\n  Days ~ Eth + Sex + Age + Lrn,\n  family = poisson(link = \"log\"),\n  data = dados\n)\n\nmodelo_pois_sqrt &lt;- glm(\n  Days ~ Eth + Sex + Age + Lrn,\n  family = poisson(link = \"sqrt\"),\n  data = dados\n)\n\nmodelo_bn_log &lt;- MASS::glm.nb(\n  Days ~ Eth + Sex + Age + Lrn,\n  data = dados,\n  link = \"log\"\n)\n\nmodelo_bn_sqrt &lt;- MASS::glm.nb(\n  Days ~ Eth + Sex + Age + Lrn,\n  data = dados,\n  link = \"sqrt\"\n)",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#comparação-inicial-das-distribuições-e-ligações",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#comparação-inicial-das-distribuições-e-ligações",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Comparação inicial das distribuições e ligações",
+    "text": "Comparação inicial das distribuições e ligações\nCom base no procedimento de seleção de variáveis por testes de razão de verossimilhanças, o modelo final adotado foi o Binomial Negativo reduzido com função de ligação logarítmica. O modelo desconsiderou as variáveis Sex e Lrn devido à ausência de ganho estatisticamente significativo de ajuste.\n\nmodelos_completos &lt;- list(\n  \"Poisson — log\" = modelo_pois_log,\n  \"Poisson — raiz quadrada\" = modelo_pois_sqrt,\n  \"Binomial negativa — log\" = modelo_bn_log,\n  \"Binomial negativa — raiz quadrada\" = modelo_bn_sqrt\n)\n\ntabela_comparacao_inicial &lt;- tibble(\n  Modelo = names(modelos_completos),\n  AIC = vapply(modelos_completos, AIC, numeric(1)),\n  BIC = vapply(modelos_completos, BIC, numeric(1)),\n  Deviance_residual = vapply(modelos_completos, deviance, numeric(1)),\n  GL_residuais = vapply(modelos_completos, df.residual, numeric(1)),\n  Razao_deviance_GL = vapply(\n    modelos_completos,\n    function(m) deviance(m) / df.residual(m),\n    numeric(1)\n  ),\n  Minimo_ajustado = vapply(\n    modelos_completos,\n    function(m) min(fitted(m)),\n    numeric(1)\n  )\n) |&gt;\n  mutate(\n    Delta_AIC = AIC - min(AIC),\n    Delta_BIC = BIC - min(BIC)\n  ) |&gt;\n  arrange(AIC)\n\nknitr::kable(\n  tabela_comparacao_inicial,\n  digits = 3,\n  caption = \"Comparação inicial dos modelos completos.\"\n)\n\n\nComparação inicial dos modelos completos.\n\n\n\n\n\n\n\n\n\n\n\n\n\nModelo\nAIC\nBIC\nDeviance_residual\nGL_residuais\nRazao_deviance_GL\nMinimo_ajustado\nDelta_AIC\nDelta_BIC\n\n\n\n\nBinomial negativa — log\n1109.151\n1133.020\n167.952\n139\n1.208\n6.532\n0.000\n0.000\n\n\nBinomial negativa — raiz quadrada\n1109.433\n1133.302\n167.900\n139\n1.208\n6.244\n0.282\n0.282\n\n\nPoisson — log\n2299.184\n2320.069\n1696.707\n139\n12.207\n6.346\n1190.033\n1187.049\n\n\nPoisson — raiz quadrada\n2312.439\n2333.324\n1709.962\n139\n12.302\n5.550\n1203.288\n1200.304\n\n\n\n\n\nOs modelos ajustados pela distribuição de Poisson apresentaram elevado AIC (\\(2.299,18\\) na ligação log e \\(2.312,44\\) na raiz quadrada) e deviance residual de \\(1.696,71\\) para \\(139\\) graus de liberdade. A razão \\(\\text{Deviance}/\\text{GL} \\approx 12,21\\) confirma a presença de severa sobredispersão, invalidando a suposição de equidispersão da Poisson (\\(\\text{Var}(Y) = \\mu\\)).\nA introdução do parâmetro de dispersão \\(\\theta\\) nos modelos Binomiais Negativos reduziu drasticamente o AIC para \\(1.109,15\\) (ligação log) e \\(1.109,43\\) (raiz quadrada), além de estabilizar a razão \\(\\text{Deviance}/\\text{GL}\\) em \\(1,208\\).\nDiante da equivalência prática em termos de AIC (\\(\\Delta\\text{AIC} = 0,282\\)), a ligação logarítmica foi selecionada por garantir que médias ajustadas fossem sempre positivas e por permitir a interpretação direta dos coeficientes exponenciados como Razões de Médias Condicionais (IRR).",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#seleção-de-variáveis-no-modelo-binomial-negativo-completo",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#seleção-de-variáveis-no-modelo-binomial-negativo-completo",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Seleção de variáveis no modelo binomial negativo completo",
+    "text": "Seleção de variáveis no modelo binomial negativo completo\nA seleção de covariáveis foi conduzida sobre o modelo Binomial Negativo completo com ligação log por meio de testes de exclusão individual (função drop1()) baseados no Teste da Razão de Verossimilhanças (LRT).\n\nselecao_drop1 &lt;- drop1(modelo_bn_log, test = \"Chisq\")\nselecao_drop1\n\nSingle term deletions\n\nModel:\nDays ~ Eth + Sex + Age + Lrn\n       Df Deviance    AIC    LRT  Pr(&gt;Chi)    \n&lt;none&gt;      167.95 1107.2                     \nEth     1   181.01 1118.2 13.059 0.0003019 ***\nSex     1   168.20 1105.4  0.250 0.6170467    \nAge     3   179.93 1113.1 11.979 0.0074547 ** \nLrn     1   170.48 1107.7  2.525 0.1120563    \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n\nAs variáveis Sex (\\(\\text{LRT} = 0,25\\); \\(p = 0,6170\\)) e Lrn (\\(\\text{LRT} = 2,53\\); \\(p = 0,1121\\)) não apresentaram contribuição estatisticamente significativa para a explicação da variabilidade das fasltas dos alunos. Por esse motivo, foram removidas do modelo.\n\nmodelo_bn_log2 &lt;- MASS::glm.nb(\n  Days ~ Eth + Age,\n  data = dados,\n  link = \"log\"\n)\n\ndrop1(modelo_bn_log2)\n\nSingle term deletions\n\nModel:\nDays ~ Eth + Age\n       Df Deviance    AIC\n&lt;none&gt;      167.84 1105.8\nEth     1   180.34 1116.3\nAge     3   179.06 1111.0",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#comparação-entre-o-modelo-completo-e-o-reduzido",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#comparação-entre-o-modelo-completo-e-o-reduzido",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Comparação entre o modelo completo e o reduzido",
+    "text": "Comparação entre o modelo completo e o reduzido\nPara testar formalmente a exclusão conjunta de Sex e Lrn, aplicou-se o Teste da Razão de Verossimilhanças entre os modelos aninhados. Como o \\(p\\)-valor \\(&gt; 0{,}05\\), não há evidência estatística de que a exclusão de Sex e Lrn afeta significativamente a qualidade do ajuste. Portanto, o modelo reduzido foi escolhido.\n\nteste_modelos &lt;- lmtest::lrtest(modelo_bn_log2, modelo_bn_log)\nteste_modelos\n\nLikelihood ratio test\n\nModel 1: Days ~ Eth + Age\nModel 2: Days ~ Eth + Sex + Age + Lrn\n  #Df  LogLik Df  Chisq Pr(&gt;Chisq)\n1   6 -547.90                     \n2   8 -546.58  2 2.6502     0.2658",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#comparação-dos-modelos-binomiais-negativos",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#comparação-dos-modelos-binomiais-negativos",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Comparação dos modelos binomiais negativos",
+    "text": "Comparação dos modelos binomiais negativos\n\nmodelos_bn &lt;- list(\n  \"Binomial negativa — log completo\" = modelo_bn_log,\n  \"Binomial negativa — raiz quadrada completa\" = modelo_bn_sqrt,\n  \"Binomial negativa — log reduzido\" = modelo_bn_log2\n)\n\ntabela_bn &lt;- tibble(\n  Modelo = names(modelos_bn),\n  AIC = vapply(modelos_bn, AIC, numeric(1)),\n  BIC = vapply(modelos_bn, BIC, numeric(1)),\n  Deviance_residual = vapply(modelos_bn, deviance, numeric(1)),\n  GL_residuais = vapply(modelos_bn, df.residual, numeric(1)),\n  Razao_deviance_GL = vapply(\n    modelos_bn,\n    function(m) deviance(m) / df.residual(m),\n    numeric(1)\n  ),\n  Minimo_ajustado = vapply(\n    modelos_bn,\n    function(m) min(fitted(m)),\n    numeric(1)\n  )\n) |&gt;\n  mutate(\n    Delta_AIC = AIC - min(AIC),\n    Delta_BIC = BIC - min(BIC)\n  ) |&gt;\n  arrange(AIC)\n\nknitr::kable(\n  tabela_bn,\n  digits = 3,\n  caption = \"Comparação dos modelos binomiais negativos.\"\n)\n\n\nComparação dos modelos binomiais negativos.\n\n\n\n\n\n\n\n\n\n\n\n\n\nModelo\nAIC\nBIC\nDeviance_residual\nGL_residuais\nRazao_deviance_GL\nMinimo_ajustado\nDelta_AIC\nDelta_BIC\n\n\n\n\nBinomial negativa — log reduzido\n1107.801\n1125.703\n167.842\n141\n1.190\n8.098\n0.000\n0.000\n\n\nBinomial negativa — log completo\n1109.151\n1133.020\n167.952\n139\n1.208\n6.532\n1.350\n7.317\n\n\nBinomial negativa — raiz quadrada completa\n1109.433\n1133.302\n167.900\n139\n1.208\n6.244\n1.631\n7.599\n\n\n\n\n\nA comparação global entre os modelos confirma que o Binomial Negativo Reduzido com Ligação Log obteve a melhor performance estatística.",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#interpretação-dos-coeficientes-do-modelo-final",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#interpretação-dos-coeficientes-do-modelo-final",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Interpretação dos coeficientes do modelo final",
+    "text": "Interpretação dos coeficientes do modelo final\nO modelo final estimado é dado por: \\[\\ln(\\hat{\\mu}_i) = 3,038 - 0,561 \\cdot \\text{EthN}_i - 0,386 \\cdot \\text{AgeF1}_i + 0,185 \\cdot \\text{AgeF2}_i + 0,255 \\cdot \\text{AgeF3}_i\\] com parâmetro de dispersão \\(\\hat{\\theta} = 1,249\\) (\\(\\text{EP} = 0,157\\)). A tabela abaixo apresetna melhor detalhamento das estimativas obtidas.\n\nresumo_final &lt;- summary(modelo_bn_log2)$coefficients\n\nic_final &lt;- confint(modelo_bn_log2)\n\nWaiting for profiling to be done...\n\ntabela_coef_final &lt;- data.frame(\n  Termo = rownames(resumo_final),\n  Estimativa = resumo_final[, \"Estimate\"],\n  Erro_padrao = resumo_final[, \"Std. Error\"],\n  Estatistica_z = resumo_final[, \"z value\"],\n  Valor_p = resumo_final[, \"Pr(&gt;|z|)\"],\n  Razao_de_medias = exp(coef(modelo_bn_log2)),\n  IC95_inferior = exp(ic_final[, 1]),\n  IC95_superior = exp(ic_final[, 2]),\n  row.names = NULL\n)\n\nknitr::kable(\n  tabela_coef_final,\n  digits = 3,\n  caption = \"Coeficientes, razões de médias e intervalos de confiança do modelo final.\"\n)\n\n\nCoeficientes, razões de médias e intervalos de confiança do modelo final.\n\n\n\n\n\n\n\n\n\n\n\n\nTermo\nEstimativa\nErro_padrao\nEstatistica_z\nValor_p\nRazao_de_medias\nIC95_inferior\nIC95_superior\n\n\n\n\n(Intercept)\n3.038\n0.196\n15.529\n0.000\n20.868\n14.086\n31.912\n\n\nEthN\n-0.561\n0.155\n-3.628\n0.000\n0.571\n0.418\n0.779\n\n\nAgeF1\n-0.386\n0.227\n-1.695\n0.090\n0.680\n0.430\n1.060\n\n\nAgeF2\n0.185\n0.231\n0.798\n0.425\n1.203\n0.752\n1.903\n\n\nAgeF3\n0.255\n0.241\n1.060\n0.289\n1.290\n0.800\n2.068\n\n\n\n\n\nO intercepto representa a média condicional estimada para o conjunto de categorias de referência de Eth e Age. Sua estimativa (\\(\\hat{\\beta}_0 = 3,038\\); \\(p &lt; 0,001\\)) indica que a média esperada de faltas para a categoria de referência (estudantes aborígenes na faixa etária F0) é de \\(\\exp(3,038) = 20,87\\) dias.\nPara Eth, a razão de médias compara a categoria N com a categoria A. Aqui, mantida a faixa etária constante, a razão de médias é \\(0,571\\) (\\(\\text{IC}_{95\\%}: [0,418; 0,779]\\); \\(p &lt; 0,001\\)). Isso indica que estudantes não aborígenes (N) apresentam uma redução esperada de \\(42,9\\%\\) no número de faltas em relação aos estudantes aborígenes (A).\nConsiderando a faixa etária, F1 apresenta redução de \\(32,0\\%\\) nas faltas esperadas em relação ao F0 (\\(\\text{Razão de Médias} = 0,680\\); \\(\\text{IC}_{95\\%}: [0,430; 1,060]\\); \\(p = 0,090\\)). Por outro lado, a faixa etária F2 apresenta aumento de \\(20,3\\%\\) nas faltas esperadas (\\(\\text{Razão de Médias} = 1,203\\); \\(\\text{IC}_{95\\%}: [0,752; 1,903]\\); \\(p = 0,425\\)). Para a faixa etária F3, há um aumento de \\(29,0\\%\\) nas faltas esperadas (\\(\\text{Razão de Médias} = 1,290\\); \\(\\text{IC}_{95\\%}: [0,800; 2,068]\\); \\(p = 0,289\\)).\n(Nota: Embora as comparações individuais de F1, F2 e F3 em relação ao F0 não sejam estatisticamente significativas a \\(5\\%\\), a variável Age como um todo é altamente significativa para o modelo, conforme o teste LRT global, \\(p = 0,0075\\)).\n\nmodelo_bn_log2$theta\n\n[1] 1.249143",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#médias-ajustadas",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#médias-ajustadas",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Médias ajustadas",
+    "text": "Médias ajustadas\nA análise visual do gráfico Dias Observados vs. Previstos mostra que os valores ajustados pelo modelo acompanham a tendência central dos dados. A dispersão observada ao redor da linha de concordância é consistente com a estrutura de variabilidade prevista pela distribuição Binomial Negativa (\\(\\text{Var}(Y) = \\mu + \\mu^2 / 1,249\\)).\n\ndados$media_ajustada_bn &lt;- predict(\n  modelo_bn_log2,\n  type = \"response\"\n)\n\nhead(\n  dados[, c(\"Days\", \"media_ajustada_bn\")]\n)\n\n  Days media_ajustada_bn\n1    2          20.86813\n2   11          20.86813\n3   14          20.86813\n4    5          20.86813\n5    5          20.86813\n6   13          20.86813\n\n\n\nggplot(dados, aes(x = media_ajustada_bn, y = Days)) +\n  geom_point(alpha = 0.7) +\n  geom_abline(\n    intercept = 0,\n    slope = 1,\n    linetype = \"dashed\"\n  ) +\n  labs(\n    title = \"Dias observados versus previstos\",\n    x = \"Média prevista pelo modelo binomial negativo\",\n    y = \"Dias de ausência observados\"\n  ) +\n  theme_minimal()",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#envelope-simulado-meio-normal",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#envelope-simulado-meio-normal",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Envelope simulado meio-normal",
+    "text": "Envelope simulado meio-normal\n\nset.seed(123)\n\nhnp::hnp(\n  modelo_bn_log2,\n  sim = 999,\n  resid.type = \"deviance\",\n  paint.out = TRUE,\n  print.on = TRUE\n)\n\nNegative binomial model (using MASS package) \n\n\n\n\n\n\n\n\n\nO gráfico de envelope simulado confirma que \\(94,52\\%\\) dos resíduos estão contidos dentro das bandas de confiança de \\(95\\%\\) (com apenas \\(8\\) observações fora do envelope, equivalente a \\(5,48\\%\\)). Essa pequena taxa de extravasamento é plenamente aceitável sob simulação aleatória, indicando que a distribuição Binomial Negativa especificou adequadamente a estrutura de probabilidade dos dados.",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#resíduos-de-pearson-versus-valores-ajustados",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#resíduos-de-pearson-versus-valores-ajustados",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Resíduos de Pearson versus valores ajustados",
+    "text": "Resíduos de Pearson versus valores ajustados\n\nplot(\n  fitted(modelo_bn_log2),\n  residuals(modelo_bn_log2, type = \"pearson\"),\n  xlab = \"Valores ajustados\",\n  ylab = \"Resíduos de Pearson\",\n  main = \"Resíduos de Pearson versus valores ajustados\"\n)\nabline(h = 0, lty = 2)\n\n\n\n\n\n\n\n\nOs gráficos de dispersão dos resíduos de Pearson contra as médias ajustadas não exibem padrões heterocedásticos ou tendências não lineares. Os resíduos encontram-se simetricamente distribuídos em torno de zero em todas as faixas de valores previstos (\\(8\\) a \\(27\\) dias). A amplitude da maioria dos resíduos situa-se dentro do intervalo \\([-2, +2]\\), sem presença de viés sistemático de sub-ajuste ou super-ajuste.",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#resíduos-de-deviance-versus-valores-ajustados",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#resíduos-de-deviance-versus-valores-ajustados",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Resíduos de deviance versus valores ajustados",
+    "text": "Resíduos de deviance versus valores ajustados\n\nplot(\n  fitted(modelo_bn_log2),\n  residuals(modelo_bn_log2, type = \"deviance\"),\n  xlab = \"Valores ajustados\",\n  ylab = \"Resíduos de deviance\",\n  main = \"Resíduos de deviance versus valores ajustados\"\n)\nabline(h = 0, lty = 2)\n\n\n\n\n\n\n\n\nA interpretação aqui é similar a dos resíduos de Pearson.",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
+  },
+  {
+    "objectID": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#análise-de-pontos-influentes-distância-de-cook",
+    "href": "aulas/11-Modelagem_dados_de_contagem/conteudo.html#análise-de-pontos-influentes-distância-de-cook",
+    "title": "11. Modelagem de Dados de Contagem",
+    "section": "Análise de Pontos Influentes (Distância de Cook)",
+    "text": "Análise de Pontos Influentes (Distância de Cook)\n\ncook &lt;- cooks.distance(modelo_bn_log2)\n\nplot(\n  cook,\n  type = \"h\",\n  xlab = \"Observação\",\n  ylab = \"Distância de Cook\",\n  main = \"Distância de Cook — modelo final\"\n)\n\nabline(h = 4 / nobs(modelo_bn_log2), lty = 2)\n\n\n\n\n\n\n\nwhich(cook &gt; 4 / nobs(modelo_bn_log2))\n\n 45  46  59  72 104 109 126 \n 45  46  59  72 104 109 126 \n\n\nA avaliação de pontos influentes identificou que a vasta maioria das observações apresenta Distância de Cook próxima de zero.\nApenas a observação nº 72 destaca-se isoladamente com valor \\(\\approx 0,22\\), seguida moderadamente pelas observações 45, 46, 59, 104, 109 e 126 que ultrapassam marginalmente o limite exploratório de \\(4/n = 0,0274\\).\n\ndados[c(72,45, 46, 59, 104, 109, 126),]\n\n    Eth Sex Age Lrn Days media_ajustada_bn\n72    N   M  F0  SL   67         11.907111\n45    A   F  F1  SL   53         14.192174\n46    A   F  F1  SL   54         14.192174\n59    A   F  F2  SL   81         25.099082\n104   N   M  F3  AL   69         15.365677\n109   N   F  F0  AL   33         11.907111\n126   N   F  F1  AL   28          8.097887\n\n\nA inspeção detalhada dos registros que ultrapassaram o limite da Distância de Cook (\\(4/n = 0,0274\\)) revela que o elevado impacto dessas observações decorre da presença de contagens atípicas de ausência escolar. O caso mais proeminente é o da observação 59 (com \\(81\\) faltas observadas frente a \\(26,44\\) previstas), que corresponde ao máximo de todo o conjunto de dados. Da mesma forma, os alunos 45, 46, 72 e 104 apresentaram faltas acentuadamente acima da tendência central do grupo (com \\(53\\), \\(54\\), \\(67\\) e \\(69\\) dias, respectivamente). Apesar do impacto visual na Distância de Cook, esses pontos refletem observações reais e válidas da cauda longa da distribuição das faltas.\nPor estarem significativamente abaixo do limiar crítico de influência severa (\\(\\text{Distância de Cook} &lt; 0,5\\)), conclui-se que nenhum ponto individual distorce isoladamente a estimativa dos parâmetros. O modelo final é robusto e está estatisticamente validado.",
+    "crumbs": [
+      "Modelagem",
+      "11. Modelagem de Dados de Contagem"
+    ]
   }
 ]
