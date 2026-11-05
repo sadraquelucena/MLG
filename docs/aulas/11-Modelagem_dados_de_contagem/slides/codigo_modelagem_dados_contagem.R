@@ -129,17 +129,9 @@ modelo_bn_sqrt <- MASS::glm.nb(
 
 # 4. COMPARAÇÃO INICIAL DOS MODELOS --------------------------
 
-AIC(modelo_pois_log,
-  modelo_pois_sqrt,
-  modelo_bn_log,
-  modelo_bn_sqrt
-)
+AIC(modelo_pois_log, modelo_pois_sqrt, modelo_bn_log, modelo_bn_sqrt)
 
-BIC(modelo_pois_log,
-  modelo_pois_sqrt,
-  modelo_bn_log,
-  modelo_bn_sqrt
-)
+BIC(modelo_pois_log, modelo_pois_sqrt, modelo_bn_log, modelo_bn_sqrt)
 
 
 ## 4.1 Razão entre deviance e graus de liberdade
@@ -175,7 +167,7 @@ modelo_bn_log2 <- MASS::glm.nb(
   link = "log"
 )
 
-drop1(modelo_bn_log2)
+drop1(modelo_bn_log2, test = "Chisq")
 
 
 ## 5.3 Comparação do modelo completo com o reduzido
@@ -184,56 +176,9 @@ teste_modelos <- lmtest::lrtest(modelo_bn_log2, modelo_bn_log)
 teste_modelos
 
 
-# 6. MODELO FINAL E INTERPRETAÇÃO ----------------------------
-# Modelo final: binomial negativo com ligação log
-# Fórmula: Days ~ Eth + Age
+# 6. DIAGNÓSTICO DO MODELO FINAL -----------------------------
 
-summary(modelo_bn_log2)
-
-## 6.1 Coeficientes, razões de médias e IC95%
-
-summary(modelo_bn_log2)
-confint(modelo_bn_log2)
-
-Razao_de_medias = exp(coef(modelo_bn_log2)),
-IC95_inferior = exp(ic_final[, 1]),
-IC95_superior = exp(ic_final[, 2]),
-
-Razao_de_medias
-IC95_inferior
-IC95_superior
-
-
-## 6.2 Parâmetro de dispersão
-
-modelo_bn_log2$theta
-summary(modelo_bn_log2)$SE.theta
-
-## 6.3 Médias ajustadas
-
-dados$media_ajustada_bn <- predict(
-  modelo_bn_log2,
-  type = "response"
-)
-
-head(dados[, c("Days", "media_ajustada_bn")])
-
-## 6.4 Observados versus previstos
-
-ggplot(dados, aes(x = media_ajustada_bn, y = Days)) +
-  geom_point(alpha = 0.7) +
-  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
-  labs(
-    title = "Dias observados versus previstos",
-    x = "Média prevista pelo modelo binomial negativo",
-    y = "Dias de ausência observados"
-  ) +
-  theme_minimal()
-
-
-# 7. DIAGNÓSTICO DO MODELO FINAL -----------------------------
-
-## 7.1 Envelope simulado meio-normal
+## 6.1 Envelope simulado meio-normal
 
 set.seed(123)
 
@@ -245,7 +190,7 @@ hnp::hnp(
   print.on = TRUE
 )
 
-## 7.2 Resíduos de Pearson versus valores ajustados
+## 6.2 Resíduos de Pearson versus valores ajustados
 
 plot(
   fitted(modelo_bn_log2),
@@ -256,7 +201,7 @@ plot(
 )
 abline(h = 0, lty = 2)
 
-## 7.3 Resíduos de deviance versus valores ajustados
+## 6.3 Resíduos de deviance versus valores ajustados
 
 plot(
   fitted(modelo_bn_log2),
@@ -267,7 +212,7 @@ plot(
 )
 abline(h = 0, lty = 2)
 
-## 7.4 Distância de Cook
+## 6.4 Distância de Cook
 
 cook <- cooks.distance(modelo_bn_log2)
 
@@ -291,3 +236,49 @@ observacoes_influentes
 dados[observacoes_influentes, ]
 
 
+# 7. MODELO FINAL E INTERPRETAÇÃO ----------------------------
+# Modelo final: binomial negativo com ligação log
+# Fórmula: Days ~ Eth + Age
+
+summary(modelo_bn_log2)
+
+## 7.1 Coeficientes, razões de médias e IC95%
+
+summary(modelo_bn_log2)
+confint(modelo_bn_log2)
+
+Razao_de_medias <- exp(coef(modelo_bn_log2))
+IC95_inferior <- exp(confint(modelo_bn_log2))[, 1]
+IC95_superior <- exp(confint(modelo_bn_log2))[, 2]
+
+cbind(
+  Razao_de_medias,
+  IC95_inferior,
+  IC95_superior
+)
+
+## 7.2 Parâmetro de dispersão
+
+modelo_bn_log2$theta
+summary(modelo_bn_log2)$SE.theta
+
+## 6.3 Médias ajustadas
+
+dados$media_ajustada_bn <- predict(
+  modelo_bn_log2,
+  type = "response"
+)
+
+head(dados[, c("Days", "media_ajustada_bn")])
+
+## 7.4 Observados versus previstos
+
+ggplot(dados, aes(x = media_ajustada_bn, y = Days)) +
+  geom_point(alpha = 0.7) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+  labs(
+    title = "Dias observados versus previstos",
+    x = "Média prevista pelo modelo binomial negativo",
+    y = "Dias de ausência observados"
+  ) +
+  theme_minimal()

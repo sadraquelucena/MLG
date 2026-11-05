@@ -129,17 +129,9 @@ modelo_bn_sqrt <- MASS::glm.nb(
 
 # 4. COMPARAÇÃO INICIAL DOS MODELOS --------------------------
 
-AIC(modelo_pois_log,
-  modelo_pois_sqrt,
-  modelo_bn_log,
-  modelo_bn_sqrt
-)
+AIC(modelo_pois_log, modelo_pois_sqrt, modelo_bn_log, modelo_bn_sqrt)
 
-BIC(modelo_pois_log,
-  modelo_pois_sqrt,
-  modelo_bn_log,
-  modelo_bn_sqrt
-)
+BIC(modelo_pois_log, modelo_pois_sqrt, modelo_bn_log, modelo_bn_sqrt)
 
 
 ## 4.1 Razão entre deviance e graus de liberdade
@@ -175,7 +167,7 @@ modelo_bn_log2 <- MASS::glm.nb(
   link = "log"
 )
 
-drop1(modelo_bn_log2)
+drop1(modelo_bn_log2, test = "Chisq")
 
 
 ## 5.3 Comparação do modelo completo com o reduzido
@@ -195,14 +187,15 @@ summary(modelo_bn_log2)
 summary(modelo_bn_log2)
 confint(modelo_bn_log2)
 
-Razao_de_medias = exp(coef(modelo_bn_log2)),
-IC95_inferior = exp(ic_final[, 1]),
-IC95_superior = exp(ic_final[, 2]),
+Razao_de_medias <- exp(coef(modelo_bn_log2))
+IC95_inferior <- exp(confint(modelo_bn_log2))[, 1]
+IC95_superior <- exp(confint(modelo_bn_log2))[, 2]
 
-Razao_de_medias
-IC95_inferior
-IC95_superior
-
+cbind(
+  Razao_de_medias,
+  IC95_inferior,
+  IC95_superior
+)
 
 ## 6.2 Parâmetro de dispersão
 
@@ -289,5 +282,3 @@ observacoes_influentes
 
 # Inspeção dos registros identificados
 dados[observacoes_influentes, ]
-
-
