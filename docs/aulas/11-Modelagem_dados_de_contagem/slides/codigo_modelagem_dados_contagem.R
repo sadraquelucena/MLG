@@ -176,9 +176,57 @@ teste_modelos <- lmtest::lrtest(modelo_bn_log2, modelo_bn_log)
 teste_modelos
 
 
-# 6. DIAGNÓSTICO DO MODELO FINAL -----------------------------
+# 6. MODELO FINAL E INTERPRETAÇÃO ----------------------------
+# Modelo final: binomial negativo com ligação log
+# Fórmula: Days ~ Eth + Age
 
-## 6.1 Envelope simulado meio-normal
+summary(modelo_bn_log2)
+
+## 6.1 Coeficientes, razões de médias e IC95%
+
+summary(modelo_bn_log2)
+confint(modelo_bn_log2)
+
+Razao_de_medias <- exp(coef(modelo_bn_log2))
+IC95_inferior <- exp(confint(modelo_bn_log2))[, 1]
+IC95_superior <- exp(confint(modelo_bn_log2))[, 2]
+
+cbind(
+  Razao_de_medias,
+  IC95_inferior,
+  IC95_superior
+)
+
+## 6.2 Parâmetro de dispersão
+
+modelo_bn_log2$theta
+summary(modelo_bn_log2)$SE.theta
+
+## 6.3 Médias ajustadas
+
+dados$media_ajustada_bn <- predict(
+  modelo_bn_log2,
+  type = "response"
+)
+
+head(dados[, c("Days", "media_ajustada_bn")])
+
+## 6.4 Observados versus previstos
+
+ggplot(dados, aes(x = media_ajustada_bn, y = Days)) +
+  geom_point(alpha = 0.7) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+  labs(
+    title = "Dias observados versus previstos",
+    x = "Média prevista pelo modelo binomial negativo",
+    y = "Dias de ausência observados"
+  ) +
+  theme_minimal()
+
+
+# 7. DIAGNÓSTICO DO MODELO FINAL -----------------------------
+
+## 7.1 Envelope simulado meio-normal
 
 set.seed(123)
 
@@ -190,7 +238,7 @@ hnp::hnp(
   print.on = TRUE
 )
 
-## 6.2 Resíduos de Pearson versus valores ajustados
+## 7.2 Resíduos de Pearson versus valores ajustados
 
 plot(
   fitted(modelo_bn_log2),
@@ -201,7 +249,7 @@ plot(
 )
 abline(h = 0, lty = 2)
 
-## 6.3 Resíduos de deviance versus valores ajustados
+## 7.3 Resíduos de deviance versus valores ajustados
 
 plot(
   fitted(modelo_bn_log2),
@@ -212,7 +260,7 @@ plot(
 )
 abline(h = 0, lty = 2)
 
-## 6.4 Distância de Cook
+## 7.4 Distância de Cook
 
 cook <- cooks.distance(modelo_bn_log2)
 
@@ -234,51 +282,3 @@ observacoes_influentes
 
 # Inspeção dos registros identificados
 dados[observacoes_influentes, ]
-
-
-# 7. MODELO FINAL E INTERPRETAÇÃO ----------------------------
-# Modelo final: binomial negativo com ligação log
-# Fórmula: Days ~ Eth + Age
-
-summary(modelo_bn_log2)
-
-## 7.1 Coeficientes, razões de médias e IC95%
-
-summary(modelo_bn_log2)
-confint(modelo_bn_log2)
-
-Razao_de_medias <- exp(coef(modelo_bn_log2))
-IC95_inferior <- exp(confint(modelo_bn_log2))[, 1]
-IC95_superior <- exp(confint(modelo_bn_log2))[, 2]
-
-cbind(
-  Razao_de_medias,
-  IC95_inferior,
-  IC95_superior
-)
-
-## 7.2 Parâmetro de dispersão
-
-modelo_bn_log2$theta
-summary(modelo_bn_log2)$SE.theta
-
-## 6.3 Médias ajustadas
-
-dados$media_ajustada_bn <- predict(
-  modelo_bn_log2,
-  type = "response"
-)
-
-head(dados[, c("Days", "media_ajustada_bn")])
-
-## 7.4 Observados versus previstos
-
-ggplot(dados, aes(x = media_ajustada_bn, y = Days)) +
-  geom_point(alpha = 0.7) +
-  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
-  labs(
-    title = "Dias observados versus previstos",
-    x = "Média prevista pelo modelo binomial negativo",
-    y = "Dias de ausência observados"
-  ) +
-  theme_minimal()
