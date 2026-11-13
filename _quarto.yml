@@ -44,6 +44,7 @@ website:                  # Configurações específicas do website
     - section: "Modelagem"
       contents: 
       - href: aulas/11-Modelagem_dados_de_contagem/conteudo.qmd
+      - href: aulas/12-Modelagem_dados_binarios/conteudo.qmd
       
 
 format:                      # Configurações do formato HTML

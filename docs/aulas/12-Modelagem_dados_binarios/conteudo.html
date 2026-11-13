@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>12. Modelagem de Dados Binários – Modelos Lineares Generalizados</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../aulas/11-Modelagem_dados_de_contagem/conteudo.html" rel="prev">
+<link href="../../img/mlg_logo.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-00d389e62b6df4345c42dbb6af57f6a4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar docked fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title">12. Modelagem de Dados Binários</h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+      <a href="../../index.html" class="sidebar-logo-link">
+      <img src="../../img/mlg_logo.png" alt="" class="sidebar-logo light-content py-0 d-lg-inline d-none">
+      <img src="../../img/mlg_logo.png" alt="" class="sidebar-logo dark-content py-0 d-lg-inline d-none">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../info.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Informações da Disciplina</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Aulas</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/00-Regressao_linear/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">0. O Modelo Normal Linear</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/01-MLG_e_familia_exponencial/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">1. MLG e Família Exponencial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/02-Propriedades_da_familia_exponencial/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">2. Propriedades da Família Exponencial</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/03-Estimacao_por_maxima_verossimilhanca/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">3. Estimação dos Parâmetros de um MLG</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/04-Teste_razao_verossimilhancas/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">4. Teste da razão de verossimilhanças</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/05-Avaliacao_dos_coeficientes_individuais_da_regressao/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">5. Avaliação dos coeficientes individuais da regressão</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/06-selecao_de_variaveis/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">6. Seleção de variáveis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/07-Variaveis_qualitativas_e_variaveis_dummies/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">7. Variáveis qualitativas e variáveis <em>dummies</em></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/08-Analise_de_desvio/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">8. Análise de desvio</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/09-Analise_de_residuos/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">9. Análise de resíduos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/10-Diagnostico/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">10. Diagnóstico de Modelos Lineares Generalizados</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Modelagem</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/11-Modelagem_dados_de_contagem/conteudo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">11. Modelagem de Dados de Contagem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../aulas/12-Modelagem_dados_binarios/conteudo.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">12. Modelagem de Dados Binários</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">12. Modelagem de Dados Binários</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Nesta aula, vamos modelar dados de inadimplência de cartão de crédito. Vamos usar o conjunto de dados <code>Default</code> do pacote <code>ISLR2</code> do R.</p>
+<ul>
+<li>Código R: <a href="../../aulas/12-Modelagem_dados_binarios/slides/codigo_modelagem_dados_binarios.R" target="_blank">Aqui</a></li>
+</ul>
+<hr>
+<section id="dados-e-variáveis" class="level1">
+<h1>Dados e variáveis</h1>
+<p>O conjunto de dados <code>Default</code> do pacote <code>ISLR2</code> contém 10000 observações. Vamos inicialmente traduzir as variáveis para português.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PACOTES</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ISLR2)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MASS)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'MASS'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:ISLR2':
+
+    Boston</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.2.1     ✔ readr     2.2.0
+✔ forcats   1.0.1     ✔ stringr   1.6.0
+✔ ggplot2   4.0.3     ✔ tibble    3.3.1
+✔ lubridate 1.9.5     ✔ tidyr     1.3.2
+✔ purrr     1.2.2     </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+✖ dplyr::select() masks MASS::select()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(hnp)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lmtest)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: zoo
+
+Attaching package: 'zoo'
+
+The following objects are masked from 'package:base':
+
+    as.Date, as.Date.numeric</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pROC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Type 'citation("pROC")' for a citation.
+
+Attaching package: 'pROC'
+
+The following objects are masked from 'package:stats':
+
+    cov, smooth, var</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"Default"</span>, <span class="at">package =</span> <span class="st">"ISLR2"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Traduindo as variáveis para português</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>dados <span class="ot">&lt;-</span> Default <span class="sc">|&gt;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">rename</span>(</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">inadimplencia =</span> default,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">estudante =</span> student,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">saldo_devedor =</span> balance,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">renda_anual =</span> income</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">inadimplencia =</span> dplyr<span class="sc">::</span><span class="fu">case_when</span>(</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>      inadimplencia <span class="sc">==</span> <span class="st">"No"</span> <span class="sc">~</span> <span class="dv">0</span>,</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>      inadimplencia <span class="sc">==</span> <span class="st">"Yes"</span> <span class="sc">~</span> <span class="dv">1</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">estudante =</span> <span class="fu">factor</span>(</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>      estudante,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"No"</span>, <span class="st">"Yes"</span>),</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Não"</span>, <span class="st">"Sim"</span>)</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Temos então 4 variáveis:</p>
+<ul>
+<li><code>inadimplencia</code> (variável resposta): <code>1</code> indica que o cliente está inadimplente e <code>0</code> indica que não;</li>
+<li><code>estudante</code>: fator indicando se o cliente é um estudante;</li>
+<li><code>saldo_devedor</code>: saldo médio restante no cartão de crédito do cliente após o pagamento mensal;</li>
+<li><code>renda_anual</code>: renda do cliente.</li>
+</ul>
+<section id="inspeção-inicial" class="level2">
+<h2 data-anchor-id="inspeção-inicial">Inspeção inicial</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(dados)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   10000 obs. of  4 variables:
+ $ inadimplencia: num  0 0 0 0 0 0 0 0 0 0 ...
+ $ estudante    : Factor w/ 2 levels "Não","Sim": 1 2 1 1 1 2 1 2 1 1 ...
+ $ saldo_devedor: num  730 817 1074 529 786 ...
+ $ renda_anual  : num  44362 12106 31767 35704 38463 ...</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dados)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  inadimplencia estudante saldo_devedor renda_anual
+1             0       Não      729.5265   44361.625
+2             0       Sim      817.1804   12106.135
+3             0       Não     1073.5492   31767.139
+4             0       Não      529.2506   35704.494
+5             0       Não      785.6559   38463.496
+6             0       Sim      919.5885    7491.559</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(dados)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> inadimplencia    estudante  saldo_devedor     renda_anual   
+ Min.   :0.0000   Não:7056   Min.   :   0.0   Min.   :  772  
+ 1st Qu.:0.0000   Sim:2944   1st Qu.: 481.7   1st Qu.:21340  
+ Median :0.0000              Median : 823.6   Median :34553  
+ Mean   :0.0333              Mean   : 835.4   Mean   :33517  
+ 3rd Qu.:0.0000              3rd Qu.:1166.3   3rd Qu.:43808  
+ Max.   :1.0000              Max.   :2654.3   Max.   :73554  </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>dados <span class="sc">|&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(inadimplencia) <span class="sc">|&gt;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">percentual =</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> n <span class="sc">/</span> <span class="fu">sum</span>(n), <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  inadimplencia    n percentual
+1             0 9667       96.7
+2             1  333        3.3</code></pre>
+</div>
+</div>
+<p>Na base há 333 (3,3%) clientes inadimplentes e 9667 (96,7%) clientes adimplentes.</p>
+</section>
+</section>
+<section id="metodologia-estatística" class="level1">
+<h1>Metodologia estatística</h1>
+<p>Seja <span class="math inline">\(Y_i\)</span> uma variável aleatória binária, assumindo valor 1 quando o cliente está inadimplente e 0 caso contrário. Seja <span class="math inline">\(\boldsymbol{x}_i\)</span> o vetor de variáveis explicativas associadas ao cliente. A probabilidade condicional de inadimplência é definida por</p>
+<p><span class="math display">\[
+\pi_i = P(Y_i=1\mid \boldsymbol{x}_i).
+\]</span></p>
+<p>Como a variável resposta é binária, considera-se a distribuição Bernoulli: <span class="math display">\[
+Y_i\mid \boldsymbol{x}_i \sim \operatorname{Bernoulli}(\pi_i),
+\]</span></p>
+<p>em que</p>
+<p><span class="math display">\[
+E(Y_i\mid \boldsymbol{x}_i)=\pi_i
+\]</span></p>
+<p>e</p>
+<p><span class="math display">\[
+\operatorname{Var}(Y_i\mid \boldsymbol{x}_i) =\pi_i(1-\pi_i).
+\]</span></p>
+<p>Os modelos lineares generalizados (MLGs) estabelecem uma relação entre a probabilidade condicional de ocorrência do evento e o preditor linear, por meio de uma função de ligação:</p>
+<p><span class="math display">\[
+g(\pi_i)=\eta_i
+=\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip},
+\]</span></p>
+<p>em que <span class="math inline">\(\beta_0,\beta_1,\ldots,\beta_p\)</span> são os parâmetros do modelo. Para investigar a influência das características dos clientes sobre a probabilidade de inadimplência, foram consideradas cinco funções de ligação: logit, probit, cauchit, logarítmica e log-log complementar (cloglog).</p>
+<section id="modelo-logístico-ligação-logit" class="level2">
+<h2 data-anchor-id="modelo-logístico-ligação-logit">Modelo logístico (ligação logit)</h2>
+<p>O modelo logístico utiliza a função de ligação logit, definida por</p>
+<p><span class="math display">\[
+g(\pi_i)=\log\left(\frac{\pi_i}{1-\pi_i}\right).
+\]</span></p>
+<p>Assim, o modelo é expresso por</p>
+<p><span class="math display">\[
+\log\left(\frac{\pi_i}{1-\pi_i}\right)=\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}.
+\]</span></p>
+<p>A função inversa da ligação é dada por</p>
+<p><span class="math display">\[
+\pi_i=\frac{\exp(\eta_i)}{1+\exp(\eta_i)}.
+\]</span></p>
+<p>Os coeficientes representam variações no logaritmo das chances (<em>odds</em>) de inadimplência. Consequentemente, a exponenciação dos coeficientes fornece razões de chances (<em>odds ratios</em>), facilitando a interpretação dos efeitos das variáveis explicativas.</p>
+</section>
+<section id="modelo-probit" class="level2">
+<h2 data-anchor-id="modelo-probit">Modelo probit</h2>
+<p>O modelo probit utiliza a função de ligação definida pelo inverso da função de distribuição acumulada da distribuição normal padrão:</p>
+<p><span class="math display">\[
+g(\pi_i)=\Phi^{-1}(\pi_i),
+\]</span></p>
+<p>em que (^{-1}) representa a função quantil da distribuição normal padrão.</p>
+<p>O modelo é dado por</p>
+<p><span class="math display">\[
+\Phi^{-1}(\pi_i)
+=\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}.
+\]</span></p>
+<p>Sua função de ligação inversa é</p>
+<p><span class="math display">\[
+\pi_i=\Phi(\eta_i).
+\]</span></p>
+<p>Essa especificação estabelece uma relação entre o preditor linear e a probabilidade de inadimplência por meio da distribuição normal padrão. Os coeficientes representam variações na escala latente normal, não sendo interpretados diretamente como razões de chances.</p>
+<p>A interpretação pode ser dada olhando para o sinal do coeficiente <span class="math inline">\(\beta_j\)</span> associado à variável explicativa: <span class="math inline">\(\beta_j&gt;0\)</span> implica que um aumento na variável <span class="math inline">\(X_j\)</span> aumenta a probabilidade de <span class="math inline">\(Y = 1\)</span>, enquanto <span class="math inline">\(\beta_j&lt;0\)</span> implica que um aumento na variável <span class="math inline">\(X_j\)</span> diminui a probabilidade de <span class="math inline">\(Y = 1\)</span>, sempre mantendo as demais variáveis constantes.</p>
+</section>
+<section id="modelai-cauchit" class="level2">
+<h2 data-anchor-id="modelai-cauchit">Modelai cauchit</h2>
+<p>O modelo cauchit utiliza uma função de ligação baseada na distribuição de Cauchy padrão, sendo definida por</p>
+<p><span class="math display">\[
+g(\pi_i)=F_C^{-1}(\pi_i),
+\]</span></p>
+<p>em que <span class="math inline">\(F_C^{-1}\)</span> representa a função quantil da distribuição de Cauchy padrão.</p>
+<p>O modelo é expresso por</p>
+<p><span class="math display">\[
+F_C^{-1}(\pi_i)=\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}.
+\]</span></p>
+<p>A função de ligação inversa é</p>
+<p><span class="math display">\[
+\pi_i=F_C(\eta_i) =\frac{1}{2}+\frac{1}{\pi}\arctan(\eta_i).
+\]</span></p>
+<p>Essa função apresenta caudas mais pesadas do que as distribuições normal e logística, permitindo uma resposta menos abrupta nas regiões extremas do preditor linear. Dessa forma, constitui uma alternativa para investigar a sensibilidade dos resultados à escolha da função de ligação.</p>
+</section>
+<section id="modelo-com-ligação-logarítmica" class="level2">
+<h2 data-anchor-id="modelo-com-ligação-logarítmica">Modelo com ligação logarítmica</h2>
+<p>O modelo com ligação logarítmica utiliza a função</p>
+<p><span class="math display">\[
+g(\pi_i)=\log(\pi_i).
+\]</span></p>
+<p>Consequentemente,</p>
+<p><span class="math display">\[
+\log(\pi_i) =\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}.
+\]</span></p>
+<p>A função de ligação inversa é</p>
+<p><span class="math display">\[
+\pi_i=\exp(\eta_i).
+\]</span></p>
+<p>Essa especificação permite modelar diretamente o logaritmo da probabilidade de inadimplência. Entretanto, diferentemente das ligações logit, probit e cauchit, a função inversa da ligação logarítmica não garante automaticamente probabilidades no intervalo <span class="math inline">\((0,1)\)</span>. Portanto, é necessário verificar se as probabilidades ajustadas permanecem no intervalo admissível, pois valores superiores a 1 não são probabilidades válidas.</p>
+</section>
+<section id="modelo-complemento-log-log" class="level2">
+<h2 data-anchor-id="modelo-complemento-log-log">Modelo complemento log-log</h2>
+<p>O modelo complemento log-log utiliza a função de ligação</p>
+<p><span class="math display">\[
+g(\pi_i)=\log[-\log(1-\pi_i)].
+\]</span></p>
+<p>Assim, o modelo é representado por</p>
+<p><span class="math display">\[
+\log[-\log(1-\pi_i)]=\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}.
+\]</span></p>
+<p>Sua função de ligação inversa é</p>
+<p><span class="math display">\[
+\pi_i=1-\exp[-\exp(\eta_i)].
+\]</span></p>
+<p>Essa especificação apresenta comportamento assimétrico, diferentemente das ligações logit, probit e cauchit, que são simétricas em torno de zero na escala do preditor linear. A ligação complemento log-log pode ser particularmente útil em situações nas quais a ocorrência do evento apresenta comportamento assimétrico ou está associada a processos de risco acumulado.</p>
+</section>
+<section id="especificação-dos-modelos-completos" class="level2">
+<h2 data-anchor-id="especificação-dos-modelos-completos">Especificação dos modelos completos</h2>
+<p>Inicialmente, todos os modelos foram ajustados com a fórmula <code>inadimplencia ~ estudante + saldo_devedor + renda_anual</code>. Essa especificação permite comparar as distribuições e funções de ligação mantendo constantes a resposta, as covariáveis e a amostra utilizada. O modelo com ligação logarítmica não convergiu e, portanto, não foi incluído na análise.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Modelo logístico</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>modelo_logit <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  inadimplencia <span class="sc">~</span> estudante <span class="sc">+</span> saldo_devedor <span class="sc">+</span> renda_anual,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>),</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dados</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Modelo com ligação probit</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>modelo_probit <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  inadimplencia <span class="sc">~</span> estudante <span class="sc">+</span> saldo_devedor <span class="sc">+</span> renda_anual,</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"probit"</span>),</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dados</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Modelo com ligação cauchit</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>modelo_cauchit <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>  inadimplencia <span class="sc">~</span> estudante <span class="sc">+</span> saldo_devedor <span class="sc">+</span> renda_anual,</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"cauchit"</span>),</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dados</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Modelo com ligação cloglog</span></span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>modelo_cloglog <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>  inadimplencia <span class="sc">~</span> estudante <span class="sc">+</span> saldo_devedor <span class="sc">+</span> renda_anual,</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"cloglog"</span>),</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dados</span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="resultados" class="level1">
+<h1>Resultados</h1>
+<section id="comparação-inicial-das-distribuições-e-ligações" class="level2">
+<h2 data-anchor-id="comparação-inicial-das-distribuições-e-ligações">Comparação inicial das distribuições e ligações</h2>
+<p>Os quatro modelos ajustados foram comparados seguindo o Critério de INformação de Akaike (AIC) e o Critério de Informação Bayesiano (BIC).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(modelo_logit, modelo_probit, modelo_cauchit, modelo_cloglog)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               df      AIC
+modelo_logit    4 1579.545
+modelo_probit   4 1591.217
+modelo_cauchit  4 1805.987
+modelo_cloglog  4 1597.120</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">BIC</span>(modelo_logit, modelo_probit, modelo_cauchit, modelo_cloglog)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>               df      BIC
+modelo_logit    4 1608.386
+modelo_probit   4 1620.058
+modelo_cauchit  4 1834.829
+modelo_cloglog  4 1625.961</code></pre>
+</div>
+</div>
+<p>Com base nos dois critérios, o modelo logístico (função de ligação logit) teve menores valores de AIC e BIC, sendo portanto o modelo escolhido para dar prosseguimento às análises.</p>
+</section>
+<section id="seleção-de-variáveis-no-modelo-logístico" class="level2">
+<h2 data-anchor-id="seleção-de-variáveis-no-modelo-logístico">Seleção de variáveis no modelo logístico</h2>
+<p>A seleção de covariáveis foi conduzida por meio de testes de exclusão individual (função <code>drop1()</code>) baseados no Teste da Razão de Verossimilhanças (LRT).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">drop1</span>(modelo_logit, <span class="at">test =</span> <span class="st">"Chisq"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Single term deletions
+
+Model:
+inadimplencia ~ estudante + saldo_devedor + renda_anual
+              Df Deviance    AIC     LRT  Pr(&gt;Chi)    
+&lt;none&gt;             1571.5 1579.5                      
+estudante      1   1579.0 1585.0    7.42  0.006445 ** 
+saldo_devedor  1   2907.5 2913.5 1335.95 &lt; 2.2e-16 ***
+renda_anual    1   1571.7 1577.7    0.14  0.711514    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>A variável <code>renda_anual</code> (<span class="math inline">\(\text{LRT} = 0{,}14\)</span>; <span class="math inline">\(p = 0{,}7115\)</span>) não apresentou contribuição estatisticamente significativa para o modelo e foi removida. A comparação entre AIC e BIC do modelo completo e do modelo sem <code>renda_anual</code> também indicou que o modelo reduzido tem melhor ajuste.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sem renda_anual</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>modelo_logit2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  inadimplencia <span class="sc">~</span> estudante <span class="sc">+</span> saldo_devedor,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>),</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dados</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="fu">drop1</span>(modelo_logit2, <span class="at">test =</span> <span class="st">"Chisq"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Single term deletions
+
+Model:
+inadimplencia ~ estudante + saldo_devedor
+              Df Deviance    AIC     LRT  Pr(&gt;Chi)    
+&lt;none&gt;             1571.7 1577.7                      
+estudante      1   1596.5 1600.5   24.77 6.459e-07 ***
+saldo_devedor  1   2908.7 2912.7 1337.00 &lt; 2.2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">AIC</span>(modelo_logit, modelo_logit2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              df      AIC
+modelo_logit   4 1579.545
+modelo_logit2  3 1577.682</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">BIC</span>(modelo_logit, modelo_logit2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              df      BIC
+modelo_logit   4 1608.386
+modelo_logit2  3 1599.313</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="diagnóstico-dos-resíduos-do-modelo-final" class="level1">
+<h1>Diagnóstico dos resíduos do modelo final</h1>
+<section id="envelope-simulado-meio-normal" class="level2">
+<h2 data-anchor-id="envelope-simulado-meio-normal">Envelope simulado meio-normal</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>hnp<span class="sc">::</span><span class="fu">hnp</span>(</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  modelo_logit2,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">sim =</span> <span class="dv">999</span>,</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">resid.type =</span> <span class="st">"deviance"</span>,</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">paint.out =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">print.on =</span> <span class="cn">TRUE</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Binomial model </code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>O gráfico de envelope simulado confirma que todos os resíduos estão contidos dentro das bandas de confiança de <span class="math inline">\(95\%\)</span>, indicando que o modelo logístico especificou adequadamente a estrutura de relação entre as variáveis.</p>
+</section>
+<section id="resíduos-de-pearson-versus-valores-ajustados" class="level2">
+<h2 data-anchor-id="resíduos-de-pearson-versus-valores-ajustados">Resíduos de Pearson versus valores ajustados</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fitted</span>(modelo_logit2),</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">residuals</span>(modelo_logit2, <span class="at">type =</span> <span class="st">"pearson"</span>),</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Valores ajustados"</span>,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Resíduos de Pearson"</span>,</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Resíduos de Pearson versus valores ajustados"</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Em regressão logística, o resíduo de Pearson é dado por <span class="math inline">\(r_i = \frac{y_i - \hat{\pi}_i}{\sqrt{\hat{\pi}_i(1 - \hat{\pi}_i)}}\)</span>. Como <span class="math inline">\(y_i\)</span> só assume dois valores, todos os pontos caem obrigatoriamente sobre a curva superior (quando <span class="math inline">\(y_i = 1\)</span>) ou sobre a curva inferior (quando <span class="math inline">\(y_i = 0\)</span>). Isso não indica falta de ajuste, apenas reflete a natureza discreta da resposta.</p>
+</section>
+<section id="resíduos-de-deviance-versus-valores-ajustados" class="level2">
+<h2 data-anchor-id="resíduos-de-deviance-versus-valores-ajustados">Resíduos de deviance versus valores ajustados</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fitted</span>(modelo_logit2),</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">residuals</span>(modelo_logit2, <span class="at">type =</span> <span class="st">"deviance"</span>),</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Valores ajustados"</span>,</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Resíduos de deviance"</span>,</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Resíduos de deviance versus valores ajustados"</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A interpretação aqui é similar a dos resíduos de Pearson.</p>
+</section>
+<section id="análise-de-pontos-influentes-distância-de-cook" class="level2">
+<h2 data-anchor-id="análise-de-pontos-influentes-distância-de-cook">Análise de Pontos Influentes (Distância de Cook)</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>cook <span class="ot">&lt;-</span> <span class="fu">cooks.distance</span>(modelo_logit2)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  cook,</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"h"</span>,</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Observação"</span>,</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"Distância de Cook"</span>,</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Distância de Cook — modelo final"</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">4</span> <span class="sc">/</span> <span class="fu">nobs</span>(modelo_logit2), <span class="at">lty =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A avaliação de pontos influentes mostra valores de Distância de Cook extremamente baixos (o pico máximo é em torno de 0,017), embora vários pontos ultrapassem a linha pontilhada de referência (<span class="math inline">\(4/n = 4/10.000 = 0,0004\)</span>). No entanto, na prática, considera-se que uma observação tem influência real sobre as estimativas dos coeficientes (<span class="math inline">\(\hat{\beta}\)</span>) apenas quando a Distância de Cook se aproxima de <span class="math inline">\(0,5\)</span> ou <span class="math inline">\(1,0\)</span>. Como o maior valor é <span class="math inline">\(0,017\)</span> (muito abaixo de <span class="math inline">\(0,5\)</span>), nenhuma observação individual está distorcendo o ajuste do modelo.</p>
+</section>
+</section>
+<section id="curva-roc-e-área-sob-a-curva" class="level1">
+<h1>Curva ROC e Área sob a curva</h1>
+<p>O modelo logístico estima a probabilidade <span class="math inline">\(\widehat{\pi}_i\)</span> de ocorrência do evento de interesse. Entretanto, para classificar uma observação como pertencente à classe 0 ou à classe 1, é necessário estabelecer um ponto de corte para <span class="math inline">\(\widehat{\pi}_i\)</span>.</p>
+<p>Por exemplo, considerando o ponto de corte de 0,5:</p>
+<ul>
+<li>Se <span class="math inline">\(\widehat{\pi}_i \geq 0{,}5\)</span>, o cliente é classificado como inadimplente (1).</li>
+<li>Se <span class="math inline">\(\widehat{\pi}_i &lt; 0{,}5\)</span>, o cliente é classificado como adimplente (0).</li>
+</ul>
+<p>A comparação entre as classificações previstas pelo modelo e as classificações efetivamente observadas produz a matriz de confusão.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 34%">
+<col style="width: 31%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Observado: Inadimplente (1)</th>
+<th style="text-align: right;">Observado: Adimplente (0)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Previsto: Inadimplente (1)</td>
+<td style="text-align: right;">Verdadeiro positivo (VP)</td>
+<td style="text-align: right;">Falso positivo (FP)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Previsto: Adimplente (0)</td>
+<td style="text-align: right;">Falso negativo (FN)</td>
+<td style="text-align: right;">Verdadeiro negativo (VN)</td>
+</tr>
+</tbody>
+</table>
+<p>Os quatro resultados são interpretados da seguinte forma:</p>
+<ul>
+<li><strong>Verdadeiro positivo (VP):</strong> cliente inadimplente corretamente identificado pelo modelo.</li>
+<li><strong>Falso positivo (FP):</strong> cliente adimplente incorretamente classificado como inadimplente.</li>
+<li><strong>Falso negativo (FN):</strong> cliente inadimplente incorretamente classificado como adimplente.</li>
+<li><strong>Verdadeiro negativo (VN):</strong> cliente adimplente corretamente identificado pelo modelo.</li>
+</ul>
+<section id="sensibilidade" class="level2">
+<h2 data-anchor-id="sensibilidade">Sensibilidade</h2>
+<p>A sensibilidade (<em>sensitivity</em>), também denominada taxa de verdadeiros positivos (<strong>True Positive Rate – TPR</strong>), mede a capacidade do modelo de identificar corretamente as observações que pertencem à classe positiva.</p>
+<p>Matematicamente: <span class="math display">\[
+\text{Sensibilidade}= \frac{VP}{VP+FN}
+\]</span></p>
+<p>No contexto da inadimplência, representa a proporção de clientes efetivamente inadimplentes que foram corretamente identificados pelo modelo.</p>
+<p><strong>Interpretação:</strong> quanto maior a sensibilidade, menor a quantidade de clientes inadimplentes que o modelo deixa de identificar.</p>
+</section>
+<section id="especificidade" class="level2">
+<h2 data-anchor-id="especificidade">Especificidade</h2>
+<p>A especificidade (<em>specificity</em>), também denominada taxa de verdadeiros negativos (<strong>True Negative Rate – TNR</strong>), mede a capacidade do modelo de identificar corretamente as observações que pertencem à classe negativa.</p>
+<p>Matematicamente:</p>
+<p><span class="math display">\[
+\text{Especificidade}= \frac{VN}{VN+FP}
+\]</span></p>
+<p>No contexto da inadimplência, representa a proporção de clientes efetivamente adimplentes que foram corretamente identificados pelo modelo.</p>
+<p><strong>Interpretação:</strong> quanto maior a especificidade, menor a quantidade de clientes adimplentes classificados incorretamente como inadimplentes.</p>
+</section>
+<section id="curva-roc" class="level2">
+<h2 data-anchor-id="curva-roc">Curva ROC</h2>
+<p>A curva ROC (Receiver Operating Characteristic) é uma representação gráfica utilizada para avaliar a capacidade discriminatória de um modelo de classificação binária.</p>
+<p>Ela relaciona a sensibilidade (eixo vertical) com a taxa de falsos positivos (eixo horizontal), para diferentes pontos de corte das probabilidades estimadas.</p>
+<p>A taxa de falsos positivos é calculada por:</p>
+<p><span class="math display">\[
+\text{FPR}= 1-\text{Especificidade} = \frac{FP}{FP+VN}.
+\]</span></p>
+<p>Cada ponto da curva ROC representa um par de valores de sensibilidade e taxa de falsos positivos, obtido a partir de determinado ponto de corte.</p>
+<p><img src="../../imagens/curva_roc.png" class="img-fluid"></p>
+<p>A interpretação da curva considera:</p>
+<ul>
+<li><strong>Curva próxima ao canto superior esquerdo:</strong> indica elevada sensibilidade e elevada especificidade, caracterizando boa capacidade discriminatória.</li>
+<li><strong>Curva próxima à diagonal:</strong> indica capacidade discriminatória semelhante à de um classificador aleatório.</li>
+<li><strong>Curva abaixo da diagonal:</strong> indica desempenho inferior ao de uma classificação aleatória, considerando a orientação convencional das classes.</li>
+</ul>
+</section>
+<section id="área-sob-a-curva-roc-auc" class="level2">
+<h2 data-anchor-id="área-sob-a-curva-roc-auc">Área sob a curva ROC (AUC)</h2>
+<p>A AUC (<em>Area Under the ROC Curve</em>) corresponde à área sob a curva ROC e resume a capacidade discriminatória do modelo em um único valor.</p>
+<p>Seu valor varia entre 0 e 1, sendo interpretado convencionalmente da seguinte maneira:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>AUC</th>
+<th style="text-align: left;">Interpretação</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0,50</td>
+<td style="text-align: left;">Discriminação equivalente ao acaso</td>
+</tr>
+<tr class="even">
+<td>0,60-0,70</td>
+<td style="text-align: left;">Discriminação fraca</td>
+</tr>
+<tr class="odd">
+<td>0,70-0,80</td>
+<td style="text-align: left;">Discriminação aceitável</td>
+</tr>
+<tr class="even">
+<td>0,80-0,90</td>
+<td style="text-align: left;">Boa discriminação</td>
+</tr>
+<tr class="odd">
+<td>Acima de 0,90</td>
+<td style="text-align: left;">Excelente discriminação</td>
+</tr>
+</tbody>
+</table>
+<p>AUC representa a probabilidade do modelo atribuir uma probabilidade de inadimplência maior a um cliente efetivamente inadimplente do que a um cliente efetivamente adimplente, escolhidos aleatoriamente.</p>
+<p>Para o nosso modelo, temos:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Probabilidades estimadas</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>probabilidades <span class="ot">&lt;-</span> <span class="fu">predict</span>(modelo_logit2, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Curva ROC</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>roc_modelo <span class="ot">&lt;-</span> pROC<span class="sc">::</span><span class="fu">roc</span>(</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">response =</span> dados<span class="sc">$</span>inadimplencia,</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">predictor =</span> probabilidades,</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">direction =</span> <span class="st">"&lt;"</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Gráfico da curva ROC</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>  roc_modelo,</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="st">"blue"</span>,</span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">lwd =</span> <span class="dv">2</span>,</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Curva ROC - Modelo Logístico"</span>,</span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">legacy.axes =</span> <span class="cn">TRUE</span></span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Linha de classificação aleatória</span></span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> <span class="dv">0</span>, <span class="at">b =</span> <span class="dv">1</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">col =</span> <span class="st">"red"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="conteudo_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Área sob a curva</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>pROC<span class="sc">::</span><span class="fu">auc</span>(roc_modelo)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Area under the curve: 0.9495</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Intervalo de confiança de 95%</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>pROC<span class="sc">::</span><span class="fu">ci.auc</span>(roc_modelo)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>95% CI: 0.9401-0.959 (DeLong)</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ponto de corte</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>ponto_corte <span class="ot">&lt;-</span> pROC<span class="sc">::</span><span class="fu">coords</span>(</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  roc_modelo,</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="st">"best"</span>,</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">best.method =</span> <span class="st">"youden"</span>,</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ret =</span> <span class="fu">c</span>(<span class="st">"threshold"</span>, <span class="st">"sensitivity"</span>, <span class="st">"specificity"</span>),</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">transpose =</span> <span class="cn">FALSE</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>ponto_corte</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   threshold sensitivity specificity
+1 0.03168237   0.9039039   0.8627289</code></pre>
+</div>
+</div>
+<p>No modelo, a área soba curva ROC foi de 0,9495, indicando excelente capacidade discriminatória do modelo logístico. Ou seja, ao selecionar aleatoriamente um cliente inadimplente e um cliente adimplente, existe aproximadamente 94,95% de probabilidade de o modelo atribuir uma probabilidade estimada de inadimplência maior ao cliente efetivamente inadimplente. O intervalo de confiança de 95% para a AUC foi [0,9401; 0,9590].</p>
+<p>O ponto de corte ótimo para a classificação foi 0,03168. Ou seja, probabilidades acima desse valor serão classificadas como inadimplentes (1). Isso era uma sensibilidade de 90,39% e especificidade de 86,27%. Assim, considerando esse limiar de classificação, o modelo identifica corretamente aproximadamente 90% dos clientes inadimplentes e 86% dos clientes adimplentes.</p>
+</section>
+<section id="interpretação-do-modelo-final" class="level2">
+<h2 data-anchor-id="interpretação-do-modelo-final">Interpretação do modelo final</h2>
+<p>No modelo logístico, aplicamos a exponencial sobre os coeficientes para interpretarmos a razão de chances (<em>odds ratio</em>) entre ser inadimplente em relação a ser adimplente.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(modelo_logit2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = inadimplencia ~ estudante + saldo_devedor, family = binomial(link = "logit"), 
+    data = dados)
+
+Coefficients:
+                Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)   -1.075e+01  3.692e-01 -29.116  &lt; 2e-16 ***
+estudanteSim  -7.149e-01  1.475e-01  -4.846 1.26e-06 ***
+saldo_devedor  5.738e-03  2.318e-04  24.750  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2920.6  on 9999  degrees of freedom
+Residual deviance: 1571.7  on 9997  degrees of freedom
+AIC: 1577.7
+
+Number of Fisher Scoring iterations: 8</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confint</span>(modelo_logit2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Waiting for profiling to be done...</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                      2.5 %        97.5 %
+(Intercept)   -11.498144891 -10.049841998
+estudanteSim   -1.007777857  -0.429075610
+saldo_devedor   0.005296591   0.006206095</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>OR <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">coef</span>(modelo_logit2))</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>IC95_inferior <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">confint</span>(modelo_logit2))[, <span class="dv">1</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Waiting for profiling to be done...</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>IC95_superior <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="fu">confint</span>(modelo_logit2))[, <span class="dv">2</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Waiting for profiling to be done...</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cbind</span>(</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  OR,</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  IC95_inferior,</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  IC95_superior</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                        OR IC95_inferior IC95_superior
+(Intercept)   2.145622e-05  0.0000101489  4.319257e-05
+estudanteSim  4.892520e-01  0.3650292262  6.511107e-01
+saldo_devedor 1.005755e+00  1.0053106429  1.006225e+00</code></pre>
+</div>
+</div>
+<p>A variável estudante apresentou coeficiente negativo (-0,7149), com razão de chances igual a 0,4893 (IC 95%: 0,3650-0,6511). Esse resultado indica que clientes estudantes apresentam chances de inadimplência aproximadamente 51,1% menores (1-0,4893 = 0,5107) do que clientes não estudantes, considerando constante o saldo devedor.</p>
+<p>Por outro lado, o saldo devedor apresentou coeficiente positivo (0,005738), com razão de chances igual a 1,005755 (IC 95%: 1,0053-1,0062). Portanto, cada unidade adicional no saldo devedor está associada a um aumento de aproximadamente 0,58% nas chances de inadimplência. Considerando um aumento de 100 unidades monetárias, esse acréscimo corresponde a aproximadamente 77,5% nas chances de inadimplência, mantendo constante a condição de estudante.</p>
+</section>
+</section>
+<section id="classificação-de-novas-observações" class="level1">
+<h1>Classificação de novas observações</h1>
+<p>Vamos classificar novos clientes usando esse modelo.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Novas observações</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>novos_clientes <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">cliente =</span> <span class="fu">c</span>(<span class="st">"Cliente 1"</span>, <span class="st">"Cliente 2"</span>, <span class="st">"Cliente 3"</span>),</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">estudante =</span> <span class="fu">factor</span>(<span class="fu">c</span>(<span class="st">"Não"</span>, <span class="st">"Não"</span>, <span class="st">"Sim"</span>), <span class="at">levels =</span> <span class="fu">levels</span>(dados<span class="sc">$</span>estudante)),</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">saldo_devedor =</span> <span class="fu">c</span>(<span class="dv">500</span>, <span class="dv">1200</span>, <span class="dv">2000</span>)</span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>novos_clientes</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    cliente estudante saldo_devedor
+1 Cliente 1       Não           500
+2 Cliente 2       Não          1200
+3 Cliente 3       Sim          2000</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Probabilidades de inadimplẽncia estimadas</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>novos_clientes<span class="sc">$</span>probabilidade <span class="ot">&lt;-</span> <span class="fu">predict</span>(</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  modelo_logit2,</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">newdata =</span> novos_clientes,</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"response"</span></span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>novos_clientes</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    cliente estudante saldo_devedor probabilidade
+1 Cliente 1       Não           500  0.0003779224
+2 Cliente 2       Não          1200  0.0205572347
+3 Cliente 3       Sim          2000  0.5029586777</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Classificação usando o ponto de corte</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Classificação</span></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>corte <span class="ot">&lt;-</span> ponto_corte<span class="sc">$</span>threshold</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>novos_clientes <span class="ot">&lt;-</span> novos_clientes <span class="sc">|&gt;</span></span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">classificacao =</span> <span class="fu">ifelse</span>(</span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>      probabilidade <span class="sc">&gt;=</span> corte,</span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Inadimplente"</span>,</span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Não inadimplente"</span></span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a>novos_clientes</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    cliente estudante saldo_devedor probabilidade    classificacao
+1 Cliente 1       Não           500  0.0003779224 Não inadimplente
+2 Cliente 2       Não          1200  0.0205572347 Não inadimplente
+3 Cliente 3       Sim          2000  0.5029586777     Inadimplente</code></pre>
+</div>
+</div>
+<p>Um cliente que não é estudante e tenha saldo devedor de 500 ou 1200 não é classificado como inadimplente. Por outro lado, um cliente que seja estudante e tenha saldo devedor de 2000 é classificado como inadimplente pelo modelo.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../../aulas/11-Modelagem_dados_de_contagem/conteudo.html" class="pagination-link" aria-label="11. Modelagem de Dados de Contagem">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">11. Modelagem de Dados de Contagem</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

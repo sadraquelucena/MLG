@@ -1,0 +1,627 @@
+---
+title: "Modelos Lineares Generalizados para Dados Binários"
+subtitle: "Análise de dados de inadimplência de cartão de crédito"
+author: "Prof. Dr. Sadraque E. F. Lucena"
+lang: pt-BR
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    code-tools: true
+    theme: cosmo
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# Dados e variáveis
+
+O conjunto de dados `Default` do pacote `ISLR2` contém 10000 observações. Vamos inicialmente traduzir as variáveis para português.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# PACOTES
+library(ISLR2)
+library(MASS)
+library(tidyverse)
+library(hnp)
+library(lmtest)
+library(pROC)
+
+data("Default", package = "ISLR2")
+
+# Traduindo as variáveis para português
+dados <- Default |>
+  dplyr::rename(
+    inadimplencia = default,
+    estudante = student,
+    saldo_devedor = balance,
+    renda_anual = income
+  ) |>
+  dplyr::mutate(
+    inadimplencia = dplyr::case_when(
+      inadimplencia == "No" ~ 0,
+      inadimplencia == "Yes" ~ 1
+    ),
+    estudante = factor(
+      estudante,
+      levels = c("No", "Yes"),
+      labels = c("Não", "Sim")
+    )
+  )
+```
+
+Temos então 4 variáveis:
+
+- `inadimplencia` (variável resposta): `1` indica que o cliente está inadimplente e `0` indica que não;
+- `estudante`: fator indicando se o cliente é um estudante;
+- `saldo_devedor`: saldo médio restante no cartão de crédito do cliente após o pagamento mensal;
+- `renda_anual`: renda do cliente.
+
+## Inspeção inicial
+
+```{r}
+#| echo: true
+#| eval: true
+
+str(dados)
+head(dados)
+summary(dados)
+```
+
+```{r}
+#| echo: true
+#| eval: true
+
+dados |>
+  count(inadimplencia) |>
+  mutate(percentual = round(100 * n / sum(n), 1))
+```
+
+Na base há 333 (3,3%) clientes inadimplentes e 9667 (96,7%) clientes adimplentes.
+
+
+# Metodologia estatística
+
+Seja $Y_i$ uma variável aleatória binária, assumindo valor 1 quando o cliente está inadimplente e 0 caso contrário. Seja $\boldsymbol{x}_i$ o vetor de variáveis explicativas associadas ao cliente. A probabilidade condicional de inadimplência é definida por
+
+$$
+\pi_i = P(Y_i=1\mid \boldsymbol{x}_i).
+$$
+
+Como a variável resposta é binária, considera-se a distribuição Bernoulli:
+$$
+Y_i\mid \boldsymbol{x}_i \sim \operatorname{Bernoulli}(\pi_i),
+$$
+
+em que
+
+$$
+E(Y_i\mid \boldsymbol{x}_i)=\pi_i
+$$
+
+e
+
+$$
+\operatorname{Var}(Y_i\mid \boldsymbol{x}_i) =\pi_i(1-\pi_i).
+$$
+
+Os modelos lineares generalizados (MLGs) estabelecem uma relação entre a probabilidade condicional de ocorrência do evento e o preditor linear, por meio de uma função de ligação:
+
+$$
+g(\pi_i)=\eta_i
+=\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip},
+$$
+
+em que $\beta_0,\beta_1,\ldots,\beta_p$ são os parâmetros do modelo. Para investigar a influência das características dos clientes sobre a probabilidade de inadimplência, foram consideradas cinco funções de ligação: logit, probit, cauchit, logarítmica e log-log complementar (cloglog).
+
+
+## Modelo logístico (ligação logit)
+
+O modelo logístico utiliza a função de ligação logit, definida por
+
+$$
+g(\pi_i)=\log\left(\frac{\pi_i}{1-\pi_i}\right).
+$$
+
+Assim, o modelo é expresso por
+
+$$
+\log\left(\frac{\pi_i}{1-\pi_i}\right)=\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}.
+$$
+
+A função inversa da ligação é dada por
+
+$$
+\pi_i=\frac{\exp(\eta_i)}{1+\exp(\eta_i)}.
+$$
+
+Os coeficientes representam variações no logaritmo das chances (*odds*) de inadimplência. Consequentemente, a exponenciação dos coeficientes fornece razões de chances (*odds ratios*), facilitando a interpretação dos efeitos das variáveis explicativas.
+
+
+## Modelo probit
+
+O modelo probit utiliza a função de ligação definida pelo inverso da função de distribuição acumulada da distribuição normal padrão:
+
+$$
+g(\pi_i)=\Phi^{-1}(\pi_i),
+$$
+
+em que (\Phi^{-1}) representa a função quantil da distribuição normal padrão.
+
+O modelo é dado por
+
+$$
+\Phi^{-1}(\pi_i)
+=\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}.
+$$
+
+Sua função de ligação inversa é
+
+$$
+\pi_i=\Phi(\eta_i).
+$$
+
+Essa especificação estabelece uma relação entre o preditor linear e a probabilidade de inadimplência por meio da distribuição normal padrão. Os coeficientes representam variações na escala latente normal, não sendo interpretados diretamente como razões de chances.
+
+A interpretação pode ser dada olhando para o sinal do coeficiente $\beta_j$ associado à variável explicativa: $\beta_j>0$ implica que um aumento na variável $X_j$ aumenta a probabilidade de $Y = 1$, enquanto $\beta_j<0$ implica que um aumento na variável $X_j$ diminui a probabilidade de $Y = 1$, sempre mantendo as demais variáveis constantes.
+
+
+## Modelai cauchit
+
+O modelo cauchit utiliza uma função de ligação baseada na distribuição de Cauchy padrão, sendo definida por
+
+$$
+g(\pi_i)=F_C^{-1}(\pi_i),
+$$
+
+em que $F_C^{-1}$ representa a função quantil da distribuição de Cauchy padrão.
+
+O modelo é expresso por
+
+$$
+F_C^{-1}(\pi_i)=\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}.
+$$
+
+A função de ligação inversa é
+
+$$
+\pi_i=F_C(\eta_i) =\frac{1}{2}+\frac{1}{\pi}\arctan(\eta_i).
+$$
+
+Essa função apresenta caudas mais pesadas do que as distribuições normal e logística, permitindo uma resposta menos abrupta nas regiões extremas do preditor linear. Dessa forma, constitui uma alternativa para investigar a sensibilidade dos resultados à escolha da função de ligação.
+
+
+## Modelo com ligação logarítmica
+
+O modelo com ligação logarítmica utiliza a função
+
+$$
+g(\pi_i)=\log(\pi_i).
+$$
+
+Consequentemente,
+
+$$
+\log(\pi_i) =\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}.
+$$
+
+A função de ligação inversa é
+
+$$
+\pi_i=\exp(\eta_i).
+$$
+
+Essa especificação permite modelar diretamente o logaritmo da probabilidade de inadimplência. Entretanto, diferentemente das ligações logit, probit e cauchit, a função inversa da ligação logarítmica não garante automaticamente probabilidades no intervalo $(0,1)$. Portanto, é necessário verificar se as probabilidades ajustadas permanecem no intervalo admissível, pois valores superiores a 1 não são probabilidades válidas.
+
+
+## Modelo complemento log-log
+
+O modelo complemento log-log utiliza a função de ligação
+
+$$
+g(\pi_i)=\log[-\log(1-\pi_i)].
+$$
+
+Assim, o modelo é representado por
+
+$$
+\log[-\log(1-\pi_i)]=\beta_0+\beta_1x_{i1}+\cdots+\beta_px_{ip}.
+$$
+
+Sua função de ligação inversa é
+
+$$
+\pi_i=1-\exp[-\exp(\eta_i)].
+$$
+
+Essa especificação apresenta comportamento assimétrico, diferentemente das ligações logit, probit e cauchit, que são simétricas em torno de zero na escala do preditor linear. A ligação complemento log-log pode ser particularmente útil em situações nas quais a ocorrência do evento apresenta comportamento assimétrico ou está associada a processos de risco acumulado.
+
+
+## Especificação dos modelos completos
+
+Inicialmente, todos os modelos foram ajustados com a fórmula `inadimplencia ~ estudante + saldo_devedor + renda_anual`. Essa especificação permite comparar as distribuições e funções de ligação mantendo constantes a resposta, as covariáveis e a amostra utilizada. O modelo com ligação logarítmica não convergiu e, portanto, não foi incluído na análise.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Modelo logístico
+modelo_logit <- glm(
+  inadimplencia ~ estudante + saldo_devedor + renda_anual,
+  family = binomial(link = "logit"),
+  data = dados
+)
+
+# Modelo com ligação probit
+modelo_probit <- glm(
+  inadimplencia ~ estudante + saldo_devedor + renda_anual,
+  family = binomial(link = "probit"),
+  data = dados
+)
+
+# Modelo com ligação cauchit
+modelo_cauchit <- glm(
+  inadimplencia ~ estudante + saldo_devedor + renda_anual,
+  family = binomial(link = "cauchit"),
+  data = dados
+)
+
+# Modelo com ligação cloglog
+modelo_cloglog <- glm(
+  inadimplencia ~ estudante + saldo_devedor + renda_anual,
+  family = binomial(link = "cloglog"),
+  data = dados
+)
+```
+
+# Resultados
+
+## Comparação inicial das distribuições e ligações
+
+Os  quatro modelos ajustados foram comparados seguindo o Critério de INformação de Akaike (AIC) e o Critério de Informação Bayesiano (BIC).
+
+```{r}
+#| echo: true
+#| eval: true
+
+AIC(modelo_logit, modelo_probit, modelo_cauchit, modelo_cloglog)
+
+BIC(modelo_logit, modelo_probit, modelo_cauchit, modelo_cloglog)
+```
+
+
+Com base nos dois critérios, o modelo logístico (função de ligação logit) teve menores valores de AIC e BIC, sendo portanto o modelo escolhido para dar prosseguimento às análises.
+
+
+## Seleção de variáveis no modelo logístico
+
+A seleção de covariáveis foi conduzida por meio de testes de exclusão individual (função `drop1()`) baseados no Teste da Razão de Verossimilhanças (LRT). 
+
+```{r}
+#| echo: true
+#| eval: true
+
+drop1(modelo_logit, test = "Chisq")
+```
+
+A variável `renda_anual` ($\text{LRT} = 0{,}14$; $p = 0{,}7115$) não apresentou contribuição estatisticamente significativa para o modelo e foi removida. A comparação entre AIC e BIC do modelo completo e do modelo sem `renda_anual` também indicou que o modelo reduzido tem melhor ajuste.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Sem renda_anual
+modelo_logit2 <- glm(
+  inadimplencia ~ estudante + saldo_devedor,
+  family = binomial(link = "logit"),
+  data = dados
+)
+
+drop1(modelo_logit2, test = "Chisq")
+
+AIC(modelo_logit, modelo_logit2)
+
+BIC(modelo_logit, modelo_logit2)
+```
+
+
+# Diagnóstico dos resíduos do modelo final
+
+
+## Envelope simulado meio-normal
+
+```{r}
+#| echo: true
+#| eval: true
+set.seed(123)
+
+hnp::hnp(
+  modelo_logit2,
+  sim = 999,
+  resid.type = "deviance",
+  paint.out = TRUE,
+  print.on = TRUE
+)
+```
+
+O gráfico de envelope simulado confirma que todos os resíduos estão contidos dentro das bandas de confiança de $95\%$, indicando que o modelo logístico especificou adequadamente a estrutura de relação entre as variáveis. 
+
+## Resíduos de Pearson versus valores ajustados
+
+```{r}
+#| echo: true
+#| eval: true
+
+plot(
+  fitted(modelo_logit2),
+  residuals(modelo_logit2, type = "pearson"),
+  xlab = "Valores ajustados",
+  ylab = "Resíduos de Pearson",
+  main = "Resíduos de Pearson versus valores ajustados"
+)
+abline(h = 0, lty = 2)
+```
+
+Em regressão logística, o resíduo de Pearson é dado por $r_i = \frac{y_i - \hat{\pi}_i}{\sqrt{\hat{\pi}_i(1 - \hat{\pi}_i)}}$. Como $y_i$ só assume dois valores, todos os pontos caem obrigatoriamente sobre a curva superior (quando $y_i = 1$) ou sobre a curva inferior (quando $y_i = 0$). Isso não indica falta de ajuste, apenas reflete a natureza discreta da resposta.
+
+## Resíduos de deviance versus valores ajustados
+
+```{r}
+#| echo: true
+#| eval: true
+
+plot(
+  fitted(modelo_logit2),
+  residuals(modelo_logit2, type = "deviance"),
+  xlab = "Valores ajustados",
+  ylab = "Resíduos de deviance",
+  main = "Resíduos de deviance versus valores ajustados"
+)
+abline(h = 0, lty = 2)
+```
+
+A interpretação aqui é similar a dos resíduos de Pearson.
+
+
+## Análise de Pontos Influentes (Distância de Cook)
+
+```{r}
+#| echo: true
+#| eval: true
+
+cook <- cooks.distance(modelo_logit2)
+
+plot(
+  cook,
+  type = "h",
+  xlab = "Observação",
+  ylab = "Distância de Cook",
+  main = "Distância de Cook — modelo final"
+)
+
+abline(h = 4 / nobs(modelo_logit2), lty = 2)
+```
+
+A avaliação de pontos influentes mostra valores de Distância de Cook extremamente baixos (o pico máximo é em torno de 0,017), embora vários pontos ultrapassem a linha pontilhada de referência ($4/n = 4/10.000 = 0,0004$). No entanto, na prática, considera-se que uma observação tem influência real sobre as estimativas dos coeficientes ($\hat{\beta}$) apenas quando a Distância de Cook se aproxima de $0,5$ ou $1,0$. Como o maior valor é $0,017$ (muito abaixo de $0,5$), nenhuma observação individual está distorcendo o ajuste do modelo.
+
+
+# Curva ROC e Área sob a curva
+
+O modelo logístico estima a probabilidade $\widehat{\pi}_i$ de ocorrência do evento de interesse. Entretanto, para classificar uma observação como pertencente à classe 0 ou à classe 1, é necessário estabelecer um ponto de corte para $\widehat{\pi}_i$.
+
+Por exemplo, considerando o ponto de corte de 0,5:
+
+- Se $\widehat{\pi}_i \geq 0{,}5$, o cliente é classificado como inadimplente (1).
+- Se $\widehat{\pi}_i < 0{,}5$, o cliente é classificado como adimplente (0).
+
+A comparação entre as classificações previstas pelo modelo e as classificações efetivamente observadas produz a matriz de confusão.
+
+|                            | Observado: Inadimplente (1) | Observado: Adimplente (0) |
+|:---------------------------|----------------------------:|-------------------------:|
+| Previsto: Inadimplente (1) | Verdadeiro positivo (VP) | Falso positivo (FP) |
+| Previsto: Adimplente (0)   | Falso negativo (FN)      | Verdadeiro negativo (VN) |
+
+Os quatro resultados são interpretados da seguinte forma:
+
+- **Verdadeiro positivo (VP):** cliente inadimplente corretamente identificado pelo modelo.
+- **Falso positivo (FP):** cliente adimplente incorretamente classificado como inadimplente.
+- **Falso negativo (FN):** cliente inadimplente incorretamente classificado como adimplente.
+- **Verdadeiro negativo (VN):** cliente adimplente corretamente identificado pelo modelo.
+
+
+## Sensibilidade
+
+
+A sensibilidade (*sensitivity*), também denominada taxa de verdadeiros positivos (**True Positive Rate – TPR**), mede a capacidade do modelo de identificar corretamente as observações que pertencem à classe positiva.
+
+Matematicamente:
+$$
+\text{Sensibilidade}= \frac{VP}{VP+FN}
+$$
+
+No contexto da inadimplência, representa a proporção de clientes efetivamente inadimplentes que foram corretamente identificados pelo modelo.
+
+**Interpretação:** quanto maior a sensibilidade, menor a quantidade de clientes inadimplentes que o modelo deixa de identificar.
+
+
+## Especificidade
+
+A especificidade (*specificity*), também denominada taxa de verdadeiros negativos (**True Negative Rate – TNR**), mede a capacidade do modelo de identificar corretamente as observações que pertencem à classe negativa.
+
+Matematicamente:
+
+$$
+\text{Especificidade}= \frac{VN}{VN+FP}
+$$
+
+No contexto da inadimplência, representa a proporção de clientes efetivamente adimplentes que foram corretamente identificados pelo modelo.
+
+**Interpretação:** quanto maior a especificidade, menor a quantidade de clientes adimplentes classificados incorretamente como inadimplentes.
+
+
+## Curva ROC
+
+A curva ROC (Receiver Operating Characteristic) é uma representação gráfica utilizada para avaliar a capacidade discriminatória de um modelo de classificação binária.
+
+Ela relaciona a sensibilidade (eixo vertical) com a taxa de falsos positivos (eixo horizontal), para diferentes pontos de corte das probabilidades estimadas.
+
+A taxa de falsos positivos é calculada por:
+
+$$
+\text{FPR}= 1-\text{Especificidade} = \frac{FP}{FP+VN}.
+$$
+
+Cada ponto da curva ROC representa um par de valores de sensibilidade e taxa de falsos positivos, obtido a partir de determinado ponto de corte.
+
+![](/imagens/curva_roc.png)
+
+A interpretação da curva considera:
+
+- **Curva próxima ao canto superior esquerdo:** indica elevada sensibilidade e elevada especificidade, caracterizando boa capacidade discriminatória.
+- **Curva próxima à diagonal:** indica capacidade discriminatória semelhante à de um classificador aleatório.
+- **Curva abaixo da diagonal:** indica desempenho inferior ao de uma classificação aleatória, considerando a orientação convencional das classes.
+
+
+## Área sob a curva ROC (AUC)
+
+A AUC (*Area Under the ROC Curve*) corresponde à área sob a curva ROC e resume a capacidade discriminatória do modelo em um único valor.
+
+Seu valor varia entre 0 e 1, sendo interpretado convencionalmente da seguinte maneira:
+
+| AUC | Interpretação |
+|--------------|:-----------------------------------|
+|0,50          | Discriminação equivalente ao acaso |
+|0,60-0,70     | Discriminação fraca                |
+|0,70-0,80     | Discriminação aceitável            |
+|0,80-0,90     | Boa discriminação                  |
+|Acima de 0,90 | Excelente discriminação            |
+
+AUC representa a probabilidade do modelo atribuir uma probabilidade de inadimplência maior a um cliente efetivamente inadimplente do que a um cliente efetivamente adimplente, escolhidos aleatoriamente.
+
+Para o nosso modelo, temos:
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Probabilidades estimadas
+probabilidades <- predict(modelo_logit2, type = "response")
+
+# Curva ROC
+roc_modelo <- pROC::roc(
+  response = dados$inadimplencia,
+  predictor = probabilidades,
+  levels = c(0, 1),
+  direction = "<"
+)
+
+# Gráfico da curva ROC
+plot(
+  roc_modelo,
+  col = "blue",
+  lwd = 2,
+  main = "Curva ROC - Modelo Logístico",
+  legacy.axes = TRUE
+)
+
+# Linha de classificação aleatória
+abline(a = 0, b = 1, lty = 2, col = "red")
+
+# Área sob a curva
+pROC::auc(roc_modelo)
+
+# Intervalo de confiança de 95%
+pROC::ci.auc(roc_modelo)
+
+# Ponto de corte
+ponto_corte <- pROC::coords(
+  roc_modelo,
+  x = "best",
+  best.method = "youden",
+  ret = c("threshold", "sensitivity", "specificity"),
+  transpose = FALSE
+)
+ponto_corte
+```
+
+No modelo, a área soba curva ROC foi de 0,9495, indicando excelente capacidade discriminatória do modelo logístico. Ou seja, ao selecionar aleatoriamente um cliente inadimplente e um cliente adimplente, existe aproximadamente 94,95% de probabilidade de o modelo atribuir uma probabilidade estimada de inadimplência maior ao cliente efetivamente inadimplente. O intervalo de confiança de 95% para a AUC foi [0,9401; 0,9590].
+
+O ponto de corte ótimo para a classificação foi 0,03168. Ou seja, probabilidades acima desse valor serão classificadas como inadimplentes (1). Isso era uma sensibilidade de 90,39% e especificidade de 86,27%. Assim, considerando esse limiar de classificação, o modelo identifica corretamente aproximadamente 90% dos clientes inadimplentes e 86% dos clientes adimplentes.
+
+
+## Interpretação do modelo final
+
+No modelo logístico, aplicamos a exponencial sobre os coeficientes para interpretarmos a razão de chances (*odds ratio*) entre ser inadimplente em relação a ser adimplente.
+
+```{r}
+#| echo: true
+#| eval: true
+
+summary(modelo_logit2)
+confint(modelo_logit2)
+
+OR <- exp(coef(modelo_logit2))
+IC95_inferior <- exp(confint(modelo_logit2))[, 1]
+IC95_superior <- exp(confint(modelo_logit2))[, 2]
+
+cbind(
+  OR,
+  IC95_inferior,
+  IC95_superior
+)
+```
+
+A variável estudante apresentou coeficiente negativo (-0,7149), com razão de chances igual a 0,4893 (IC 95%: 0,3650-0,6511). Esse resultado indica que clientes estudantes apresentam chances de inadimplência aproximadamente 51,1% menores (1-0,4893 = 0,5107) do que clientes não estudantes, considerando constante o saldo devedor.
+
+Por outro lado, o saldo devedor apresentou coeficiente positivo (0,005738), com razão de chances igual a 1,005755 (IC 95%: 1,0053-1,0062). Portanto, cada unidade adicional no saldo devedor está associada a um aumento de aproximadamente 0,58% nas chances de inadimplência. Considerando um aumento de 100 unidades monetárias, esse acréscimo corresponde a aproximadamente 77,5% nas chances de inadimplência, mantendo constante a condição de estudante.
+
+
+# Classificação de novas observações
+
+Vamos classificar novos clientes usando esse modelo.
+
+```{r}
+#| echo: true
+#| eval: true
+
+# Novas observações
+novos_clientes <- data.frame(
+  cliente = c("Cliente 1", "Cliente 2", "Cliente 3"),
+  estudante = factor(c("Não", "Não", "Sim"), levels = levels(dados$estudante)),
+  saldo_devedor = c(500, 1200, 2000)
+)
+
+novos_clientes
+
+# Probabilidades de inadimplẽncia estimadas
+novos_clientes$probabilidade <- predict(
+  modelo_logit2,
+  newdata = novos_clientes,
+  type = "response"
+)
+
+novos_clientes
+
+# Classificação usando o ponto de corte
+
+# Classificação
+corte <- ponto_corte$threshold
+novos_clientes <- novos_clientes |>
+  mutate(
+    classificacao = ifelse(
+      probabilidade >= corte,
+      "Inadimplente",
+      "Não inadimplente"
+    )
+  )
+
+novos_clientes
+```
+
+Um cliente que não é estudante e tenha saldo devedor de 500 ou 1200 não é classificado como inadimplente. Por outro lado, um cliente que seja estudante e tenha saldo devedor de 2000 é classificado como inadimplente pelo modelo.
